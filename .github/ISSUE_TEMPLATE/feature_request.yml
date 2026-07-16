@@ -1,0 +1,32 @@
+name: Предложение функции
+description: Идея для развития yadirect-mcp
+title: "[Feature]: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Какую проблему решает функция?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Предлагаемое решение
+    validations:
+      required: true
+  - type: dropdown
+    id: access
+    attributes:
+      label: Требуется ли запись в Яндекс Директ?
+      options:
+        - Нет, только чтение
+        - Да
+        - Не уверен
+    validations:
+      required: true
+  - type: textarea
+    id: safety
+    attributes:
+      label: Риски и защитные меры
+      description: Для write-функций опишите preview, подтверждение, идемпотентность и частичные ошибки.

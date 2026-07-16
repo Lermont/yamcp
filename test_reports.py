@@ -1,0 +1,199 @@
+"""Тесты на то, что ломается у всех: поллинг офлайн-отчёта и пересчёт итогов."""
+
+from __future__ import annotations
+
+import json
+
+import httpx
+import pytest
+import respx
+
+from yadirect_mcp import store
+from yadirect_mcp.client import DirectClient, DirectError
+from yadirect_mcp import config
+from yadirect_mcp.config import Settings
+
+REPORTS = "https://api.direct.yandex.com/json/v5/reports"
+
+TSV = (
+    "Date\tCampaignName\tImpressions\tClicks\tCost\tCtr\n"
+    "2026-07-01\tПоиск | Москва\t1000\t50\t2500.00\t5.00\n"
+    "2026-07-02\tПоиск | Москва\t3000\t50\t2500.00\t1.67\n"
+    "2026-07-03\tРСЯ\t6000\t100\t1000.00\t1.67\n"
+    "2026-07-04\tРСЯ\t--\t--\t--\t--\n"
+)
+
+
+def settings(tmp_path) -> Settings:
+    return Settings(
+        token="t0k3n",
+        agency_login="agency",
+        allowed_logins=frozenset({"good-client"}),
+        out_dir=tmp_path,
+        sandbox=False,
+        max_inflight=4,
+        inline_rows=2,
+        report_deadline=30.0,
+        lang="ru",
+    )
+
+
+SPEC = {
+    "SelectionCriteria": {"DateFrom": "2026-07-01", "DateTo": "2026-07-04"},
+    "FieldNames": ["Date", "CampaignName", "Impressions", "Clicks", "Cost", "Ctr"],
+    "ReportType": "CUSTOM_REPORT",
+    "DateRangeType": "CUSTOM_DATE",
+    "Format": "TSV",
+    "IncludeVAT": "YES",
+    "IncludeDiscount": "NO",
+}
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_offline_report_polls_until_ready(tmp_path, monkeypatch):
+    """201 → 202 → 200. Тела у 201/202 пустые: кто смотрит на resp.ok, вернёт ''."""
+    monkeypatch.setattr("asyncio.sleep", _no_sleep)
+    route = respx.post(REPORTS).mock(
+        side_effect=[
+            httpx.Response(201, headers={"retryIn": "2", "reportsInQueue": "1"}),
+            httpx.Response(202, headers={"retryIn": "1", "reportsInQueue": "1"}),
+            httpx.Response(
+                200,
+                content=TSV.encode("utf-8"),
+                headers={"Units": "12/23695/64000"},
+            ),
+        ]
+    )
+    async with DirectClient(settings(tmp_path)) as api:
+        tsv = await api.report(SPEC, client_login="good-client")
+
+    assert route.call_count == 3
+    assert tsv.startswith("Date\tCampaignName")
+    assert api.last_units.rest == 23695
+    assert api.reports_in_queue == 1
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_report_name_stable_across_polls(tmp_path, monkeypatch):
+    """Все попытки должны нести ОДНО имя, иначе каждый поллинг ставит новый отчёт."""
+    monkeypatch.setattr("asyncio.sleep", _no_sleep)
+    respx.post(REPORTS).mock(
+        side_effect=[
+            httpx.Response(201, headers={"retryIn": "1"}),
+            httpx.Response(200, content=TSV.encode("utf-8")),
+        ]
+    )
+    async with DirectClient(settings(tmp_path)) as api:
+        await api.report(SPEC, client_login="good-client")
+
+    names = {
+        json.loads(c.request.content)["params"]["ReportName"]
+        for c in respx.calls
+    }
+    assert len(names) == 1
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_headers_and_client_login(tmp_path):
+    respx.post(REPORTS).mock(return_value=httpx.Response(200, content=TSV.encode()))
+    async with DirectClient(settings(tmp_path)) as api:
+        await api.report(SPEC, client_login="good-client")
+
+    h = respx.calls[0].request.headers
+    assert h["Client-Login"] == "good-client"
+    assert h["Authorization"] == "Bearer t0k3n"
+    assert h["processingMode"] == "auto"
+    assert h["returnMoneyInMicros"] == "false"
+    assert h["skipReportHeader"] == "true"
+    assert "skipColumnHeader" not in h  # имена колонок нам нужны
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_400_surfaces_error_code(tmp_path):
+    respx.post(REPORTS).mock(
+        return_value=httpx.Response(
+            400,
+            json={"error": {"error_code": 8000, "error_string": "Ошибка в параметрах",
+                            "error_detail": "Поле Keyword нельзя выводить",
+                            "request_id": "42"}},
+        )
+    )
+    async with DirectClient(settings(tmp_path)) as api:
+        with pytest.raises(DirectError) as e:
+            await api.report(SPEC, client_login="good-client")
+    assert e.value.code == 8000
+    assert "Keyword" in str(e.value)
+
+
+def test_totals_recomputed_not_summed(tmp_path):
+    out = store.persist(TSV, out_dir=tmp_path, stem="x", inline_rows=2)
+    t = out["totals"]
+    assert out["rows"] == 4
+    assert t["Impressions"] == 10000
+    assert t["Clicks"] == 200
+    assert t["Cost"] == 6000.0
+    # Наивная сумма колонки Ctr дала бы 8.34. Правильный CTR = 200/10000.
+    assert t["Ctr"] == 2.0
+    assert t["AvgCpc"] == 30.0
+    assert out["preview_truncated"] is True
+    assert len(out["preview"]) == 2
+
+
+def test_whitelist_blocks_foreign_login(tmp_path):
+    with pytest.raises(ValueError, match="не разрешён"):
+        settings(tmp_path).check_login("someone-elses-account")
+
+
+def test_package_import_does_not_require_token(monkeypatch):
+    monkeypatch.delenv("YD_TOKEN", raising=False)
+    import yadirect_mcp
+
+    assert callable(yadirect_mcp.main)
+
+
+def test_config_rejects_unsafe_queue_size(monkeypatch, tmp_path):
+    monkeypatch.setenv("YD_TOKEN", "dummy")
+    monkeypatch.setenv("YD_OUT_DIR", str(tmp_path))
+    monkeypatch.setenv("YD_MAX_INFLIGHT", "6")
+    with pytest.raises(RuntimeError, match="от 1 до 5"):
+        config.load()
+
+
+def test_config_validates_mode(monkeypatch, tmp_path):
+    monkeypatch.setenv("YD_TOKEN", "dummy")
+    monkeypatch.setenv("YD_OUT_DIR", str(tmp_path))
+    monkeypatch.setenv("YD_MODE", "write-everything")
+    with pytest.raises(RuntimeError, match="YD_MODE"):
+        config.load()
+
+
+def test_read_back_validates_pagination(tmp_path):
+    path = tmp_path / "report.tsv"
+    path.write_text(TSV, encoding="utf-8")
+    with pytest.raises(ValueError, match="offset"):
+        store.read_back(path, -1, 10)
+    with pytest.raises(ValueError, match="limit"):
+        store.read_back(path, 0, 1001)
+
+
+def test_parse_tsv_rejects_ragged_rows():
+    with pytest.raises(ValueError, match="строка 2"):
+        store.parse_tsv("A\tB\nonly-one-field\n")
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_json_api_rejects_invalid_success_body(tmp_path):
+    url = "https://api.direct.yandex.com/json/v5/campaigns"
+    respx.post(url).mock(return_value=httpx.Response(200, text="not-json"))
+    async with DirectClient(settings(tmp_path)) as api:
+        with pytest.raises(DirectError, match="некорректный JSON"):
+            await api.call("campaigns", "get", {}, client_login="good-client")
+
+
+async def _no_sleep(_seconds):
+    return None

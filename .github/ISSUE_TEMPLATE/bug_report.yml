@@ -1,0 +1,57 @@
+name: Сообщение об ошибке
+description: Воспроизводимая проблема в yadirect-mcp
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Не публикуйте OAuth-токены, реальные логины клиентов и содержимое рекламных отчётов.
+  - type: input
+    id: version
+    attributes:
+      label: Версия yadirect-mcp
+      placeholder: 0.2.0
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Окружение
+      description: ОС, версия Python и MCP-клиент
+      placeholder: Windows 11, Python 3.12, Codex CLI
+    validations:
+      required: true
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Режим
+      options:
+        - report
+        - campaign_setup
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Шаги воспроизведения
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Ожидаемое поведение
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Фактическое поведение и обезличенная ошибка
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Проверка секретов
+      options:
+        - label: Я удалил токены, логины клиентов и чувствительные данные.
+          required: true
