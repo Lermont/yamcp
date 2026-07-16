@@ -33,6 +33,13 @@ dependencies = [
     "httpx>=0.27.0",
 ]
 
+[project.urls]
+Homepage = "https://github.com/Lermont/yamcp"
+Repository = "https://github.com/Lermont/yamcp.git"
+Documentation = "https://github.com/Lermont/yamcp#readme"
+Issues = "https://github.com/Lermont/yamcp/issues"
+Changelog = "https://github.com/Lermont/yamcp/blob/main/CHANGELOG.md"
+
 [project.optional-dependencies]
 dev = [
     "build>=1.2",

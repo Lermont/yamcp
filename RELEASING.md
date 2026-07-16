@@ -26,21 +26,22 @@ python -m venv .release-venv
 
 На Windows замените `.release-venv/bin/python` на `.release-venv\Scripts\python.exe`.
 
-## 3. Публикация GitHub-репозитория
+## 3. Проверка GitHub-репозитория
 
-Если remote ещё не создан:
+Проект опубликован в `Lermont/yamcp`. Проверьте remote и синхронизацию ветки:
 
 ```bash
-gh repo create yadirect-mcp --public --source . --remote origin --push
+git remote get-url origin
+git status --short --branch
+git push origin main
 ```
 
-Перед выполнением проверьте активный аккаунт через `gh auth status`. Создание репозитория и push выполняются вручную владельцем проекта.
-
-Добавьте поисковое описание и GitHub Topics:
+Через GitHub CLI можно задать поисковое описание, homepage и Topics:
 
 ```bash
-gh repo edit \
+gh repo edit Lermont/yamcp \
   --description "MCP server for Yandex Direct reports and guarded campaign setup" \
+  --homepage "https://github.com/Lermont/yamcp" \
   --add-topic mcp \
   --add-topic model-context-protocol \
   --add-topic yandex-direct \
@@ -48,6 +49,8 @@ gh repo edit \
   --add-topic ai-agents \
   --add-topic python
 ```
+
+Перед выполнением проверьте активный аккаунт через `gh auth status`. То же самое можно сделать в **Settings → General → Repository details**.
 
 ## 4. Тег и GitHub Release
 

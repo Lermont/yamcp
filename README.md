@@ -3,6 +3,7 @@
 [![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![MCP](https://img.shields.io/badge/MCP-stdio-6F42C1)](https://modelcontextprotocol.io/)
 [![Yandex Direct API](https://img.shields.io/badge/Yandex_Direct-API_v5-FFCC00?logo=yandex&logoColor=black)](https://yandex.ru/dev/direct/doc/ru/)
+[![CI](https://github.com/Lermont/yamcp/actions/workflows/ci.yml/badge.svg)](https://github.com/Lermont/yamcp/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 **yadirect-mcp** — локальный MCP-сервер для Яндекс Директа, который подключает рекламную отчётность и защищённую настройку кампаний к Claude Code, OpenAI Codex, Hermes Agent, ZCode и другим MCP-совместимым AI-агентам.
@@ -153,8 +154,8 @@ flowchart LR
 Скачайте архив из GitHub Releases или клонируйте репозиторий:
 
 ```powershell
-git clone <URL-ЭТОГО-РЕПОЗИТОРИЯ> yadirect-mcp
-Set-Location yadirect-mcp
+git clone https://github.com/Lermont/yamcp.git
+Set-Location yamcp
 ```
 
 ### 2. Создайте виртуальное окружение
@@ -200,8 +201,8 @@ sudo apt-get install -y python3 python3-venv git
 Затем установите сервер в изолированное окружение:
 
 ```bash
-git clone <URL-ЭТОГО-РЕПОЗИТОРИЯ> yadirect-mcp
-cd yadirect-mcp
+git clone https://github.com/Lermont/yamcp.git
+cd yamcp
 python3 -m venv .venv
 .venv/bin/python -m pip install --upgrade pip
 .venv/bin/python -m pip install .
@@ -249,7 +250,7 @@ claude mcp add --scope user --transport stdio `
   --env "YD_OUT_DIR=D:/yadirect-reports" `
   --env "YD_MODE=report" `
   yandex-direct -- `
-  "D:/path/to/yadirect-mcp/.venv/Scripts/python.exe" -m yadirect_mcp
+  "D:/path/to/yamcp/.venv/Scripts/python.exe" -m yadirect_mcp
 ```
 
 ### Linux
@@ -262,7 +263,7 @@ claude mcp add --scope user --transport stdio \
   --env "YD_OUT_DIR=$HOME/yadirect-reports" \
   --env "YD_MODE=report" \
   yandex-direct -- \
-  /absolute/path/to/yadirect-mcp/.venv/bin/python -m yadirect_mcp
+  /absolute/path/to/yamcp/.venv/bin/python -m yadirect_mcp
 ```
 
 Проверка:
@@ -284,9 +285,9 @@ Codex CLI, IDE extension и Codex desktop используют общую MCP-к
 
 ```toml
 [mcp_servers.yandex-direct]
-command = "D:/path/to/yadirect-mcp/.venv/Scripts/python.exe"
+command = "D:/path/to/yamcp/.venv/Scripts/python.exe"
 args = ["-m", "yadirect_mcp"]
-cwd = "D:/path/to/yadirect-mcp"
+cwd = "D:/path/to/yamcp"
 startup_timeout_sec = 20
 tool_timeout_sec = 660
 default_tools_approval_mode = "writes"
@@ -311,9 +312,9 @@ codex
 
 ```toml
 [mcp_servers.yandex-direct]
-command = "/absolute/path/to/yadirect-mcp/.venv/bin/python"
+command = "/absolute/path/to/yamcp/.venv/bin/python"
 args = ["-m", "yadirect_mcp"]
-cwd = "/absolute/path/to/yadirect-mcp"
+cwd = "/absolute/path/to/yamcp"
 startup_timeout_sec = 20
 tool_timeout_sec = 660
 default_tools_approval_mode = "writes"
@@ -340,7 +341,7 @@ Hermes читает MCP-настройки из `~/.hermes/config.yaml`. Для 
 ```yaml
 mcp_servers:
   yandex-direct:
-    command: "/absolute/path/to/yadirect-mcp/.venv/bin/python"
+    command: "/absolute/path/to/yamcp/.venv/bin/python"
     args: ["-m", "yadirect_mcp"]
     env:
       YD_TOKEN: "y0_your_token"
@@ -359,7 +360,7 @@ mcp_servers:
 ```yaml
 mcp_servers:
   yandex-direct:
-    command: "D:/path/to/yadirect-mcp/.venv/Scripts/python.exe"
+    command: "D:/path/to/yamcp/.venv/Scripts/python.exe"
     args: ["-m", "yadirect_mcp"]
     env:
       YD_TOKEN: "y0_your_token"
@@ -391,7 +392,7 @@ mcp_servers:
   "mcpServers": {
     "yandex-direct": {
       "type": "stdio",
-      "command": "D:/path/to/yadirect-mcp/.venv/Scripts/python.exe",
+      "command": "D:/path/to/yamcp/.venv/Scripts/python.exe",
       "args": ["-m", "yadirect_mcp"],
       "env": {
         "YD_TOKEN": "y0_your_token",
@@ -416,7 +417,7 @@ Cursor, Windsurf, Cline, Continue, OpenCode, VS Code и другие клиен�
 {
   "mcpServers": {
     "yandex-direct": {
-      "command": "/absolute/path/to/yadirect-mcp/.venv/bin/python",
+      "command": "/absolute/path/to/yamcp/.venv/bin/python",
       "args": ["-m", "yadirect_mcp"],
       "env": {
         "YD_TOKEN": "y0_your_token",
