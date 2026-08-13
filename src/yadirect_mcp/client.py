@@ -39,6 +39,12 @@ log = logging.getLogger("yadirect-mcp")
 API_URL = "https://api.direct.yandex.com/json/v5"
 SANDBOX_URL = "https://api-sandbox.direct.yandex.com/json/v5"
 
+# 502/503/504 отдаёт балансировщик, а не сам Директ. Отчёт при этом уже стоит
+# в офлайн-очереди, и повтор того же запроса (имя стабильно) его же и заберёт,
+# так что сдаваться на первом таком ответе — значит терять готовую работу.
+TRANSIENT_STATUSES = frozenset({500, 502, 503, 504})
+TRANSIENT_RETRIES = 3
+
 
 @dataclass(frozen=True)
 class Units:
@@ -79,6 +85,19 @@ class DirectError(RuntimeError):
 def _decode(resp: httpx.Response) -> str:
     """Директ иногда врёт про кодировку в Content-Type. Декодируем сами."""
     return resp.content.decode("utf-8", errors="replace")
+
+
+def _retry_in(resp: httpx.Response, default: int = 5) -> int:
+    """Сколько ждать до следующей попытки.
+
+    Заголовок может прийти пустым или мусорным (прокси, кеш, страница ошибки),
+    и int() на нём валит весь поллинг вместе с уже заказанным отчётом.
+    """
+    raw = (resp.headers.get("retryIn") or "").strip()
+    try:
+        return max(1, int(raw))
+    except ValueError:
+        return default
 
 
 class DirectClient:
@@ -210,7 +229,7 @@ class DirectClient:
         payload = json.dumps({"params": spec}, ensure_ascii=False).encode("utf-8")
         url = f"{self._base}/reports"
         deadline = time.monotonic() + self._s.report_deadline
-        server_error_retries = 1
+        transient_retries = TRANSIENT_RETRIES
 
         async with self._slots[client_login.lower()]:
             while True:
@@ -231,17 +250,26 @@ class DirectClient:
                             status=code,
                             request_id=resp.headers.get("RequestId"),
                         )
-                    wait = int(resp.headers.get("retryIn", "5") or 5)
+                    wait = _retry_in(resp)
                     log.info(
                         "report %s: HTTP %s, ждём %s c (в очереди: %s)",
                         client_login, code, wait, self.reports_in_queue,
                     )
-                    await asyncio.sleep(max(1, wait))
+                    await asyncio.sleep(wait)
                     continue
 
-                if code == 500 and server_error_retries > 0:
-                    server_error_retries -= 1
-                    await asyncio.sleep(5)
+                if (
+                    code in TRANSIENT_STATUSES
+                    and transient_retries > 0
+                    and time.monotonic() < deadline
+                ):
+                    transient_retries -= 1
+                    wait = _retry_in(resp)
+                    log.warning(
+                        "report %s: HTTP %s, повтор через %s c (осталось попыток: %s)",
+                        client_login, code, wait, transient_retries,
+                    )
+                    await asyncio.sleep(wait)
                     continue
 
                 raise self._report_error(resp)

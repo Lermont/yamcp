@@ -151,6 +151,55 @@ async def test_fatal_child_call_keeps_created_parent_ids():
     }
 
 
+@pytest.mark.asyncio
+async def test_failure_on_later_chunk_keeps_ids_from_earlier_chunks():
+    """Объекты из прошедших чанков уже созданы в Директе — их ID терять нельзя."""
+    campaign, _ = plan()
+
+    def ad(title):
+        return {"TextAd": {"Title": title, "Text": "Текст",
+                           "Href": "https://example.test", "Mobile": "NO"}}
+
+    # Групп ровно под лимит, но объявлений на 5 больше: ads.add уйдёт двумя
+    # чанками, и второй упадёт.
+    groups = [
+        {"Name": f"Группа {i}", "RegionIds": [213], "Keywords": [],
+         "Ads": [ad("Объявление")] + ([ad("Второе")] if i < 5 else [])}
+        for i in range(campaign_setup.MAX_BATCH)
+    ]
+
+    class SecondAdsChunkFails(FakeApi):
+        def __init__(self):
+            super().__init__()
+            self.ads_chunks = 0
+
+        async def call(self, service, method, params, *, client_login):
+            self.calls.append((service, method, params, client_login))
+            if service == "campaigns":
+                return {"AddResults": [{"Id": 101}]}
+            if service == "adgroups":
+                return {"AddResults": [
+                    {"Id": 200 + i} for i in range(len(params["AdGroups"]))
+                ]}
+            if service == "ads":
+                self.ads_chunks += 1
+                if self.ads_chunks == 1:
+                    return {"AddResults": [
+                        {"Id": 300 + i} for i in range(len(params["Ads"]))
+                    ]}
+                raise RuntimeError("сеть отвалилась")
+            raise AssertionError(service)
+
+    out = await campaign_setup.apply(SecondAdsChunkFails(), "client", campaign, groups)
+    assert out["status"] == "partial"
+    assert out["fatal_error"]["stage"] == "ads.add"
+    assert out["fatal_error"]["message"] == "сеть отвалилась"
+    assert out["summary"]["ads"] == {
+        "requested": campaign_setup.MAX_BATCH + 5, "created": campaign_setup.MAX_BATCH
+    }
+    assert sum(len(g["ads"]) for g in out["groups"]) == campaign_setup.MAX_BATCH
+
+
 @pytest.mark.parametrize(
     ("mutate", "message"),
     [

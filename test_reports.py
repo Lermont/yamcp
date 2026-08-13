@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 
 import httpx
 import pytest
@@ -141,6 +142,84 @@ def test_totals_recomputed_not_summed(tmp_path):
     assert t["AvgCpc"] == 30.0
     assert out["preview_truncated"] is True
     assert len(out["preview"]) == 2
+
+
+TSV_GOALS = (
+    "Date\tImpressions\tClicks\tCost\tConversions_12345_LSC\tRevenue_12345_LSC\n"
+    "2026-07-01\t1000\t50\t2500.00\t5\t50000\n"
+    "2026-07-02\t3000\t50\t2500.00\t3\t30000\n"
+)
+
+
+def test_totals_include_goal_suffixed_columns(tmp_path):
+    """С Goals Директ отдаёт Conversions_<цель>_<атрибуция>, а не Conversions."""
+    t = store.persist(TSV_GOALS, out_dir=tmp_path, stem="g", inline_rows=5)["totals"]
+    assert t["Conversions_12345_LSC"] == 8
+    assert t["Revenue_12345_LSC"] == 80000
+    # Производные пересчитываются на каждую цель, а не суммируются по строкам.
+    assert t["ConversionRate_12345_LSC"] == 8.0
+    assert t["CostPerConversion_12345_LSC"] == 625.0
+
+
+def test_persist_keeps_report_when_row_is_ragged(tmp_path):
+    """Лишний таб в тексте не должен стоить целой выгрузки: она уже оплачена."""
+    out = store.persist(
+        "Date\tName\tClicks\n2026-07-01\tA\tB\t50\n",
+        out_dir=tmp_path,
+        stem="ragged",
+        inline_rows=5,
+    )
+    saved = Path(out["path"])
+    assert saved.exists()
+    assert "строка 2" in out["parse_error"]
+
+
+def test_persist_confines_report_to_out_dir(tmp_path):
+    """client_login приходит от модели и попадает в имя файла."""
+    out_dir = (tmp_path / "reports").resolve()
+    out_dir.mkdir()
+    out = store.persist(
+        "A\n1\n", out_dir=out_dir, stem=r"..\..\pwned_2026-07-01", inline_rows=1
+    )
+    assert Path(out["path"]).resolve().is_relative_to(out_dir)
+
+
+def test_persist_writes_bytes_as_received(tmp_path):
+    """Файл обрабатывают сторонним кодом — он должен совпадать с ответом API."""
+    out = store.persist(TSV, out_dir=tmp_path, stem="raw", inline_rows=1)
+    assert Path(out["path"]).read_bytes() == TSV.encode("utf-8")
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_report_survives_broken_retry_in_header(tmp_path, monkeypatch):
+    """int() на мусорном заголовке ронял поллинг вместе с заказанным отчётом."""
+    monkeypatch.setattr("asyncio.sleep", _no_sleep)
+    respx.post(REPORTS).mock(
+        side_effect=[
+            httpx.Response(201, headers={"retryIn": "soon"}),
+            httpx.Response(200, content=TSV.encode("utf-8")),
+        ]
+    )
+    async with DirectClient(settings(tmp_path)) as api:
+        assert await api.report(SPEC, client_login="good-client")
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_report_retries_gateway_errors(tmp_path, monkeypatch):
+    """502/503/504 отдаёт балансировщик; отчёт при этом уже в очереди."""
+    monkeypatch.setattr("asyncio.sleep", _no_sleep)
+    route = respx.post(REPORTS).mock(
+        side_effect=[
+            httpx.Response(502, text="<html>Bad Gateway</html>"),
+            httpx.Response(503),
+            httpx.Response(200, content=TSV.encode("utf-8")),
+        ]
+    )
+    async with DirectClient(settings(tmp_path)) as api:
+        assert await api.report(SPEC, client_login="good-client")
+    assert route.call_count == 3
 
 
 def test_whitelist_blocks_foreign_login(tmp_path):

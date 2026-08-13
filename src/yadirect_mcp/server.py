@@ -231,11 +231,12 @@ async def direct_report(
         api = _api()
         tsv = await api.report(spec, client_login=client_login)
 
+        # Логин попадает в имя файла, поэтому чистит его store.safe_stem.
         stem = f"{client_login}_{date_from}_{date_to}_{api.report_name(spec)}"
         payload = store.persist(
             tsv,
             out_dir=SETTINGS.out_dir,
-            stem=stem.replace("/", "_"),
+            stem=stem,
             inline_rows=SETTINGS.inline_rows,
         )
         payload["client_login"] = client_login
@@ -251,7 +252,10 @@ async def direct_read_report(path: str, offset: int = 0, limit: int = 100) -> st
     Без повторного обращения к API и без расхода баллов.
     """
     try:
-        p = Path(path).resolve()
+        # Относительный путь считаем от каталога выгрузок, а не от текущего
+        # каталога процесса: модель обычно передаёт просто имя файла.
+        raw = Path(path)
+        p = (raw if raw.is_absolute() else SETTINGS.out_dir / raw).resolve()
         # Не выпускаем модель за пределы каталога выгрузок.
         if not p.is_relative_to(SETTINGS.out_dir):
             raise ValueError(f"Путь вне {SETTINGS.out_dir}")

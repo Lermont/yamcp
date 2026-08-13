@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import csv
 import io
+import re
 from pathlib import Path
 from typing import Any
 
@@ -36,11 +37,25 @@ def _num(raw: str) -> float | None:
         return None
 
 
+def _metric(column: str) -> tuple[str, str]:
+    """`Conversions_12345_LSC` → ("Conversions", "_12345_LSC").
+
+    Как только в запросе появляются Goals, Директ дописывает к метрикам цели
+    её идентификатор и модель атрибуции. Сравнение имени колонки с "Conversions"
+    целиком после этого не срабатывает, и конверсии с доходом молча выпадают из
+    итогов — то есть ровно то, ради чего отчёт обычно и заказывают. Все имена
+    полей Директа в CamelCase, подчёркивание встречается только в этом суффиксе.
+    """
+    base, sep, suffix = column.partition("_")
+    return (base, sep + suffix) if sep else (column, "")
+
+
 def _totals(rows: list[dict[str, str]], columns: list[str]) -> dict[str, float]:
     """Суммы по аддитивным полям + корректно пересчитанные производные."""
     sums: dict[str, float] = {}
     for col in columns:
-        if col not in SUMMABLE or col in DERIVED:
+        base, _ = _metric(col)
+        if base not in SUMMABLE or base in DERIVED:
             continue
         acc, seen = 0.0, False
         for row in rows:
@@ -54,16 +69,22 @@ def _totals(rows: list[dict[str, str]], columns: list[str]) -> dict[str, float]:
     impressions = sums.get("Impressions")
     clicks = sums.get("Clicks")
     cost = sums.get("Cost")
-    conversions = sums.get("Conversions")
 
     if impressions:
         sums["Ctr"] = round((clicks or 0) / impressions * 100, 2)
     if clicks:
         sums["AvgCpc"] = round((cost or 0) / clicks, 2)
-        if conversions is not None:
-            sums["ConversionRate"] = round(conversions / clicks * 100, 2)
-    if conversions:
-        sums["CostPerConversion"] = round((cost or 0) / conversions, 2)
+
+    # Показы, клики и расход общие на строку, а конверсии — свои у каждой пары
+    # «цель + модель атрибуции», поэтому производные считаем по каждому суффиксу.
+    for suffix in {_metric(c)[1] for c in columns if _metric(c)[0] == "Conversions"}:
+        conversions = sums.get(f"Conversions{suffix}")
+        if conversions is None:
+            continue
+        if clicks:
+            sums[f"ConversionRate{suffix}"] = round(conversions / clicks * 100, 2)
+        if conversions:
+            sums[f"CostPerConversion{suffix}"] = round((cost or 0) / conversions, 2)
     return sums
 
 
@@ -88,6 +109,21 @@ def parse_tsv(tsv: str) -> tuple[list[str], list[dict[str, str]]]:
     return columns, rows
 
 
+_UNSAFE_STEM = re.compile(r"[^0-9A-Za-zА-Яа-яЁё._-]+")
+
+
+def safe_stem(stem: str) -> str:
+    """Имя файла собирается из client_login, а его выбирает модель.
+
+    Без чистки логин вида `..\\..\\x` уводит запись за пределы YD_OUT_DIR:
+    `out_dir / "..\\..\\x_2026-07-01_..."` — это валидный путь на два каталога
+    выше. Чтение из отчётов уже ограничено каталогом, запись должна быть тоже.
+    """
+    # Обрезаем до strip: точка в конце имени файла на Windows — отдельная беда.
+    cleaned = _UNSAFE_STEM.sub("_", stem)[:120].strip("._")
+    return cleaned or "report"
+
+
 def persist(
     tsv: str,
     *,
@@ -95,10 +131,29 @@ def persist(
     stem: str,
     inline_rows: int,
 ) -> dict[str, Any]:
-    columns, rows = parse_tsv(tsv)
+    path = out_dir / f"{safe_stem(stem)}.tsv"
 
-    path = out_dir / f"{stem}.tsv"
-    path.write_text(tsv, encoding="utf-8")
+    # Пишем ДО разбора. Отчёт уже стоил баллов API и до нескольких минут
+    # ожидания в офлайн-очереди; ронять его целиком из-за одной кривой строки
+    # (лишний таб в тексте объявления или в поисковом запросе) нельзя.
+    path.write_text(tsv, encoding="utf-8", newline="")
+
+    try:
+        columns, rows = parse_tsv(tsv)
+    except ValueError as exc:
+        return {
+            "path": str(path),
+            "rows": None,
+            "columns": [],
+            "totals": {},
+            "preview": [],
+            "preview_truncated": False,
+            "parse_error": str(exc),
+            "hint": (
+                f"Отчёт выгружен и сохранён в {path}, но разобрать TSV не удалось: "
+                f"{exc}. Данные не потеряны — откройте файл и проверьте строку."
+            ),
+        }
 
     return {
         "path": str(path),
