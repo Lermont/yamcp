@@ -29,7 +29,10 @@ classifiers = [
     "Topic :: Office/Business",
 ]
 dependencies = [
-    "mcp>=1.3.0",
+    # Нижняя граница: до 1.14.0 FastMCP.Tool.from_function падает на строковых
+    # аннотациях (`from __future__ import annotations`) — issubclass() arg 1 must
+    # be a class. Верхняя: в mcp 2.0.0 пакет mcp.server.fastmcp удалён.
+    "mcp>=1.14.0,<2.0.0",
     "httpx>=0.27.0",
 ]
 
