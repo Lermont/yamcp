@@ -39,6 +39,10 @@ log = logging.getLogger("yadirect-mcp")
 API_URL = "https://api.direct.yandex.com/json/v5"
 SANDBOX_URL = "https://api-sandbox.direct.yandex.com/json/v5"
 
+# Вордстат остался в v4: в v5 аналога нет и не появилось. Ветка старая, и
+# правила у неё свои — см. call_v4.
+API_V4_URL = "https://api.direct.yandex.ru/v4/json/"
+
 # 502/503/504 отдаёт балансировщик, а не сам Директ. Отчёт при этом уже стоит
 # в офлайн-очереди, и повтор того же запроса (имя стабильно) его же и заберёт,
 # так что сдаваться на первом таком ответе — значит терять готовую работу.
@@ -295,3 +299,60 @@ class DirectClient:
                 request_id=request_id,
                 status=resp.status_code,
             )
+
+    # ── Wordstat: API v4 ─────────────────────────────────────────────────
+
+    async def call_v4(self, method: str, param: Any = None) -> Any:
+        """Вызов метода API v4. Отличий от v5 больше, чем сходства.
+
+        1. Токен уходит ПОЛЕМ ТЕЛА, а не заголовком. На `Authorization` v4
+           отвечает error_code 53 «Authorization error», то есть выглядит как
+           протухший токен, хотя дело в транспорте.
+        2. Ошибка приезжает с HTTP 200 и без ключа `error`: плоские
+           `error_code` / `error_str` / `error_detail` в корне ответа. Проверка
+           статуса или `if "error" in data` не поймает ничего.
+        3. Баллы v4 считаются отдельно от v5 и в заголовках не приходят,
+           поэтому `last_units` тут не трогаем: смешивать два счётчика — врать
+           модели про остаток.
+        """
+        body: dict[str, Any] = {
+            "method": method,
+            "token": self._s.token,
+            "locale": self._s.lang,
+        }
+        if param is not None:
+            body["param"] = param
+
+        resp = await self._http.post(
+            API_V4_URL,
+            headers={"Content-Type": "application/json; charset=utf-8"},
+            content=json.dumps(body, ensure_ascii=False).encode("utf-8"),
+        )
+        if resp.status_code != 200:
+            raise DirectError(
+                f"v4.{method}: HTTP {resp.status_code}",
+                status=resp.status_code,
+                detail=_decode(resp)[:500],
+                request_id=resp.headers.get("RequestId"),
+            )
+
+        try:
+            data = json.loads(_decode(resp))
+        except json.JSONDecodeError as exc:
+            raise DirectError(
+                f"v4.{method}: некорректный JSON в ответе",
+                status=resp.status_code,
+                detail=_decode(resp)[:500],
+                request_id=resp.headers.get("RequestId"),
+            ) from exc
+
+        if not isinstance(data, dict):
+            raise DirectError(f"v4.{method}: неожиданный ответ", detail=str(data)[:500])
+        if data.get("error_code") is not None or data.get("error_str"):
+            raise DirectError(
+                f"v4.{method}: {data.get('error_str', 'ошибка')}",
+                code=data.get("error_code"),
+                detail=data.get("error_detail", ""),
+                request_id=resp.headers.get("RequestId"),
+            )
+        return data.get("data")

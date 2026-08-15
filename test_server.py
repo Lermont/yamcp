@@ -68,6 +68,7 @@ def test_report_mode_exposes_only_read_tools(tmp_path):
         "direct_campaigns",
         "direct_report",
         "direct_read_report",
+        "direct_wordstat",
     ]
 
 
@@ -77,6 +78,7 @@ def test_campaign_setup_mode_adds_guarded_write_tool(tmp_path):
         "direct_campaigns",
         "direct_report",
         "direct_read_report",
+        "direct_wordstat",
         "direct_campaign_setup",
     ]
 

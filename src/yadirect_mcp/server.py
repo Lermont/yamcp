@@ -20,7 +20,7 @@ from typing import Any
 
 from mcp.server.fastmcp import FastMCP
 
-from . import campaign_setup, config, knowledge, store
+from . import campaign_setup, config, knowledge, store, wordstat
 from .client import DirectClient, DirectError
 
 # ВАЖНО: stdio-транспорт живёт на stdout. Любой print() туда ломает протокол.
@@ -51,6 +51,11 @@ def _instructions(settings: config.Settings) -> str:
             "client_login; список логинов даёт direct_list_clients. "
             "direct_report пишет отчёт на диск и возвращает сводку — не проси его "
             "вернуть все строки, читай файл через direct_read_report постранично."
+        ),
+        (
+            "Частотность запросов даёт direct_wordstat: спрос по фразе, вложенные "
+            "и похожие запросы. Он про спрос в поиске, а не про статистику "
+            "кабинета, и client_login ему не нужен."
         ),
         (
             "База знаний по настройке и оптимизации кампаний отдаётся ресурсами: "
@@ -334,6 +339,58 @@ async def direct_read_report(path: str, offset: int = 0, limit: int = 100) -> st
         return json.dumps(
             store.read_back(p, offset, limit), ensure_ascii=False, default=str
         )
+    except Exception as exc:  # noqa: BLE001
+        return _fail(exc)
+
+
+# ── Вордстат ─────────────────────────────────────────────────────────────
+
+
+@mcp.tool(annotations={"readOnlyHint": True})
+async def direct_wordstat(
+    phrases: list[str],
+    geo_ids: list[int] | None = None,
+    min_shows: int = 0,
+    top: int = 10,
+) -> str:
+    """Частотность Вордстата: сколько раз за месяц искали фразу, что искали
+    вместе с ней и что искали похожего. Пишет полный список на диск, возвращает
+    сводку по каждой запрошенной фразе.
+
+    Нужен на сборке семантики (что брать в кампанию, где спрос есть, а где нет),
+    на разборе «мало показов» и когда в отчёте надо отделить падение спроса от
+    падения кампании.
+
+    phrases: до 50 фраз за вызов. Операторы Директа работают: «!» фиксирует
+        словоформу, кавычки ограничивают фразу, «+» держит стоп-слово.
+    geo_ids: регионы Директа, например [225] — Россия, [213] — Москва. Пусто —
+        без ограничения по региону. Директ коды не проверяет: неверный код
+        молча вернёт данные не по тому региону.
+    min_shows: отбросить подсказки с частотностью ниже порога.
+    top: сколько подсказок каждого вида показать в ответе, 1–100.
+
+    client_login не нужен: данные Вордстата общие для всех кабинетов. Значение
+    Shows — спрос в поиске за месяц, а не прогноз показов кампании. В песочнице
+    метод недоступен.
+    """
+    try:
+        if SETTINGS.sandbox:
+            raise ValueError(
+                "Вордстат недоступен в песочнице: метод есть только в боевом API. "
+                "Уберите YD_SANDBOX."
+            )
+        payload = await wordstat.lookup(
+            _api(),
+            phrases=phrases,
+            geo_ids=geo_ids,
+            out_dir=SETTINGS.out_dir,
+            deadline_seconds=SETTINGS.report_deadline,
+            min_shows=min_shows,
+            top=top,
+        )
+        # Через _ok не отдаём: заголовок Units — это баллы v5, а Вордстат живёт
+        # в v4 со своим счётчиком. Приписать сюда остаток v5 значит соврать.
+        return json.dumps(payload, ensure_ascii=False, default=str)
     except Exception as exc:  # noqa: BLE001
         return _fail(exc)
 
