@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import date, timedelta
+from datetime import timedelta
 
 import pytest
 
@@ -12,7 +12,9 @@ from yadirect_mcp import campaign_setup
 def plan():
     campaign = {
         "Name": "Поиск | Москва",
-        "StartDate": (date.today() + timedelta(days=1)).isoformat(),
+        # Дата берётся тем же способом, что и проверка внутри модуля: иначе на
+        # машине восточнее Москвы «завтра» окажется сегодняшним днём Директа.
+        "StartDate": (campaign_setup.moscow_today() + timedelta(days=1)).isoformat(),
         "TextCampaign": {
             "BiddingStrategy": {
                 "Search": {"BiddingStrategyType": "HIGHEST_POSITION"},

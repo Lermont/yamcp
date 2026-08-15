@@ -9,9 +9,8 @@ import httpx
 import pytest
 import respx
 
-from yadirect_mcp import store
+from yadirect_mcp import config, store
 from yadirect_mcp.client import DirectClient, DirectError
-from yadirect_mcp import config
 from yadirect_mcp.config import Settings
 
 REPORTS = "https://api.direct.yandex.com/json/v5/reports"

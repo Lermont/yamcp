@@ -14,7 +14,7 @@
 ## Ограничения
 
 1. **Клиент ходит на `https://api.direct.yandex.com/json/v5`, а не на v501.** Создаётся `TextCampaign`, который Директ переводит в ЕПК в режиме совместимости. Напрямую ЕПК не создать: план с `UnifiedCampaign`, `SmartCampaign`, `DynamicTextCampaign`, `CpmBannerCampaign`, `MobileAppCampaign` отвергается валидацией. Недоступны раздельные стратегии Search/Network, `PlacementTypes`, `PriorityGoals`, форматы `ShoppingAd` / `ListingAd`. Подробности — «Типы кампаний и ЕПК» (`direct://kb/campaign-types`).
-2. **`StartDate` обязателен и не может быть в прошлом**, формат `YYYY-MM-DD`.
+2. **`StartDate` обязателен и не может быть в прошлом**, формат `YYYY-MM-DD`. «Сегодня» здесь московское — сервер сверяет дату с часами Директа, а не с часовым поясом машины, на которой запущен.
 3. **Обязателен `BiddingStrategy` или `PackageBiddingStrategy`** в `TextCampaign`. Деньги — в микроединицах, см. «Контракт записи в Direct API» (`direct://kb/api-contract`).
 4. В каждой группе обязательны `Name`, непустой `RegionIds` и непустой массив `Ads`; в `TextAd` — `Title`, `Text`, `Mobile` (`YES`/`NO`) и `Href` либо `TurboPageId`.
 5. **Дополнения и изображения сервер не создаёт.** Быстрые ссылки, уточнения и картинки живут в отдельных сервисах API (`Sitelinks`, `AdExtensions`, `AdImages`), которых у сервера нет. Передать можно только уже существующие в аккаунте `SitelinkSetId`, `AdExtensionIds`, `AdImageHash`. При этом заполненные дополнения — обязательный пункт чек-листа, значит их придётся добирать в интерфейсе.

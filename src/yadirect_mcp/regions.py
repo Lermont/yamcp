@@ -20,6 +20,7 @@
 from __future__ import annotations
 
 import logging
+from contextlib import suppress
 from typing import Any
 
 log = logging.getLogger("yadirect-mcp")
@@ -77,10 +78,8 @@ def _path(item: dict[str, Any], by_id: dict[int, dict[str, Any]]) -> list[str]:
     # Свой же ID в seen: при цикле в данных регион иначе оказывается
     # родителем самому себе.
     seen: set[int] = set()
-    try:
+    with suppress(KeyError, TypeError, ValueError):
         seen.add(int(item["GeoRegionId"]))
-    except (KeyError, TypeError, ValueError):
-        pass
     parent = item.get("ParentId")
     while parent is not None and len(chain) < MAX_DEPTH:
         try:

@@ -105,7 +105,9 @@ def parse_tsv(tsv: str) -> tuple[list[str], list[dict[str, str]]]:
                 f"Некорректный TSV: строка {line_number} содержит {len(row)} "
                 f"полей вместо {len(columns)}"
             )
-        rows.append(dict(zip(columns, row)))
+        # strict=True держит инвариант проверки выше: расхождение длин здесь
+        # означало бы молча потерянную колонку.
+        rows.append(dict(zip(columns, row, strict=True)))
     return columns, rows
 
 

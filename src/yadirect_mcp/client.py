@@ -29,8 +29,9 @@ import json
 import logging
 import time
 from collections import defaultdict
+from contextlib import suppress
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Self
 
 import httpx
 
@@ -115,7 +116,7 @@ class DirectClient:
         self.last_units: Units | None = None
         self.reports_in_queue: int | None = None
 
-    async def __aenter__(self) -> "DirectClient":
+    async def __aenter__(self) -> Self:
         return self
 
     async def __aexit__(self, *_: object) -> None:
@@ -144,16 +145,12 @@ class DirectClient:
         raw = resp.headers.get("Units", "")
         parts = raw.replace(" ", "").split("/")
         if len(parts) == 3:
-            try:
+            with suppress(ValueError):
                 self.last_units = Units(int(parts[0]), int(parts[1]), int(parts[2]))
-            except ValueError:
-                pass
         q = resp.headers.get("reportsInQueue")
         if q is not None:
-            try:
+            with suppress(ValueError):
                 self.reports_in_queue = int(q)
-            except ValueError:
-                pass
 
     # ── обычный JSON API ─────────────────────────────────────────────────
 

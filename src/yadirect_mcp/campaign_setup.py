@@ -8,11 +8,21 @@ Ads.add и Keywords.add. Этот модуль принимает дерево �
 from __future__ import annotations
 
 from copy import deepcopy
-from datetime import date
+from datetime import date, datetime, timedelta, timezone
 from typing import Any
 
-
 MAX_BATCH = 1000
+
+# Директ сверяет StartDate со своим «сегодня», а оно московское, а не то, что
+# на машине с сервером. Для кабинета из Владивостока или Калининграда разница
+# ровно в те сутки, из-за которых валидный план получает отказ (или наоборот).
+# Москва с 2014 года часы не переводит, поэтому фиксированного смещения хватает.
+MOSCOW = timezone(timedelta(hours=3))
+
+
+def moscow_today() -> date:
+    """Сегодняшняя дата по часам Директа."""
+    return datetime.now(MOSCOW).date()
 
 
 def confirmation_phrase(client_login: str) -> str:
@@ -57,7 +67,7 @@ def normalize_plan(
         start = date.fromisoformat(raw_start)
     except ValueError as exc:
         raise ValueError("campaign.StartDate должен иметь формат YYYY-MM-DD") from exc
-    if start < (today or date.today()):
+    if start < (today or moscow_today()):
         raise ValueError("campaign.StartDate не может быть в прошлом")
 
     if not isinstance(groups, list) or not groups:
@@ -234,15 +244,17 @@ async def apply(
         group_actions = await _add(
             api, "adgroups", "AdGroups", group_payloads, client_login
         )
-    except Exception as exc:  # API не поддерживает транзакции/rollback
-        # Чанки до упавшего уже создались — их ID нужны, чтобы было что чинить.
+    # API не поддерживает транзакции и rollback, поэтому ловим всё: чанки до
+    # упавшего уже создались, и их ID нужны, чтобы было что чинить.
+    except Exception as exc:  # noqa: BLE001
         group_actions = getattr(exc, "results", [])
         group_fatal = _fatal("adgroups.add", exc)
 
     group_results: list[dict[str, Any]] = []
     flat_ads: list[tuple[int, dict[str, Any]]] = []
     flat_keywords: list[tuple[int, dict[str, Any]]] = []
-    for index, (group, action) in enumerate(zip(groups, group_actions)):
+    # strict=False: при обрыве на adgroups.add ответов меньше, чем групп.
+    for index, (group, action) in enumerate(zip(groups, group_actions, strict=False)):
         group_id = _action_id(action)
         item = {
             "plan_index": index,
@@ -269,10 +281,12 @@ async def apply(
             actions = await _add(
                 api, "ads", "Ads", [payload for _, payload in flat_ads], client_login
             )
-        except Exception as exc:  # сохраняем уже известные ID кампании и групп
+        except Exception as exc:  # noqa: BLE001 — сохраняем ID кампании и групп
             actions = getattr(exc, "results", [])
             fatal_error = _fatal("ads.add", exc)
-        for (group_index, _), action in zip(flat_ads, actions):
+        # strict=False намеренно: после обрыва actions короче flat_ads, и в
+        # результат должно попасть то, что успело создаться.
+        for (group_index, _), action in zip(flat_ads, actions, strict=False):
             group_results[group_index]["ads"].append(action)
     if flat_keywords and fatal_error is None:
         try:
@@ -280,10 +294,10 @@ async def apply(
                 api, "keywords", "Keywords",
                 [payload for _, payload in flat_keywords], client_login,
             )
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001 — тот же разбор частичного отказа
             actions = getattr(exc, "results", [])
             fatal_error = _fatal("keywords.add", exc)
-        for (group_index, _), action in zip(flat_keywords, actions):
+        for (group_index, _), action in zip(flat_keywords, actions, strict=False):
             group_results[group_index]["keywords"].append(action)
 
     requested_groups = len(groups)
