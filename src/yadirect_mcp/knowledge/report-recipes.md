@@ -12,7 +12,7 @@
 
 **А/Б объявлений.** `report_type: AD_PERFORMANCE_REPORT`, `fields: ["CampaignName","AdGroupName","AdId","Impressions","Clicks","Ctr","Cost","Conversions","CostPerConversion"]`. Оценивать только группы с 10+ кликами.
 
-**Основания для корректировок.** `report_type: CUSTOM_REPORT`, `fields: ["CampaignName","Device","Gender","Age","Impressions","Clicks","Cost","Conversions","CostPerConversion"]`.
+**Основания для корректировок.** `report_type: CUSTOM_REPORT`, `fields: ["CampaignName","Device","Gender","Age","Impressions","Clicks","Cost","Conversions","CostPerConversion"]`. Отчёт даёт только статистику по срезу, но не заданные коэффициенты: перед выводами прочитать уже выставленные корректировки через `direct_account_settings`, иначе «на мобильных нет конверсий» окажется корректировкой −100%, а не поведением аудитории.
 
 **Динамика и поиск обрывов.** `report_type: CUSTOM_REPORT`, `fields: ["Date","CampaignName","Impressions","Clicks","Cost","Conversions"]`.
 

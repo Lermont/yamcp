@@ -1,8 +1,9 @@
 """MCP-сервер для отчётности и опциональной настройки кампаний с нуля.
 
-Четыре тула, а не сто двадцать. Тул-лист — это часть контекста и, что важнее,
-пространство выбора для модели: чем он шире, тем чаще она мажет. Всё, что нужно
-для отчётности, — это Reports API плюс два справочника.
+Семь тулов, а не сто двадцать. Тул-лист — это часть контекста и, что важнее,
+пространство выбора для модели: чем он шире, тем чаще она мажет. Поэтому тул
+соответствует задаче, а не методу API: `direct_account_settings` за один вызов
+читает три сервиса, которые в разборе кампании нужны вместе.
 
 Знания о самом Директе живут не в тулах, а в ресурсах (модуль knowledge):
 инструкции едут в каждый запрос, поэтому в них остаётся только то, без чего
@@ -20,7 +21,7 @@ from typing import Any
 
 from mcp.server.fastmcp import FastMCP
 
-from . import campaign_setup, config, knowledge, store, wordstat
+from . import account, campaign_setup, config, knowledge, regions, store, wordstat
 from .client import DirectClient, DirectError
 
 # ВАЖНО: stdio-транспорт живёт на stdout. Любой print() туда ломает протокол.
@@ -56,6 +57,17 @@ def _instructions(settings: config.Settings) -> str:
             "Частотность запросов даёт direct_wordstat: спрос по фразе, вложенные "
             "и похожие запросы. Он про спрос в поиске, а не про статистику "
             "кабинета, и client_login ему не нужен."
+        ),
+        (
+            "Коды регионов не угадывай: Директ их не проверяет и молча покажет "
+            "данные и рекламу не по тому региону. Сверяй через direct_regions "
+            "всё, что уходит в geo_ids и RegionIds."
+        ),
+        (
+            "Корректировки ставок, условия ретаргетинга и общие наборы минус-фраз "
+            "в отчётах не видны — их читает direct_account_settings. Разбирая "
+            "срезы отчёта по устройствам, полу и возрасту, сначала проверь, какие "
+            "корректировки выставлены."
         ),
         (
             "База знаний по настройке и оптимизации кампаний отдаётся ресурсами: "
@@ -141,12 +153,14 @@ def _ok(payload: dict[str, Any]) -> str:
     return json.dumps(payload, ensure_ascii=False, default=str)
 
 
-def _fail(exc: Exception) -> str:
+def _fail(exc: Exception, hint: str | None = None) -> str:
     log.warning("%s: %s", type(exc).__name__, exc)
     out: dict[str, Any] = {"error": str(exc)}
     if isinstance(exc, DirectError):
         out["error_code"] = exc.code
         out["request_id"] = exc.request_id
+    if hint:
+        out["hint"] = hint
     return json.dumps(out, ensure_ascii=False)
 
 
@@ -217,6 +231,88 @@ async def direct_campaigns(client_login: str, include_archived: bool = False) ->
         ]
         return _ok({"client_login": client_login, "campaigns": campaigns,
                     "count": len(campaigns)})
+    except Exception as exc:  # noqa: BLE001
+        return _fail(exc)
+
+
+@mcp.tool(annotations={"readOnlyHint": True})
+async def direct_regions(
+    query: str | None = None,
+    ids: list[int] | None = None,
+    client_login: str | None = None,
+    limit: int = 20,
+) -> str:
+    """Коды регионов Директа по названию и обратная проверка готовых кодов.
+
+    Вызывать всегда, когда в geo_ids (direct_wordstat) или RegionIds
+    (direct_campaign_setup) уходит регион: Директ коды НЕ проверяет. Неверный
+    код не вызовет ошибку — он молча даст данные и показы не по тому региону,
+    и заметно это станет только по статистике.
+
+    query: часть названия, например "Москва", "Ростов", "Татарстан". Регистр и
+        «ё» не важны. Совпадения возвращаются с путём до корня (path), потому
+        что названия неуникальны: «Москва» — это и город 213, и «Москва и
+        область» 1.
+    ids: коды для обратной проверки. Вернёт названия, а отсутствующие в
+        справочнике коды — отдельным списком unknown_ids.
+    client_login: нужен только агентскому токену — Директ требует заголовок
+        Client-Login на клиентских методах. Подойдёт любой логин из
+        direct_list_clients.
+    limit: сколько совпадений вернуть, 1–200.
+
+    Нужен хотя бы один из query / ids: справочник целиком тул не отдаёт.
+    Загружается он один раз на процесс, повторные вызовы баллов не тратят.
+    """
+    try:
+        if client_login:
+            SETTINGS.check_login(client_login)
+        payload = await regions.lookup(
+            _api(), query=query, ids=ids, client_login=client_login, limit=limit
+        )
+        return _ok(payload)
+    except Exception as exc:  # noqa: BLE001
+        hint = None
+        if isinstance(exc, DirectError) and not client_login:
+            hint = (
+                "Если токен агентский, Директ требует Client-Login: повторите "
+                "вызов с client_login любого клиента из direct_list_clients."
+            )
+        return _fail(exc, hint)
+
+
+@mcp.tool(annotations={"readOnlyHint": True})
+async def direct_account_settings(
+    client_login: str,
+    sections: list[str] | None = None,
+    campaign_ids: list[int] | None = None,
+) -> str:
+    """Настройки кабинета, которых нет в отчётах: корректировки ставок, условия
+    ретаргетинга, общие наборы минус-фраз.
+
+    Нужен при разборе «почему кампания не работает» и перед выводами по срезам
+    отчёта. Reports API покажет статистику по Device, Gender, Age, но не
+    покажет выставленный коэффициент, а это разные диагнозы: «нет мобильных
+    конверсий» и «на мобильные стоит −100%».
+
+    sections: какие секции читать. Доступны bid_modifiers, retargeting_lists,
+        negative_keyword_sets. Пусто — все три.
+    campaign_ids: для каких кампаний смотреть корректировки. Пусто — сервер
+        сам возьмёт неархивные кампании клиента, но не более 50; если их
+        больше, в ответе будет truncated и число пропущенных.
+
+    Секции независимы: ошибка в одной приходит полем error внутри неё, а
+    остальные возвращаются как есть. Корректировки перемножаются между собой —
+    как их читать, описано в direct://kb/targeting-adjustments.
+    """
+    try:
+        SETTINGS.check_login(client_login)
+        payload = await account.read(
+            _api(),
+            client_login,
+            sections=sections,
+            campaign_ids=campaign_ids,
+        )
+        return _ok(payload)
     except Exception as exc:  # noqa: BLE001
         return _fail(exc)
 

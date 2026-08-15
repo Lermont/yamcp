@@ -62,23 +62,24 @@ def test_module_entrypoint_is_runnable(tmp_path):
     assert "yandex-direct MCP" in result.stderr
 
 
+READ_TOOLS = [
+    "direct_list_clients",
+    "direct_campaigns",
+    "direct_regions",
+    "direct_account_settings",
+    "direct_report",
+    "direct_read_report",
+    "direct_wordstat",
+]
+
+
 def test_report_mode_exposes_only_read_tools(tmp_path):
-    assert _tool_names("report", str(tmp_path)) == [
-        "direct_list_clients",
-        "direct_campaigns",
-        "direct_report",
-        "direct_read_report",
-        "direct_wordstat",
-    ]
+    assert _tool_names("report", str(tmp_path)) == READ_TOOLS
 
 
 def test_campaign_setup_mode_adds_guarded_write_tool(tmp_path):
     assert _tool_names("campaign_setup", str(tmp_path)) == [
-        "direct_list_clients",
-        "direct_campaigns",
-        "direct_report",
-        "direct_read_report",
-        "direct_wordstat",
+        *READ_TOOLS,
         "direct_campaign_setup",
     ]
 
