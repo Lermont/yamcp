@@ -17,6 +17,11 @@
     YD_LANG             — Accept-Language для сообщений об ошибках (ru/en)
     YD_MODE             — report (по умолчанию) или campaign_setup.
                           Второй режим добавляет подтверждаемое создание кампаний.
+    YD_DEFAULT_WEEKLY_BUDGET
+                        — недельный бюджет кампании по умолчанию, в валюте
+                          кабинета (не в микроединицах). Пусто = не подсказывать.
+                          Попадает в instructions, чтобы не проговаривать одну
+                          и ту же сумму на каждом запуске.
 """
 
 from __future__ import annotations
@@ -38,6 +43,7 @@ class Settings:
     report_deadline: float
     lang: str
     mode: str = "report"
+    default_weekly_budget: float | None = None
 
     def check_login(self, client_login: str) -> None:
         """Бросает ValueError, если логин не в белом списке."""
@@ -87,6 +93,18 @@ def load() -> Settings:
     if mode not in {"report", "campaign_setup"}:
         raise RuntimeError("YD_MODE должен быть report или campaign_setup")
 
+    raw_budget = os.getenv("YD_DEFAULT_WEEKLY_BUDGET", "").strip().replace(",", ".")
+    default_weekly_budget: float | None = None
+    if raw_budget:
+        try:
+            default_weekly_budget = float(raw_budget)
+        except ValueError as exc:
+            raise RuntimeError(
+                f"YD_DEFAULT_WEEKLY_BUDGET должен быть числом, получено {raw_budget!r}"
+            ) from exc
+        if default_weekly_budget <= 0:
+            raise RuntimeError("YD_DEFAULT_WEEKLY_BUDGET должен быть больше 0")
+
     return Settings(
         token=token,
         agency_login=os.getenv("YD_AGENCY_LOGIN", "").strip() or None,
@@ -98,4 +116,5 @@ def load() -> Settings:
         report_deadline=report_deadline,
         lang=lang,
         mode=mode,
+        default_weekly_budget=default_weekly_budget,
     )
