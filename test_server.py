@@ -67,6 +67,7 @@ READ_TOOLS = [
     "direct_campaigns",
     "direct_regions",
     "direct_account_settings",
+    "direct_ads",
     "direct_report",
     "direct_read_report",
     "direct_wordstat",

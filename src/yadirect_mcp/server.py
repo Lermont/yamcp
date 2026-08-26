@@ -1,6 +1,6 @@
 """MCP-сервер для отчётности и опциональной настройки кампаний с нуля.
 
-Семь тулов, а не сто двадцать. Тул-лист — это часть контекста и, что важнее,
+Восемь тулов, а не сто двадцать. Тул-лист — это часть контекста и, что важнее,
 пространство выбора для модели: чем он шире, тем чаще она мажет. Поэтому тул
 соответствует задаче, а не методу API: `direct_account_settings` за один вызов
 читает три сервиса, которые в разборе кампании нужны вместе.
@@ -21,7 +21,7 @@ from typing import Any
 
 from mcp.server.fastmcp import FastMCP
 
-from . import account, campaign_setup, config, knowledge, regions, store, wordstat
+from . import account, ads, campaign_setup, config, knowledge, regions, store, wordstat
 from .client import DirectClient, DirectError
 
 # ВАЖНО: stdio-транспорт живёт на stdout. Любой print() туда ломает протокол.
@@ -68,6 +68,12 @@ def _instructions(settings: config.Settings) -> str:
             "в отчётах не видны — их читает direct_account_settings. Разбирая "
             "срезы отчёта по устройствам, полу и возрасту, сначала проверь, какие "
             "корректировки выставлены."
+        ),
+        (
+            "Ссылки на посадочные страницы в отчётах тоже нет — её отдаёт "
+            "direct_ads вместе с текстами объявлений и разобранными UTM. "
+            "Не рассуждай о качестве трафика и конверсии, не посмотрев, куда "
+            "он ведёт."
         ),
         (
             "База знаний по настройке и оптимизации кампаний отдаётся ресурсами: "
@@ -311,6 +317,50 @@ async def direct_account_settings(
             client_login,
             sections=sections,
             campaign_ids=campaign_ids,
+        )
+        return _ok(payload)
+    except Exception as exc:  # noqa: BLE001
+        return _fail(exc)
+
+
+@mcp.tool(annotations={"readOnlyHint": True})
+async def direct_ads(
+    client_login: str,
+    campaign_ids: list[int] | None = None,
+    ad_group_ids: list[int] | None = None,
+    ad_ids: list[int] | None = None,
+    include_archived: bool = False,
+    limit: int = 1000,
+) -> str:
+    """Объявления и посадочные страницы: куда ведёт реклама, что в заголовках,
+    размечены ли ссылки UTM.
+
+    Ссылки в отчётах не существует ни в одном типе: поле Href есть только
+    здесь. Вызывать, когда разбор дошёл до вопросов «на какую страницу идёт
+    группа», «одна ли это главная на весь аккаунт», «есть ли метки» — и перед
+    любыми выводами про конверсию, потому что дорогой клик на нерелевантной
+    странице выглядит в отчёте так же, как дорогой клик вообще.
+
+    campaign_ids / ad_group_ids / ad_ids: чем сузить выборку. Пусто — все
+        объявления клиента.
+    include_archived: включить архивные, по умолчанию нет.
+    limit: сколько объявлений забрать за вызов, 1–10000.
+
+    В ответе landing_pages — сводка по уникальным URL с числом объявлений,
+    кампаниями и разобранными UTM; domains — домены, на которые идёт реклама.
+    Запрашивается блок TextAd: у графических, видео и смарт-объявлений href
+    придёт пустым, их число видно в ads_without_href.
+    """
+    try:
+        SETTINGS.check_login(client_login)
+        payload = await ads.read(
+            _api(),
+            client_login,
+            campaign_ids=campaign_ids,
+            ad_group_ids=ad_group_ids,
+            ad_ids=ad_ids,
+            include_archived=include_archived,
+            limit=limit,
         )
         return _ok(payload)
     except Exception as exc:  # noqa: BLE001
