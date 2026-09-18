@@ -9,8 +9,11 @@ MAX_MCP_OUTPUT_TOKENS), так что сырой TSV в ответе — это 
 from __future__ import annotations
 
 import csv
+import hashlib
 import io
+import json
 import re
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -132,6 +135,7 @@ def persist(
     out_dir: Path,
     stem: str,
     inline_rows: int,
+    metadata: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     path = out_dir / f"{safe_stem(stem)}.tsv"
 
@@ -139,6 +143,7 @@ def persist(
     # ожидания в офлайн-очереди; ронять его целиком из-за одной кривой строки
     # (лишний таб в тексте объявления или в поисковом запросе) нельзя.
     path.write_text(tsv, encoding="utf-8", newline="")
+    metadata_payload = _write_metadata(path, metadata)
 
     try:
         columns, rows = parse_tsv(tsv)
@@ -151,6 +156,7 @@ def persist(
             "preview": [],
             "preview_truncated": False,
             "parse_error": str(exc),
+            **metadata_payload,
             "hint": (
                 f"Отчёт выгружен и сохранён в {path}, но разобрать TSV не удалось: "
                 f"{exc}. Данные не потеряны — откройте файл и проверьте строку."
@@ -164,6 +170,7 @@ def persist(
         "totals": _totals(rows, columns),
         "preview": rows[:inline_rows],
         "preview_truncated": len(rows) > inline_rows,
+        **metadata_payload,
         "hint": (
             f"Показаны первые {min(len(rows), inline_rows)} из {len(rows)} строк. "
             f"Полный отчёт в {path} — читайте его direct_read_report "
@@ -172,18 +179,110 @@ def persist(
     }
 
 
+def _metadata_preview(metadata: dict[str, Any]) -> dict[str, Any]:
+    result = dict(metadata)
+    for key in ("campaign_settings", "comparison_mismatch_campaign_ids"):
+        if isinstance(result.get(key), list) and len(result[key]) > 50:
+            result[f"{key}_count"] = len(result[key])
+            result[key] = result[key][:50]
+            result["preview_truncated"] = True
+    return result
+
+
+def _write_metadata(path: Path, metadata: dict[str, Any] | None) -> dict[str, Any]:
+    sidecar = path.with_suffix(".metadata.json")
+    if metadata is None:
+        # Reusing a legacy output stem must not retain another report's labels.
+        sidecar.unlink(missing_ok=True)
+        return {}
+    full = {**metadata, "tsv_sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
+    sidecar.write_text(json.dumps(full, ensure_ascii=False, indent=2), encoding="utf-8")
+    return {"metadata_path": str(sidecar), "metadata": _metadata_preview(full)}
+
+
+def _read_metadata(path: Path) -> dict[str, Any]:
+    sidecar = path.with_suffix(".metadata.json")
+    if not sidecar.exists():
+        return {"metadata_warning": (
+            "У старого отчёта нет метаданных; цели и атрибуция не подтверждены."
+        )}
+    try:
+        full = json.loads(sidecar.read_text(encoding="utf-8"))
+        if (not isinstance(full, dict)
+                or full.get("tsv_sha256") != hashlib.sha256(path.read_bytes()).hexdigest()):
+            raise ValueError("metadata/TSV mismatch")
+    except (OSError, ValueError):
+        return {"metadata_warning": (
+            "Метаданные повреждены или относятся к другой версии TSV; "
+            "не используйте их для выводов."
+        )}
+    return {"metadata_path": str(sidecar), "metadata": _metadata_preview(full)}
+
+
+def _fingerprint(path: Path) -> tuple[int, int, int, str]:
+    try:
+        stat = path.stat()
+        # Windows can retain identical timestamps for consecutive same-size
+        # writes. Content must participate or cached metadata may label new TSV
+        # bytes with old goals despite the sidecar's SHA-256 protection.
+        digest = hashlib.sha256(path.read_bytes()).hexdigest() if stat.st_size <= 2_000_000 else ""
+        return stat.st_size, stat.st_mtime_ns, stat.st_ctime_ns, digest
+    except FileNotFoundError:
+        return 0, 0, 0, ""
+
+
+def _snapshot(path: Path) -> dict[str, Any]:
+    text = path.read_text(encoding="utf-8")
+    try:
+        columns, rows = parse_tsv(text)
+        return {"columns": columns, "data": rows, **_read_metadata(path)}
+    except ValueError as exc:
+        return {
+            "columns": [], "data": [], "parse_error": str(exc),
+            "raw_lines": text.splitlines(), **_read_metadata(path),
+        }
+
+
+@lru_cache(maxsize=4)
+def _cached_snapshot(
+    path: Path, fingerprint: tuple[int, int, int, str],
+    metadata_fingerprint: tuple[int, int, int, str],
+) -> dict[str, Any]:
+    return _snapshot(path)
+
+
 def read_back(path: Path, offset: int, limit: int) -> dict[str, Any]:
     if offset < 0:
         raise ValueError("offset не может быть отрицательным")
     if not 1 <= limit <= 1000:
         raise ValueError("limit должен быть от 1 до 1000")
-    columns, rows = parse_tsv(path.read_text(encoding="utf-8"))
+    fingerprint = _fingerprint(path)
+    # Bound the parse cache by entry count and source bytes. Hash small files on
+    # each read; larger reports do not occupy persistent memory.
+    snapshot = (
+        _cached_snapshot(path, fingerprint, _fingerprint(path.with_suffix(".metadata.json")))
+        if fingerprint[0] <= 2_000_000 else _snapshot(path)
+    )
+    rows = snapshot["data"]
     window = rows[offset : offset + limit]
+    if "parse_error" in snapshot:
+        lines = snapshot["raw_lines"]
+        window = lines[offset : offset + limit]
+        return {
+            "path": str(path), "parse_error": snapshot["parse_error"],
+            "mode": "raw_lines", "offset": offset, "returned": len(window),
+            "lines_total": len(lines), "raw_lines": window,
+            "next_offset": offset + len(window) if offset + len(window) < len(lines) else None,
+            "hint": ("offset считает физические строки с 0, включая заголовок. "
+                     "Значения не исправлены."),
+            **{key: value for key, value in snapshot.items() if key.startswith("metadata")},
+        }
     return {
         "path": str(path),
-        "columns": columns,
+        "columns": snapshot["columns"],
         "rows_total": len(rows),
         "offset": offset,
         "returned": len(window),
         "data": window,
+        **{key: value for key, value in snapshot.items() if key.startswith("metadata")},
     }

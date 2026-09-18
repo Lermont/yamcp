@@ -22,6 +22,13 @@
                           кабинета (не в микроединицах). Пусто = не подсказывать.
                           Попадает в instructions, чтобы не проговаривать одну
                           и ту же сумму на каждом запуске.
+    YD_CREATE_REPORT_SSH_HOST
+                        — SSH-алиас для публикации итогового HTML. Пусто =
+                          сохранить отчёт только локально.
+    YD_CREATE_REPORT_REMOTE_ROOT
+                        — корень клиентских отчётов на удалённом сервере.
+    YD_CREATE_REPORT_PUBLIC_BASE_URL
+                        — публичный базовый URL клиентских отчётов.
 """
 
 from __future__ import annotations
@@ -29,6 +36,7 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 from pathlib import Path
+from urllib.parse import urlsplit
 
 
 @dataclass(frozen=True)
@@ -42,8 +50,14 @@ class Settings:
     inline_rows: int
     report_deadline: float
     lang: str
+    wordstat_token: str = ""
+    metrika_token: str = ""
+    use_operator_units: bool = False
     mode: str = "report"
     default_weekly_budget: float | None = None
+    create_report_ssh_host: str | None = None
+    create_report_remote_root: str = ""
+    create_report_public_base_url: str = ""
 
     def check_login(self, client_login: str) -> None:
         """Бросает ValueError, если логин не в белом списке."""
@@ -105,7 +119,42 @@ def load() -> Settings:
         if default_weekly_budget <= 0:
             raise RuntimeError("YD_DEFAULT_WEEKLY_BUDGET должен быть больше 0")
 
+    create_report_ssh_host = (
+        os.getenv("YD_CREATE_REPORT_SSH_HOST", "").strip() or None
+    )
+    create_report_remote_root = os.getenv(
+        "YD_CREATE_REPORT_REMOTE_ROOT",
+        "",
+    ).strip().rstrip("/")
+    if create_report_remote_root and (
+        not create_report_remote_root.startswith("/") or create_report_remote_root == "/"
+        or ".." in create_report_remote_root.split("/")
+    ):
+        raise RuntimeError("YD_CREATE_REPORT_REMOTE_ROOT должен быть абсолютным путём")
+    create_report_public_base_url = os.getenv(
+        "YD_CREATE_REPORT_PUBLIC_BASE_URL", ""
+    ).strip().rstrip("/")
+    url = urlsplit(create_report_public_base_url)
+    if create_report_public_base_url and (
+        url.scheme not in {"http", "https"} or not url.hostname
+        or url.username is not None or url.password is not None or url.query or url.fragment
+    ):
+        raise RuntimeError(
+            "YD_CREATE_REPORT_PUBLIC_BASE_URL должен быть HTTP(S) URL"
+        )
+
+    if create_report_ssh_host and not (
+        create_report_remote_root and create_report_public_base_url
+    ):
+        raise RuntimeError(
+            "Публикация требует явных YD_CREATE_REPORT_REMOTE_ROOT и "
+            "YD_CREATE_REPORT_PUBLIC_BASE_URL вместе с YD_CREATE_REPORT_SSH_HOST"
+        )
+
     return Settings(
+        wordstat_token=os.getenv("YD_WORDSTAT_TOKEN", "").strip(),
+        metrika_token=os.getenv("YD_METRIKA_TOKEN", "").strip(),
+        use_operator_units=_flag("YD_USE_OPERATOR_UNITS"),
         token=token,
         agency_login=os.getenv("YD_AGENCY_LOGIN", "").strip() or None,
         allowed_logins=frozenset(allowed),
@@ -117,4 +166,7 @@ def load() -> Settings:
         lang=lang,
         mode=mode,
         default_weekly_budget=default_weekly_budget,
+        create_report_ssh_host=create_report_ssh_host,
+        create_report_remote_root=create_report_remote_root,
+        create_report_public_base_url=create_report_public_base_url,
     )

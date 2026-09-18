@@ -19,6 +19,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from contextlib import suppress
 from typing import Any
@@ -32,12 +33,14 @@ MAX_LIMIT = 200
 MAX_DEPTH = 16
 
 _cache: list[dict[str, Any]] | None = None
+_load_lock = asyncio.Lock()
 
 
 def reset_cache() -> None:
     """Сбросить справочник. Нужен тестам: кеш живёт на уровне модуля."""
-    global _cache
+    global _cache, _load_lock
     _cache = None
+    _load_lock = asyncio.Lock()
 
 
 def _norm(text: str) -> str:
@@ -47,15 +50,16 @@ def _norm(text: str) -> str:
 
 async def _load(api: Any, client_login: str | None) -> list[dict[str, Any]]:
     global _cache
-    if _cache is None:
-        result = await api.call(
-            "dictionaries",
-            "get",
-            {"DictionaryNames": ["GeoRegions"]},
-            client_login=client_login,
-        )
-        _cache = result.get("GeoRegions") or []
-        log.info("справочник регионов загружен: %s записей", len(_cache))
+    async with _load_lock:
+        if _cache is None:
+            result = await api.call(
+                "dictionaries",
+                "get",
+                {"DictionaryNames": ["GeoRegions"]},
+                client_login=client_login,
+            )
+            _cache = result.get("GeoRegions") or []
+            log.info("справочник регионов загружен: %s записей", len(_cache))
     return _cache
 
 
