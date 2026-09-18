@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import locale
 from copy import deepcopy
 from dataclasses import replace
 from pathlib import Path
@@ -326,3 +327,17 @@ def test_report_renders_without_optional_fonts(tmp_path, monkeypatch):
     assert "Arial,sans-serif" in html
     assert "data:image/svg+xml;base64," in html
     assert model["client"]["name"] in html
+
+
+@pytest.mark.asyncio
+async def test_refresh_timestamp_works_in_c_locale(tmp_path):
+    cfg, _, _, _ = register(tmp_path)
+    previous = locale.setlocale(locale.LC_TIME)
+    try:
+        locale.setlocale(locale.LC_TIME, "C")
+        outcome = await pipeline.refresh(cfg, API(), "client", as_of="2026-08-02")
+    finally:
+        locale.setlocale(locale.LC_TIME, previous)
+    assert outcome["status"] == "updated"
+    model = pipeline._load(tmp_path / "client")["model"]
+    assert model["periods"][0]["updated"].endswith(" · Москва")

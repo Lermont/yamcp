@@ -572,7 +572,7 @@ async def refresh(
                 "start": config["start_date"],
                 "end": end.isoformat(),
                 "campaignIds": ids,
-                "updated": datetime.now(MOSCOW).strftime("%d.%m.%Y %H:%M · Москва"),
+                "updated": datetime.now(MOSCOW).strftime("%d.%m.%Y %H:%M") + " · Москва",
                 "source": "Яндекс Директ",
                 "sourceNote": (
                     "Статистика за завершённые дни. Метрика цели — целевые визиты, "
