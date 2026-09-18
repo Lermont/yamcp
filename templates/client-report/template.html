@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="color-scheme" content="light">
+  <meta name="description" content="Клиентский отчёт Media Targeting: настройка рекламы, результаты и план работы.">
+  <title>Клиентский отчёт · Media Targeting</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%2321172b'/%3E%3Ccircle cx='32' cy='32' r='16' fill='%23ff6600'/%3E%3Ccircle cx='32' cy='32' r='6' fill='%2321172b'/%3E%3C/svg%3E">
+  <style>/*__STYLES__*/</style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Перейти к отчёту</a>
+  <div class="mobile-bar"><img src="__LOGO__" alt="Media Targeting" width="151" height="42"><button type="button" class="icon-button" id="menu-toggle" aria-label="Открыть меню" aria-expanded="false" aria-controls="sidebar">☰</button></div>
+  <button type="button" class="scrim" id="scrim" aria-label="Закрыть меню" hidden></button>
+  <aside class="sidebar" id="sidebar" aria-label="Навигация по отчёту">
+    <a href="https://mediatargeting.agency/" class="brand" aria-label="Media Targeting — сайт агентства"><img src="__LOGO__" alt="Media Targeting" width="169" height="47"></a>
+    <div class="sidebar-caption">КАБИНЕТ КЛИЕНТА</div>
+    <div class="client-card"><div class="client-monogram" id="client-monogram">A</div><div><strong id="sidebar-client">Ваш проект</strong><span id="sidebar-description">Рекламный отчёт</span></div><span class="client-dot" aria-hidden="true"></span></div>
+    <div class="sidebar-caption report-views-caption">РАЗДЕЛЫ ОТЧЁТА</div>
+    <div class="report-views" role="tablist" aria-label="Вид отчёта" aria-orientation="vertical">
+      <button id="tab-setup" role="tab" aria-selected="false" aria-controls="panel-setup" tabindex="-1" data-view="setup"><span data-icon="layers"></span><span>Настройка</span></button>
+      <button id="tab-statistics" role="tab" aria-selected="true" aria-controls="panel-statistics" tabindex="0" data-view="statistics"><span data-icon="chart"></span><span>Статистика</span></button>
+    </div>
+    <div class="sidebar-caption nav-caption">НА СТРАНИЦЕ</div>
+    <nav id="section-nav"></nav>
+    <div class="sidebar-bottom"><div class="sidebar-art" aria-hidden="true"><i></i><i></i><i></i><b>↗</b></div><p>Видим за цифрами<br><strong>возможности для роста.</strong></p><a href="mailto:hello@mediatargeting.agency">На связи с вами <span aria-hidden="true">↗</span></a></div>
+    <div class="sidebar-foot">MEDIA TARGETING <span>AGENCY</span></div>
+  </aside>
+  <div class="workspace">
+    <header class="topbar"><div class="breadcrumb">Клиентский отчёт <span>/</span> <strong id="breadcrumb-client"></strong></div><div class="topbar-right"><span class="demo-badge" id="demo-badge">Демонстрационный отчёт</span><span class="report-number" id="report-number"></span></div></header>
+    <main id="main" tabindex="-1">
+      <div class="report-toolbar"><span class="report-view-label" id="report-view-label">Статистика проекта</span><div class="toolbar-actions"><button class="button ghost" id="copy-link" type="button"><span data-icon="link"></span><span>Ссылка</span></button><button class="button primary" id="print-report" type="button"><span data-icon="download"></span>Сохранить PDF</button></div></div>
+      <div class="demo-notice" id="demo-notice"><span class="small-dot"></span>Пример оформления. Проект, показатели и выполненные работы — демонстрационные.</div>
+      <div id="panel-statistics" role="tabpanel" aria-labelledby="tab-statistics"></div>
+      <div id="panel-setup" role="tabpanel" aria-labelledby="tab-setup" hidden></div>
+      <noscript><div class="panel empty">Для интерактивного отчёта включите JavaScript в браузере.</div></noscript>
+      <div id="load-error" class="panel empty" hidden>Не удалось открыть данные отчёта. Обратитесь в агентство.</div>
+      <footer class="footer" id="contacts">
+        <div class="footer-top"><div><span class="eyebrow">ОБСУДИМ ВАШ СЛЕДУЮЩИЙ ШАГ</span><h2>Мы на связи.</h2><p>Ответим на вопросы по цифрам<br>и вместе спланируем дальнейшую работу.</p><div class="footer-messengers"><a class="contact-messenger" href="https://t.me/SergeyMushtuk" target="_blank" rel="noopener noreferrer"><span class="messenger-label">Telegram</span><strong>@SergeyMushtuk</strong><span aria-hidden="true">↗</span></a><button class="contact-messenger" type="button" id="copy-max" aria-label="Скопировать номер MAX +7 909 999-44-02"><span class="messenger-label">MAX</span><strong>+7 909 999-44-02</strong><span class="contact-copy-hint">Скопировать</span></button></div></div><div class="footer-contacts"><a href="mailto:hello@mediatargeting.agency">hello@mediatargeting.agency <span aria-hidden="true">↗</span></a><a href="tel:+74951961160">+7 495 196-11-60</a><address>Москва, Рижский проезд, 11</address></div></div>
+        <div class="footer-bottom"><a href="https://mediatargeting.agency/">mediatargeting.agency <span aria-hidden="true">↗</span></a><span>Media Targeting · Реклама и аналитика</span><a href="#main">К началу отчёта ↑</a></div>
+      </footer>
+    </main>
+  </div>
+  <div class="toast" role="status" id="toast" hidden></div>
+  <dialog id="link-dialog" aria-labelledby="share-dialog-title"><form method="dialog"><h2 id="share-dialog-title">Ссылка на отчёт</h2><p id="share-dialog-description">Скопируйте адрес или передайте получателю HTML-файл.</p><input id="share-url" readonly aria-label="Адрес отчёта"><button class="button primary">Закрыть</button></form></dialog>
+  <script type="application/json" id="report-data">/*__DATA__*/</script>
+  <script>/*__SCRIPT__*/</script>
+</body>
+</html>

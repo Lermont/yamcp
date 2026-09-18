@@ -29,11 +29,11 @@ classifiers = [
     "Topic :: Office/Business",
 ]
 dependencies = [
-    # Нижняя граница: до 1.14.0 FastMCP.Tool.from_function падает на строковых
-    # аннотациях (`from __future__ import annotations`) — issubclass() arg 1 must
-    # be a class. Верхняя: в mcp 2.0.0 пакет mcp.server.fastmcp удалён.
-    "mcp>=1.14.0,<2.0.0",
+    # С 1.19.0 FastMCP передаёт CallToolResult напрямую, сохраняя isError и
+    # structuredContent. В 2.x пакет mcp.server.fastmcp удалён.
+    "mcp>=1.29.0,<2.0.0",
     "httpx>=0.27.0",
+    "Pillow>=12.1.0,<13",
 ]
 
 [project.urls]
@@ -58,6 +58,7 @@ dev = [
 
 [project.scripts]
 yadirect-mcp = "yadirect_mcp:main"
+yadirect-report = "yadirect_mcp.report_runner:main"
 
 [build-system]
 requires = ["hatchling"]
@@ -66,9 +67,31 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["src/yadirect_mcp"]
 
+[tool.hatch.build.targets.wheel.force-include]
+"templates/client-report/build.py" = "yadirect_mcp/report_template/build.py"
+"templates/client-report/template.html" = "yadirect_mcp/report_template/template.html"
+"templates/client-report/styles.css" = "yadirect_mcp/report_template/styles.css"
+"templates/client-report/report.js" = "yadirect_mcp/report_template/report.js"
+"templates/client-report/assets/logo.svg" = "yadirect_mcp/report_template/assets/logo.svg"
+
+[tool.hatch.build.targets.sdist]
+# Gitignore's !.env.example exception can re-include nested backup/worktree
+# examples in Hatch's file selection. Explicitly exclude local directories.
+exclude = [
+    "/out/**",
+    "/.claude/**",
+    "/.codex/**",
+    "/.build-check/**",
+    "/.release-check/**",
+    "/scripts/**",
+    "/templates/client-report/*.zip",
+    "/templates/client-report/assets/gilroy-*.ttf",
+]
+
 [tool.pytest.ini_options]
 testpaths = ["."]
 python_files = ["test_*.py"]
+norecursedirs = [".*", "out", "build", "dist", "venv", "ENV", "__pycache__"]
 
 [tool.ruff]
 target-version = "py311"

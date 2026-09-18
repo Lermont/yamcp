@@ -32,6 +32,7 @@ import hashlib
 import json
 import logging
 import time
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -224,18 +225,24 @@ def summarize(
         with_rows = _suggestions(item, SEARCHED_WITH, min_shows)
         also_rows = _suggestions(item, SEARCHED_ALSO, min_shows)
 
-        # Пустая выдача и отсутствие ответа выглядят одинаково — обе дают
-        # shows: null, — но значат разное: в первом случае спроса нет, во втором
-        # мы просто ничего не знаем. Смотрим на сырой ответ, а не на строки
-        # после min_shows: иначе порог отсечения выдаётся за отсутствие спроса.
         note = None
         if item is None:
             note = "Вордстат не вернул данных по фразе"
         elif not ((item.get(SEARCHED_WITH) or []) or (item.get(SEARCHED_ALSO) or [])):
-            note = "Вордстат не нашёл запросов: спроса нет либо фраза с опечаткой"
+            note = "Вордстат не нашёл запросов в выбранной географии и периоде"
 
         key = phrase.casefold()
-        exact = next((shows for text, shows in with_rows if text.casefold() == key), None)
+        # Presentation filters must never erase the requested phrase's frequency.
+        raw_with = _suggestions(item, SEARCHED_WITH, 0)
+        exact = next((shows for text, shows in raw_with if text.casefold() == key), None)
+        if item is None:
+            data_status = "missing_response"
+        elif exact is not None:
+            data_status = "zero" if exact == 0 else "observed"
+        elif not ((item.get(SEARCHED_WITH) or []) or (item.get(SEARCHED_ALSO) or [])):
+            data_status = "no_results"
+        else:
+            data_status = "missing_frequency"
         nested = [
             {"phrase": text, "shows": shows}
             for text, shows in with_rows
@@ -245,6 +252,7 @@ def summarize(
             {
                 "phrase": phrase,
                 "shows": exact,
+                "data_status": data_status,
                 "nested_total": len(with_rows),
                 "similar_total": len(also_rows),
                 "top_nested": nested,
@@ -258,8 +266,7 @@ def summarize(
 
 
 def _stem(phrases: list[str], geo_ids: list[int] | None) -> str:
-    """Имя файла: узнаваемое начало + хеш, чтобы разные запросы не затирали
-    друг друга, а повтор того же запроса обновлял свой файл."""
+    """Узнаваемое начало + хеш параметров; lookup добавляет время для сохранности истории."""
     blob = json.dumps([phrases, geo_ids or []], ensure_ascii=False, sort_keys=True)
     digest = hashlib.sha1(blob.encode("utf-8")).hexdigest()[:8]
     return f"wordstat_{phrases[0][:40]}_{digest}"
@@ -282,28 +289,64 @@ async def lookup(
     if not 1 <= top <= 100:
         raise ValueError("top должен быть от 1 до 100")
 
+    modern = getattr(api, "modern_wordstat", False) is True
     report_ids: list[int] = []
-    try:
-        report_ids = await _create(api, phrases, geo_ids)
-        await _await_ready(api, report_ids, time.monotonic() + deadline_seconds)
-        items = await _fetch(api, report_ids)
-    finally:
-        # Отчёты живут в очереди аккаунта до удаления, а не до конца процесса.
-        if report_ids:
-            await _drop(api, report_ids)
+    if modern:
+        items = []
+        async with asyncio.timeout(deadline_seconds):
+            for phrase in phrases:
+                response = await api.wordstat_top_requests(phrase, geo_ids)
+                items.append({"Phrase": phrase, SEARCHED_WITH: [
+                    {"Phrase": row["phrase"], "Shows": row["count"]}
+                    for row in response["topRequests"]], SEARCHED_ALSO: []})
+    else:
+        try:
+            # Append each successful batch immediately so partial creation is cleaned up.
+            for batch in _batches(phrases):
+                report_ids.extend(await _create(api, batch, geo_ids))
+            await _await_ready(api, report_ids, time.monotonic() + deadline_seconds)
+            items = await _fetch(api, report_ids)
+        finally:
+            if report_ids:
+                await _drop(api, report_ids)
 
     by_phrase = _by_phrase(items, phrases)
     tsv = to_tsv(phrases, by_phrase, min_shows)
-    path = out_dir / f"{safe_stem(_stem(phrases, geo_ids))}.tsv"
+    collected_at = datetime.now(UTC)
+    stamp = collected_at.strftime("%Y%m%dT%H%M%S%fZ")
+    path = out_dir / f"{safe_stem(_stem(phrases, geo_ids))}_{stamp}.tsv"
     path.write_text(tsv, encoding="utf-8", newline="")
 
     rows = tsv.count("\n") - 1
+    summary = summarize(phrases, by_phrase, min_shows, top)
+    metadata = {
+        "schema": "direct_wordstat_evidence_v1",
+        "source": "wordstat_v1" if modern else "wordstat_v4",
+        "collected_at": collected_at.isoformat(),
+        "geo_ids": list(geo_ids or []),
+        "requested_phrases": phrases,
+        "min_shows": min_shows,
+        "period": "last_30_days" if modern else "monthly_window_returned_by_wordstat",
+        "frequency_scope": "as_requested_with_operators_not_campaign_forecast",
+        "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+        "phrases": [
+            {key: row[key] for key in ("phrase", "shows", "data_status")} for row in summary
+        ],
+    }
+    metadata_path = path.with_suffix(".meta.json")
+    metadata_path.write_text(json.dumps(metadata, ensure_ascii=False, indent=2) + "\n",
+                             encoding="utf-8")
     return {
+        "source": metadata["source"],
+        "legacy_api": not modern,
         "path": str(path),
+        "metadata_path": str(metadata_path),
+        "collected_at": metadata["collected_at"],
+        "sha256": metadata["sha256"],
         "geo_ids": list(geo_ids) if geo_ids else None,
         "rows": rows,
         "columns": list(COLUMNS),
-        "phrases": summarize(phrases, by_phrase, min_shows, top),
+        "phrases": summary,
         "hint": (
             f"В ответе — топ-{top} подсказок на фразу; всего строк в файле: {rows}. "
             f"Полный список в {path}, читайте его direct_read_report постранично "

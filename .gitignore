@@ -48,3 +48,6 @@ scripts/fix_smart_best_sitelinks.py
 
 # Generated template distribution (keep the editable sources)
 templates/client-report/*.zip
+
+# Optional locally licensed fonts are not redistributed
+templates/client-report/assets/gilroy-*.ttf
