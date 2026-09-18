@@ -9,11 +9,11 @@ import httpx
 import pytest
 import respx
 
-from yadirect_mcp import config, store
+from yadirect_mcp import config, reports, store
 from yadirect_mcp.client import DirectClient, DirectError
 from yadirect_mcp.config import Settings
 
-REPORTS = "https://api.direct.yandex.com/json/v5/reports"
+REPORTS = "https://api.direct.yandex.com/json/v501/reports"
 
 TSV = (
     "Date\tCampaignName\tImpressions\tClicks\tCost\tCtr\n"
@@ -72,6 +72,79 @@ async def test_offline_report_polls_until_ready(tmp_path, monkeypatch):
     assert tsv.startswith("Date\tCampaignName")
     assert api.last_units.rest == 23695
     assert api.reports_in_queue == 1
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_v501_units_are_journaled_per_request_and_aggregated(tmp_path):
+    route = respx.post(
+        "https://api.direct.yandex.com/json/v501/campaigns"
+    ).mock(
+        side_effect=[
+            httpx.Response(
+                200,
+                json={"result": {"Campaigns": []}},
+                headers={
+                    "Units": "11/989/1000",
+                    "Units-Used-Login": "good-client",
+                    "RequestId": "req-1",
+                },
+            ),
+            httpx.Response(
+                200,
+                json={"result": {"Campaigns": []}},
+                headers={
+                    "Units": "13/976/1000",
+                    "Units-Used-Login": "good-client",
+                    "RequestId": "req-2",
+                },
+            ),
+        ]
+    )
+    async with DirectClient(settings(tmp_path)) as api:
+        mark = api.units_mark()
+        await api.call_v501("campaigns", "get", {}, client_login="good-client")
+        await api.call_v501("campaigns", "get", {}, client_login="good-client")
+        usage = api.units_since(mark)
+
+    assert route.call_count == 2
+    assert usage["requests_with_units"] == 2
+    assert usage["spent"] == 24
+    assert usage["rest"] == 976
+    assert usage["daily"] == 1000
+    assert usage["truncated"] is False
+    assert usage["by_operation"] == [{
+        "api_version": "v501",
+        "service": "campaigns",
+        "method": "get",
+        "requests": 2,
+        "spent": 24,
+    }]
+    assert [row["request_id"] for row in usage["requests"]] == ["req-1", "req-2"]
+    assert all(row["units_used_login"] == "good-client" for row in usage["requests"])
+
+
+@pytest.mark.asyncio
+async def test_units_scopes_do_not_mix_parallel_tasks(tmp_path):
+    async with DirectClient(settings(tmp_path)) as api:
+        async def worker(spent):
+            mark = api.units_mark()
+            await _no_sleep(0)
+            api._note_units(
+                httpx.Response(200, headers={"Units": f"{spent}/900/1000"}),
+                api_version="v501",
+                service="campaigns",
+                method="get",
+                client_login="good-client",
+            )
+            await _no_sleep(0)
+            return api.units_since(mark)
+
+        first, second = await __import__("asyncio").gather(worker(11), worker(13))
+
+    assert first["spent"] == 11
+    assert second["spent"] == 13
+    assert first["requests_with_units"] == second["requests_with_units"] == 1
 
 
 @pytest.mark.asyncio
@@ -261,6 +334,73 @@ def test_read_back_validates_pagination(tmp_path):
 def test_parse_tsv_rejects_ragged_rows():
     with pytest.raises(ValueError, match="строка 2"):
         store.parse_tsv("A\tB\nonly-one-field\n")
+
+
+def normalize_report(**overrides):
+    params = {
+        "fields": ["Date", "CampaignName", "Impressions", "Clicks", "Cost"],
+        "report_type": "CUSTOM_REPORT",
+        "goals": None,
+        "attribution_models": None,
+        "filters": None,
+        "order_by": None,
+        "limit": None,
+    }
+    params.update(overrides)
+    return reports.normalize(**params)
+
+
+@pytest.mark.parametrize("model", ["FC", "LSC", "LYDC", "LYDCCD"])
+def test_reports_rejects_deprecated_attribution_models(model):
+    with pytest.raises(ValueError, match="Устаревшие"):
+        normalize_report(goals=["123"], attribution_models=[model])
+
+
+def test_reports_accepts_current_attribution_models():
+    out = normalize_report(
+        goals=["123"], attribution_models=["FCCD", "LC", "LSCCD", "AUTO"]
+    )
+    assert out["attribution_models"] == ["FCCD", "LC", "LSCCD", "AUTO"]
+
+
+def test_reports_rejects_field_for_wrong_report_type():
+    with pytest.raises(ValueError, match="недоступно"):
+        normalize_report(fields=["Query", "Clicks"], report_type="CUSTOM_REPORT")
+
+
+def test_reports_rejects_filter_only_field_in_output():
+    with pytest.raises(ValueError, match="только в filters"):
+        normalize_report(fields=["Keyword", "Clicks"])
+
+
+def test_reports_enforces_documented_incompatible_fields():
+    with pytest.raises(ValueError, match="взаимоисключающие"):
+        normalize_report(fields=["Date", "Month", "Clicks"])
+    with pytest.raises(ValueError, match="ClickType несовместим"):
+        normalize_report(fields=["ClickType", "Impressions"])
+    with pytest.raises(ValueError, match=r"Criteria\*"):
+        normalize_report(fields=["Criteria", "Criterion", "Clicks"])
+
+
+def test_reports_validates_filter_and_order_contract():
+    out = normalize_report(
+        filters=[{"Field": "CampaignId", "Operator": "in", "Values": [123]}],
+        order_by=[{"Field": "Cost", "SortOrder": "descending"}],
+        limit=100,
+    )
+    assert out["filters"] == [
+        {"Field": "CampaignId", "Operator": "IN", "Values": ["123"]}
+    ]
+    assert out["order_by"] == [{"Field": "Cost", "SortOrder": "DESCENDING"}]
+    assert out["limit"] == 100
+
+
+def test_reach_report_requires_campaign_id():
+    with pytest.raises(ValueError, match="CampaignId"):
+        normalize_report(
+            fields=["Impressions", "ImpressionReach"],
+            report_type="REACH_AND_FREQUENCY_PERFORMANCE_REPORT",
+        )
 
 
 @pytest.mark.asyncio

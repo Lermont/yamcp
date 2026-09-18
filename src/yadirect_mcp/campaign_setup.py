@@ -1,15 +1,20 @@
-"""Безопасная сборка текстово-графической кампании из одного плана.
+"""Безопасная сборка legacy TextCampaign с актуальными ResponsiveAd.
 
 Модели неудобно вручную протаскивать ID между Campaigns.add, AdGroups.add,
 Ads.add и Keywords.add. Этот модуль принимает дерево объектов, проверяет его,
-а затем последовательно создаёт родительские объекты и подставляет их ID.
+Старые preview/apply удалены; запись выполняется только через типизированный executor.
 """
 
 from __future__ import annotations
 
+import hashlib
+import json
 from copy import deepcopy
 from datetime import date, datetime, timedelta, timezone
 from typing import Any
+from urllib.parse import urlsplit
+
+from . import limits, policy, semantics
 
 MAX_BATCH = 1000
 
@@ -19,15 +24,143 @@ MAX_BATCH = 1000
 # Москва с 2014 года часы не переводит, поэтому фиксированного смещения хватает.
 MOSCOW = timezone(timedelta(hours=3))
 
-
+RESPONSIVE_AD_FIELDS = {
+    "Titles",
+    "Texts",
+    "Href",
+    "AgeLabel",
+    "DisplayUrlPath",
+    "AdImageHashes",
+    "SitelinkSetId",
+    "AdExtensionIds",
+    "VideoExtensionIds",
+    "PriceExtension",
+    "BusinessId",
+    "ErirAdDescription",
+}
 def moscow_today() -> date:
     """Сегодняшняя дата по часам Директа."""
     return datetime.now(MOSCOW).date()
 
 
-def confirmation_phrase(client_login: str) -> str:
-    """Фраза, которую вызывающая модель передаёт только после согласия человека."""
-    return f"CREATE CAMPAIGN {client_login}"
+def _nonempty_string(value: Any, field: str) -> str:
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"{field} должен быть непустой строкой")
+    return value.strip()
+
+
+def _validate_responsive_ad(
+    value: dict[str, Any], prefix: str, *, partial: bool = False,
+) -> None:
+    unknown = sorted(set(value) - RESPONSIVE_AD_FIELDS)
+    if unknown:
+        raise ValueError(
+            f"{prefix}.ResponsiveAd содержит неизвестные поля: {', '.join(unknown)}"
+        )
+
+    if not partial or "Titles" in value:
+        titles = value.get("Titles")
+        if not isinstance(titles, list) or not 3 <= len(titles) <= 7:
+            raise ValueError(
+                f"{prefix}.ResponsiveAd.Titles должен содержать от 3 до 7 заголовков"
+            )
+        normalized_titles = []
+        for index, raw in enumerate(titles):
+            title = _nonempty_string(raw, f"{prefix}.ResponsiveAd.Titles[{index}]")
+            normalized_titles.append(title)
+            limits.validate_title(title, f"{prefix}.ResponsiveAd.Titles[{index}]")
+        if len({title.casefold() for title in normalized_titles}) != len(titles):
+            raise ValueError(f"{prefix}.ResponsiveAd.Titles должны быть уникальными")
+        utilization = policy.responsive_title_utilization(normalized_titles)
+        if not utilization["passes"]:
+            raise ValueError(
+                f"{prefix}.ResponsiveAd.Titles: минимум "
+                f"{utilization['required_near_limit_count']} заголовка должны "
+                f"использовать 45–56 символов"
+            )
+
+    if not partial or "Texts" in value:
+        texts = value.get("Texts")
+        if not isinstance(texts, list) or len(texts) != 3:
+            raise ValueError(
+                f"{prefix}.ResponsiveAd.Texts должен содержать ровно 3 текста"
+            )
+        normalized_texts = []
+        for index, raw in enumerate(texts):
+            text = _nonempty_string(raw, f"{prefix}.ResponsiveAd.Texts[{index}]")
+            normalized_texts.append(text)
+            limits.validate_text(text, f"{prefix}.ResponsiveAd.Texts[{index}]")
+        if len({text.casefold() for text in normalized_texts}) != len(texts):
+            raise ValueError(f"{prefix}.ResponsiveAd.Texts должны быть уникальными")
+
+    href = value.get("Href")
+    business_id = value.get("BusinessId")
+    if not partial and href is None and business_id is None:
+        raise ValueError(f"{prefix}.ResponsiveAd требует Href или BusinessId")
+    if href is not None:
+        href = _nonempty_string(href, f"{prefix}.ResponsiveAd.Href")
+        parsed = urlsplit(href)
+        if (
+            parsed.scheme not in {"http", "https"}
+            or not parsed.netloc
+            or len(href) > 1024
+        ):
+            raise ValueError(
+                f"{prefix}.ResponsiveAd.Href должен быть полным HTTP(S) URL до 1024 знаков"
+            )
+    if business_id is not None and int(business_id) <= 0:
+        raise ValueError(f"{prefix}.ResponsiveAd.BusinessId должен быть положительным")
+
+    display_path = value.get("DisplayUrlPath")
+    if display_path is not None:
+        display_path = str(display_path)
+        if not partial and href is None:
+            raise ValueError(
+                f"{prefix}.ResponsiveAd.DisplayUrlPath допустим только с Href"
+            )
+        limits.validate_display_path(display_path, f"{prefix}.ResponsiveAd.DisplayUrlPath")
+
+
+def _normalize_ad(ad: dict[str, Any], prefix: str) -> dict[str, Any]:
+    """Validate the only current ad creation format."""
+    if "TextAd" in ad:
+        raise ValueError(
+            f"{prefix}.TextAd больше не поддерживается для создания; "
+            "передайте ResponsiveAd с 3–7 Titles и ровно 3 Texts"
+        )
+    responsive_ad = ad.get("ResponsiveAd")
+    if not isinstance(responsive_ad, dict):
+        raise ValueError(f"{prefix}.ResponsiveAd должен быть JSON-объектом")
+    responsive_ad = deepcopy(responsive_ad)
+
+    _validate_responsive_ad(responsive_ad, prefix)
+    normalized = {
+        key: deepcopy(value)
+        for key, value in ad.items()
+        if key not in {"TextAd", "ResponsiveAd"}
+    }
+    normalized["ResponsiveAd"] = responsive_ad
+    return normalized
+
+
+def plan_hash(
+    client_login: str,
+    campaign: dict[str, Any],
+    ad_groups: list[dict[str, Any]],
+) -> str:
+    """SHA-256 нормализованного raw-плана, включая целевой логин."""
+    normalized_campaign, normalized_groups = normalize_plan(campaign, ad_groups)
+    raw = json.dumps(
+        {
+            "client_login": client_login,
+            "campaign": normalized_campaign,
+            "ad_groups": normalized_groups,
+        },
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    return hashlib.sha256(raw).hexdigest()
 
 
 def normalize_plan(
@@ -52,6 +185,17 @@ def normalize_plan(
     if not text_campaign.get("BiddingStrategy") and not text_campaign.get("PackageBiddingStrategy"):
         raise ValueError(
             "campaign.TextCampaign требует BiddingStrategy или PackageBiddingStrategy"
+        )
+    counters = (text_campaign.get("CounterIds") or {}).get("Items") or []
+    priority_goals = (text_campaign.get("PriorityGoals") or {}).get("Items") or []
+    clicks_without_goals = not priority_goals and policy.is_maximum_clicks_strategy(
+        text_campaign.get("BiddingStrategy")
+    )
+    if not counters and not clicks_without_goals:
+        raise ValueError("campaign.TextCampaign.CounterIds требует счётчик Метрики")
+    if not priority_goals and not clicks_without_goals:
+        raise ValueError(
+            "campaign.TextCampaign.PriorityGoals требует приоритетную бизнес-цель"
         )
     unsupported_types = {
         "UnifiedCampaign", "MobileAppCampaign", "DynamicTextCampaign",
@@ -90,22 +234,17 @@ def normalize_plan(
         ads = group.get("Ads")
         if not isinstance(ads, list) or not ads:
             raise ValueError(f"{prefix}.Ads должен содержать хотя бы одно объявление")
+        if len(ads) > policy.RESPONSIVE_ADS_MAX_NON_ARCHIVED:
+            raise ValueError(f"{prefix}.Ads: не более 3 новых комбинаторных объявлений в группе")
+        normalized_ads: list[dict[str, Any]] = []
         for ad_index, ad in enumerate(ads):
             ad_prefix = f"{prefix}.Ads[{ad_index}]"
             if not isinstance(ad, dict):
                 raise ValueError(f"{ad_prefix} должен быть JSON-объектом")
             if "AdGroupId" in ad:
                 raise ValueError(f"{ad_prefix}.AdGroupId задавать нельзя")
-            text_ad = ad.get("TextAd")
-            if not isinstance(text_ad, dict):
-                raise ValueError(f"{ad_prefix}.TextAd обязателен")
-            for field in ("Title", "Text", "Mobile"):
-                if field not in text_ad:
-                    raise ValueError(f"{ad_prefix}.TextAd.{field} обязателен")
-            if text_ad["Mobile"] not in {"YES", "NO"}:
-                raise ValueError(f"{ad_prefix}.TextAd.Mobile должен быть YES или NO")
-            if not text_ad.get("Href") and not text_ad.get("TurboPageId"):
-                raise ValueError(f"{ad_prefix}.TextAd требует Href или TurboPageId")
+            normalized_ads.append(_normalize_ad(ad, ad_prefix))
+        group["Ads"] = normalized_ads
 
         keywords = group.get("Keywords", [])
         if not isinstance(keywords, list):
@@ -123,222 +262,6 @@ def normalize_plan(
                 raise ValueError(f"{kw_prefix}.Keyword обязателен")
             normalized_keywords.append(keyword)
         group["Keywords"] = normalized_keywords
+        semantics.validate_keywords(normalized_keywords, f"{prefix}.Keywords")
 
     return campaign, groups
-
-
-def preview(
-    client_login: str,
-    campaign: dict[str, Any],
-    ad_groups: list[dict[str, Any]],
-) -> dict[str, Any]:
-    """Полный проверенный план без обращения к API."""
-    campaign, groups = normalize_plan(campaign, ad_groups)
-    return {
-        "status": "preview",
-        "executed": False,
-        "client_login": client_login,
-        "summary": {
-            "campaigns": 1,
-            "ad_groups": len(groups),
-            "ads": sum(len(g["Ads"]) for g in groups),
-            "keywords": sum(len(g["Keywords"]) for g in groups),
-        },
-        "campaign": campaign,
-        "ad_groups": groups,
-        "confirmation_required": confirmation_phrase(client_login),
-        "warning": (
-            "Проверьте бюджет, стратегию, регионы, тексты, ссылки и ключевые фразы. "
-            "Создание не атомарно; созданная кампания не запускается автоматически."
-        ),
-    }
-
-
-def _action_id(action: dict[str, Any]) -> int | None:
-    value = action.get("Id") if isinstance(action, dict) else None
-    return value if isinstance(value, int) else None
-
-
-class BatchFailure(RuntimeError):
-    """Падение на одном из чанков add.
-
-    Объекты из предыдущих чанков в Директе уже созданы. Если потерять их
-    результаты вместе с исключением, оператор получит ответ «создано 0» при
-    тысяче реально существующих объявлений — найти и убрать их будет нечем.
-    """
-
-    def __init__(self, original: Exception, results: list[dict[str, Any]]) -> None:
-        super().__init__(str(original))
-        self.original = original
-        self.results = results
-
-
-def _fatal(stage: str, exc: Exception) -> dict[str, Any]:
-    source = getattr(exc, "original", exc)
-    out: dict[str, Any] = {"stage": stage, "message": str(source)}
-    if getattr(source, "code", None) is not None:
-        out["error_code"] = source.code
-    if getattr(source, "request_id", None):
-        out["request_id"] = source.request_id
-    return out
-
-
-async def _add(
-    api: Any,
-    service: str,
-    collection: str,
-    objects: list[dict[str, Any]],
-    client_login: str,
-) -> list[dict[str, Any]]:
-    results: list[dict[str, Any]] = []
-    for offset in range(0, len(objects), MAX_BATCH):
-        chunk = objects[offset : offset + MAX_BATCH]
-        try:
-            response = await api.call(
-                service,
-                "add",
-                {collection: chunk},
-                client_login=client_login,
-            )
-            actions = response.get("AddResults", [])
-            if not isinstance(actions, list) or len(actions) != len(chunk):
-                raise RuntimeError(
-                    f"{service}.add вернул "
-                    f"{len(actions) if isinstance(actions, list) else 0} "
-                    f"результатов для {len(chunk)} объектов"
-                )
-        except Exception as exc:
-            raise BatchFailure(exc, results) from exc
-        results.extend(actions)
-    return results
-
-
-async def apply(
-    api: Any,
-    client_login: str,
-    campaign: dict[str, Any],
-    ad_groups: list[dict[str, Any]],
-) -> dict[str, Any]:
-    """Создать кампанию и дочерние объекты; не активировать показы."""
-    campaign, groups = normalize_plan(campaign, ad_groups)
-    campaign_actions = await _add(api, "campaigns", "Campaigns", [campaign], client_login)
-    campaign_action = campaign_actions[0]
-    campaign_id = _action_id(campaign_action)
-    if campaign_id is None:
-        return {
-            "status": "failed",
-            "executed": True,
-            "client_login": client_login,
-            "campaign": campaign_action,
-            "message": "Кампания не создана; дочерние объекты не отправлялись.",
-        }
-
-    group_payloads = []
-    for group in groups:
-        payload = {k: v for k, v in group.items() if k not in {"Ads", "Keywords"}}
-        payload["CampaignId"] = campaign_id
-        group_payloads.append(payload)
-
-    group_fatal = None
-    try:
-        group_actions = await _add(
-            api, "adgroups", "AdGroups", group_payloads, client_login
-        )
-    # API не поддерживает транзакции и rollback, поэтому ловим всё: чанки до
-    # упавшего уже создались, и их ID нужны, чтобы было что чинить.
-    except Exception as exc:  # noqa: BLE001
-        group_actions = getattr(exc, "results", [])
-        group_fatal = _fatal("adgroups.add", exc)
-
-    group_results: list[dict[str, Any]] = []
-    flat_ads: list[tuple[int, dict[str, Any]]] = []
-    flat_keywords: list[tuple[int, dict[str, Any]]] = []
-    # strict=False: при обрыве на adgroups.add ответов меньше, чем групп.
-    for index, (group, action) in enumerate(zip(groups, group_actions, strict=False)):
-        group_id = _action_id(action)
-        item = {
-            "plan_index": index,
-            "name": group["Name"],
-            "id": group_id,
-            "warnings": action.get("Warnings", []),
-            "errors": action.get("Errors", []),
-            "ads": [],
-            "keywords": [],
-        }
-        group_results.append(item)
-        if group_id is None:
-            continue
-        for ad in group["Ads"]:
-            flat_ads.append((index, {**ad, "AdGroupId": group_id}))
-        for keyword in group["Keywords"]:
-            flat_keywords.append((index, {**keyword, "AdGroupId": group_id}))
-
-    fatal_error = group_fatal
-    # После обрыва на группах дочерние объекты не досылаем: план уже разъехался
-    # с тем, что подтверждал человек.
-    if flat_ads and fatal_error is None:
-        try:
-            actions = await _add(
-                api, "ads", "Ads", [payload for _, payload in flat_ads], client_login
-            )
-        except Exception as exc:  # noqa: BLE001 — сохраняем ID кампании и групп
-            actions = getattr(exc, "results", [])
-            fatal_error = _fatal("ads.add", exc)
-        # strict=False намеренно: после обрыва actions короче flat_ads, и в
-        # результат должно попасть то, что успело создаться.
-        for (group_index, _), action in zip(flat_ads, actions, strict=False):
-            group_results[group_index]["ads"].append(action)
-    if flat_keywords and fatal_error is None:
-        try:
-            actions = await _add(
-                api, "keywords", "Keywords",
-                [payload for _, payload in flat_keywords], client_login,
-            )
-        except Exception as exc:  # noqa: BLE001 — тот же разбор частичного отказа
-            actions = getattr(exc, "results", [])
-            fatal_error = _fatal("keywords.add", exc)
-        for (group_index, _), action in zip(flat_keywords, actions, strict=False):
-            group_results[group_index]["keywords"].append(action)
-
-    requested_groups = len(groups)
-    created_groups = sum(r["id"] is not None for r in group_results)
-    requested_ads = sum(len(g["Ads"]) for g in groups)
-    created_ads = sum(
-        _action_id(action) is not None
-        for result in group_results for action in result["ads"]
-    )
-    requested_keywords = sum(len(g["Keywords"]) for g in groups)
-    created_keywords = sum(
-        _action_id(action) is not None
-        for result in group_results for action in result["keywords"]
-    )
-    complete = fatal_error is None and (
-        created_groups == requested_groups
-        and created_ads == requested_ads
-        and created_keywords == requested_keywords
-    )
-    result = {
-        "status": "complete" if complete else "partial",
-        "executed": True,
-        "client_login": client_login,
-        "campaign_id": campaign_id,
-        "campaign_warnings": campaign_action.get("Warnings", []),
-        "groups": group_results,
-        "summary": {
-            "ad_groups": {"requested": requested_groups, "created": created_groups},
-            "ads": {"requested": requested_ads, "created": created_ads},
-            "keywords": {"requested": requested_keywords, "created": created_keywords},
-        },
-        "activated": False,
-        "message": (
-            "Кампания создана, но показы не запущены."
-            if fatal_error is None
-            else (
-                f"Обрыв на шаге {fatal_error['stage']}. Кампания и перечисленные "
-                "в groups объекты уже созданы — повторяйте только недостающие."
-            )
-        ),
-    }
-    if fatal_error is not None:
-        result["fatal_error"] = fatal_error
-    return result

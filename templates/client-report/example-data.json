@@ -1,0 +1,3385 @@
+{
+  "schemaVersion": 1,
+  "demo": true,
+  "reportNumber": "ОБРАЗЕЦ / 2026",
+  "views": [
+    "statistics",
+    "setup"
+  ],
+  "client": {
+    "name": "АУРА",
+    "description": "Студия дизайна интерьера",
+    "shortDescription": "Студия интерьера",
+    "monogram": "A"
+  },
+  "campaigns": [
+    {
+      "id": "search-design",
+      "channel": "search",
+      "name": "Дизайн интерьера · Поиск",
+      "groups": 4,
+      "ads": 6,
+      "keywords": [
+        "дизайн интерьера квартиры",
+        "заказать дизайн проект",
+        "студия дизайна интерьера",
+        "дизайн квартиры под ключ",
+        "дизайнер интерьера москва",
+        "дизайн проект стоимость"
+      ],
+      "purpose": "Привлекаем тех, кто уже ищет дизайн-проект для своей квартиры.",
+      "status": "Ожидает запуска",
+      "negatives": [
+        "бесплатно",
+        "вакансии",
+        "обучение",
+        "своими руками"
+      ],
+      "settings": [
+        {
+          "label": "География",
+          "value": "Москва и Московская область"
+        },
+        {
+          "label": "Стратегия",
+          "value": "Максимум конверсий"
+        },
+        {
+          "label": "Бюджет с НДС",
+          "value": "28 000 ₽ в неделю"
+        },
+        {
+          "label": "Расписание",
+          "value": "Ежедневно, 09:00–21:00 · Москва"
+        },
+        {
+          "label": "Цель",
+          "value": "Отправка формы"
+        },
+        {
+          "label": "Группы / объявления",
+          "value": "4 / 6"
+        }
+      ]
+    },
+    {
+      "id": "search-brand",
+      "channel": "search",
+      "name": "Бренд · Поиск",
+      "groups": 2,
+      "ads": 3,
+      "keywords": [
+        "аура дизайн",
+        "студия аура",
+        "аура дизайн интерьера",
+        "аура дизайн проект"
+      ],
+      "purpose": "Помогаем найти студию людям, которые уже знакомы с брендом.",
+      "status": "Ожидает запуска",
+      "negatives": [
+        "бесплатно",
+        "вакансии",
+        "обучение",
+        "своими руками"
+      ],
+      "settings": [
+        {
+          "label": "География",
+          "value": "Москва и Московская область"
+        },
+        {
+          "label": "Стратегия",
+          "value": "Максимум конверсий"
+        },
+        {
+          "label": "Бюджет с НДС",
+          "value": "4 000 ₽ в неделю"
+        },
+        {
+          "label": "Расписание",
+          "value": "Ежедневно, 09:00–21:00 · Москва"
+        },
+        {
+          "label": "Цель",
+          "value": "Отправка формы"
+        },
+        {
+          "label": "Группы / объявления",
+          "value": "2 / 3"
+        }
+      ]
+    },
+    {
+      "id": "network-interests",
+      "channel": "network",
+      "name": "Интересы · РСЯ",
+      "groups": 3,
+      "ads": 6,
+      "keywords": [
+        "современный интерьер",
+        "дизайн новостройки",
+        "ремонт и дизайн",
+        "проект квартиры",
+        "планировка квартиры",
+        "дизайнерская студия"
+      ],
+      "purpose": "Знакомим со студией аудиторию, которая интересуется ремонтом и интерьером.",
+      "status": "Ожидает запуска",
+      "negatives": [
+        "бесплатно",
+        "вакансии",
+        "обучение",
+        "своими руками"
+      ],
+      "settings": [
+        {
+          "label": "География",
+          "value": "Москва и Московская область"
+        },
+        {
+          "label": "Стратегия",
+          "value": "Максимум конверсий"
+        },
+        {
+          "label": "Бюджет с НДС",
+          "value": "14 000 ₽ в неделю"
+        },
+        {
+          "label": "Расписание",
+          "value": "Ежедневно, 09:00–21:00 · Москва"
+        },
+        {
+          "label": "Цель",
+          "value": "Отправка формы"
+        },
+        {
+          "label": "Группы / объявления",
+          "value": "3 / 6"
+        }
+      ]
+    },
+    {
+      "id": "network-return",
+      "channel": "network",
+      "name": "Возврат посетителей · РСЯ",
+      "groups": 2,
+      "ads": 3,
+      "keywords": [
+        "дизайн интерьера",
+        "ремонт квартиры"
+      ],
+      "purpose": "Возвращаем посетителей сайта, которые ещё не отправили форму.",
+      "status": "Ожидает запуска",
+      "negatives": [
+        "бесплатно",
+        "вакансии",
+        "обучение",
+        "своими руками"
+      ],
+      "settings": [
+        {
+          "label": "География",
+          "value": "Москва и Московская область"
+        },
+        {
+          "label": "Стратегия",
+          "value": "Максимум конверсий"
+        },
+        {
+          "label": "Бюджет с НДС",
+          "value": "4 000 ₽ в неделю"
+        },
+        {
+          "label": "Расписание",
+          "value": "Ежедневно, 09:00–21:00 · Москва"
+        },
+        {
+          "label": "Цель",
+          "value": "Отправка формы"
+        },
+        {
+          "label": "Группы / объявления",
+          "value": "2 / 3"
+        }
+      ]
+    }
+  ],
+  "periods": [
+    {
+      "id": "2026-08",
+      "label": "Август 2026",
+      "start": "2026-08-01",
+      "end": "2026-08-31",
+      "previous": {
+        "start": "2026-07-01",
+        "end": "2026-07-31"
+      },
+      "updated": "Пример · данные на 1 сентября 2026",
+      "source": "Демонстрационный набор, смоделированный для этого шаблона",
+      "sourceNote": "Данные не получены из рекламного кабинета.",
+      "completenessNote": "В реальном отчёте здесь указываются полнота выгрузки и ограничения данных.",
+      "measurement": {
+        "available": true,
+        "goal": "Отправка формы",
+        "attribution": "автоматическая атрибуция",
+        "comparable": true
+      },
+      "budget": {
+        "search-design": 120000,
+        "search-brand": 18000,
+        "network-interests": 65000,
+        "network-return": 22000
+      },
+      "work": [
+        {
+          "title": "Уточнили поисковые запросы",
+          "text": "Добавили исключения по нецелевым запросам, связанным с обучением и самостоятельным ремонтом.",
+          "meta": "Поисковые кампании"
+        },
+        {
+          "title": "Обновили варианты объявлений",
+          "text": "Подготовили новые заголовки с акцентом на состав и этапы дизайн-проекта.",
+          "meta": "Поиск и РСЯ"
+        },
+        {
+          "title": "Проверили передачу целей",
+          "text": "Сверили отправку формы с настройками аналитики и рекламных кампаний.",
+          "meta": "Измерение результата"
+        }
+      ],
+      "next": [
+        {
+          "title": "Проверить качество обращений",
+          "text": "Сопоставить достижения цели с обращениями в CRM и оценить их качество.",
+          "meta": "Совместно с командой клиента"
+        },
+        {
+          "title": "Протестировать новые креативы",
+          "text": "Сравнить подачу с готовым интерьером и с процессом работы над проектом.",
+          "meta": "Следующий отчётный период"
+        },
+        {
+          "title": "Уточнить распределение бюджета",
+          "text": "Подготовить предложение после оценки стоимости и качества обращений.",
+          "meta": "По результатам анализа"
+        }
+      ]
+    },
+    {
+      "id": "2026-07",
+      "label": "Июль 2026",
+      "start": "2026-07-01",
+      "end": "2026-07-31",
+      "previous": {
+        "start": "2026-06-01",
+        "end": "2026-06-30"
+      },
+      "updated": "Пример · данные на 1 сентября 2026",
+      "source": "Демонстрационный набор, смоделированный для этого шаблона",
+      "sourceNote": "Данные не получены из рекламного кабинета.",
+      "completenessNote": "В реальном отчёте здесь указываются полнота выгрузки и ограничения данных.",
+      "measurement": {
+        "available": true,
+        "goal": "Отправка формы",
+        "attribution": "автоматическая атрибуция",
+        "comparable": true
+      },
+      "budget": {
+        "search-design": 120000,
+        "search-brand": 18000,
+        "network-interests": 65000,
+        "network-return": 22000
+      },
+      "work": [
+        {
+          "title": "Уточнили поисковые запросы",
+          "text": "Добавили исключения по нецелевым запросам, связанным с обучением и самостоятельным ремонтом.",
+          "meta": "Поисковые кампании"
+        },
+        {
+          "title": "Обновили варианты объявлений",
+          "text": "Подготовили новые заголовки с акцентом на состав и этапы дизайн-проекта.",
+          "meta": "Поиск и РСЯ"
+        },
+        {
+          "title": "Проверили передачу целей",
+          "text": "Сверили отправку формы с настройками аналитики и рекламных кампаний.",
+          "meta": "Измерение результата"
+        }
+      ],
+      "next": [
+        {
+          "title": "Проверить качество обращений",
+          "text": "Сопоставить достижения цели с обращениями в CRM и оценить их качество.",
+          "meta": "Совместно с командой клиента"
+        },
+        {
+          "title": "Протестировать новые креативы",
+          "text": "Сравнить подачу с готовым интерьером и с процессом работы над проектом.",
+          "meta": "Следующий отчётный период"
+        },
+        {
+          "title": "Уточнить распределение бюджета",
+          "text": "Подготовить предложение после оценки стоимости и качества обращений.",
+          "meta": "По результатам анализа"
+        }
+      ]
+    }
+  ],
+  "daily": [
+    {
+      "date": "2026-06-01",
+      "campaign": "search-design",
+      "spend": 2657.49,
+      "impressions": 522,
+      "clicks": 39,
+      "conversions": 3
+    },
+    {
+      "date": "2026-06-01",
+      "campaign": "search-brand",
+      "spend": 378.98,
+      "impressions": 70,
+      "clicks": 11,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-01",
+      "campaign": "network-interests",
+      "spend": 1458.39,
+      "impressions": 5457,
+      "clicks": 72,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-01",
+      "campaign": "network-return",
+      "spend": 465.81,
+      "impressions": 751,
+      "clicks": 19,
+      "conversions": 1
+    },
+    {
+      "date": "2026-06-02",
+      "campaign": "search-design",
+      "spend": 2723.24,
+      "impressions": 561,
+      "clicks": 39,
+      "conversions": 3
+    },
+    {
+      "date": "2026-06-02",
+      "campaign": "search-brand",
+      "spend": 340.22,
+      "impressions": 69,
+      "clicks": 10,
+      "conversions": 1
+    },
+    {
+      "date": "2026-06-02",
+      "campaign": "network-interests",
+      "spend": 1207.15,
+      "impressions": 5055,
+      "clicks": 62,
+      "conversions": 1
+    },
+    {
+      "date": "2026-06-02",
+      "campaign": "network-return",
+      "spend": 403.86,
+      "impressions": 723,
+      "clicks": 17,
+      "conversions": 0
+    },
+    {
+      "date": "2026-06-03",
+      "campaign": "search-design",
+      "spend": 2730.72,
+      "impressions": 614,
+      "clicks": 39,
+      "conversions": 3
+    },
+    {
+      "date": "2026-06-03",
+      "campaign": "search-brand",
+      "spend": 329.55,
+      "impressions": 75,
+      "clicks": 10,
+      "conversions": 1
+    },
+    {
+      "date": "2026-06-03",
+      "campaign": "network-interests",
+      "spend": 1197.61,
+      "impressions": 5708,
+      "clicks": 64,
+      "conversions": 1
+    },
+    {
+      "date": "2026-06-03",
+      "campaign": "network-return",
+      "spend": 470.72,
+      "impressions": 931,
+      "clicks": 20,
+      "conversions": 1
+    },
+    {
+      "date": "2026-06-04",
+      "campaign": "search-design",
+      "spend": 2608.68,
+      "impressions": 637,
+      "clicks": 38,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-04",
+      "campaign": "search-brand",
+      "spend": 316.24,
+      "impressions": 80,
+      "clicks": 10,
+      "conversions": 1
+    },
+    {
+      "date": "2026-06-04",
+      "campaign": "network-interests",
+      "spend": 1313.84,
+      "impressions": 6838,
+      "clicks": 72,
+      "conversions": 1
+    },
+    {
+      "date": "2026-06-04",
+      "campaign": "network-return",
+      "spend": 550.42,
+      "impressions": 1140,
+      "clicks": 23,
+      "conversions": 1
+    },
+    {
+      "date": "2026-06-05",
+      "campaign": "search-design",
+      "spend": 2184.52,
+      "impressions": 553,
+      "clicks": 33,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-05",
+      "campaign": "search-brand",
+      "spend": 274.45,
+      "impressions": 72,
+      "clicks": 9,
+      "conversions": 1
+    },
+    {
+      "date": "2026-06-05",
+      "campaign": "network-interests",
+      "spend": 1386.07,
+      "impressions": 7211,
+      "clicks": 76,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-05",
+      "campaign": "network-return",
+      "spend": 595.32,
+      "impressions": 1188,
+      "clicks": 24,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-06",
+      "campaign": "search-design",
+      "spend": 2032.62,
+      "impressions": 503,
+      "clicks": 32,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-06",
+      "campaign": "search-brand",
+      "spend": 299.6,
+      "impressions": 75,
+      "clicks": 10,
+      "conversions": 1
+    },
+    {
+      "date": "2026-06-06",
+      "campaign": "network-interests",
+      "spend": 1494.89,
+      "impressions": 7120,
+      "clicks": 80,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-06",
+      "campaign": "network-return",
+      "spend": 594.59,
+      "impressions": 1068,
+      "clicks": 23,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-07",
+      "campaign": "search-design",
+      "spend": 2462.03,
+      "impressions": 574,
+      "clicks": 40,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-07",
+      "campaign": "search-brand",
+      "spend": 362.5,
+      "impressions": 83,
+      "clicks": 12,
+      "conversions": 1
+    },
+    {
+      "date": "2026-06-07",
+      "campaign": "network-interests",
+      "spend": 1690.96,
+      "impressions": 7078,
+      "clicks": 87,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-07",
+      "campaign": "network-return",
+      "spend": 614.23,
+      "impressions": 976,
+      "clicks": 23,
+      "conversions": 1
+    },
+    {
+      "date": "2026-06-08",
+      "campaign": "search-design",
+      "spend": 2805.04,
+      "impressions": 615,
+      "clicks": 46,
+      "conversions": 3
+    },
+    {
+      "date": "2026-06-08",
+      "campaign": "search-brand",
+      "spend": 404.99,
+      "impressions": 83,
+      "clicks": 13,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-08",
+      "campaign": "network-interests",
+      "spend": 1719.23,
+      "impressions": 6435,
+      "clicks": 85,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-08",
+      "campaign": "network-return",
+      "spend": 595.51,
+      "impressions": 869,
+      "clicks": 22,
+      "conversions": 1
+    },
+    {
+      "date": "2026-06-09",
+      "campaign": "search-design",
+      "spend": 2790.19,
+      "impressions": 586,
+      "clicks": 45,
+      "conversions": 3
+    },
+    {
+      "date": "2026-06-09",
+      "campaign": "search-brand",
+      "spend": 357.09,
+      "impressions": 69,
+      "clicks": 11,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-09",
+      "campaign": "network-interests",
+      "spend": 1475.37,
+      "impressions": 5236,
+      "clicks": 71,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-09",
+      "campaign": "network-return",
+      "spend": 536.27,
+      "impressions": 770,
+      "clicks": 20,
+      "conversions": 1
+    },
+    {
+      "date": "2026-06-10",
+      "campaign": "search-design",
+      "spend": 2634.98,
+      "impressions": 549,
+      "clicks": 41,
+      "conversions": 3
+    },
+    {
+      "date": "2026-06-10",
+      "campaign": "search-brand",
+      "spend": 336.81,
+      "impressions": 64,
+      "clicks": 10,
+      "conversions": 1
+    },
+    {
+      "date": "2026-06-10",
+      "campaign": "network-interests",
+      "spend": 1358.76,
+      "impressions": 4933,
+      "clicks": 65,
+      "conversions": 1
+    },
+    {
+      "date": "2026-06-10",
+      "campaign": "network-return",
+      "spend": 520.6,
+      "impressions": 792,
+      "clicks": 20,
+      "conversions": 1
+    },
+    {
+      "date": "2026-06-11",
+      "campaign": "search-design",
+      "spend": 2679.18,
+      "impressions": 577,
+      "clicks": 40,
+      "conversions": 3
+    },
+    {
+      "date": "2026-06-11",
+      "campaign": "search-brand",
+      "spend": 343.82,
+      "impressions": 69,
+      "clicks": 10,
+      "conversions": 1
+    },
+    {
+      "date": "2026-06-11",
+      "campaign": "network-interests",
+      "spend": 1562.18,
+      "impressions": 6210,
+      "clicks": 76,
+      "conversions": 1
+    },
+    {
+      "date": "2026-06-11",
+      "campaign": "network-return",
+      "spend": 624.78,
+      "impressions": 1066,
+      "clicks": 25,
+      "conversions": 1
+    },
+    {
+      "date": "2026-06-12",
+      "campaign": "search-design",
+      "spend": 2698.48,
+      "impressions": 615,
+      "clicks": 39,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-12",
+      "campaign": "search-brand",
+      "spend": 377.52,
+      "impressions": 83,
+      "clicks": 11,
+      "conversions": 1
+    },
+    {
+      "date": "2026-06-12",
+      "campaign": "network-interests",
+      "spend": 1767.1,
+      "impressions": 7954,
+      "clicks": 89,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-12",
+      "campaign": "network-return",
+      "spend": 673.69,
+      "impressions": 1306,
+      "clicks": 28,
+      "conversions": 1
+    },
+    {
+      "date": "2026-06-13",
+      "campaign": "search-design",
+      "spend": 2594.88,
+      "impressions": 621,
+      "clicks": 37,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-13",
+      "campaign": "search-brand",
+      "spend": 402.22,
+      "impressions": 96,
+      "clicks": 12,
+      "conversions": 1
+    },
+    {
+      "date": "2026-06-13",
+      "campaign": "network-interests",
+      "spend": 1733.41,
+      "impressions": 8649,
+      "clicks": 91,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-13",
+      "campaign": "network-return",
+      "spend": 612.63,
+      "impressions": 1289,
+      "clicks": 26,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-14",
+      "campaign": "search-design",
+      "spend": 2848.32,
+      "impressions": 686,
+      "clicks": 41,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-14",
+      "campaign": "search-brand",
+      "spend": 419.33,
+      "impressions": 104,
+      "clicks": 13,
+      "conversions": 1
+    },
+    {
+      "date": "2026-06-14",
+      "campaign": "network-interests",
+      "spend": 1639.12,
+      "impressions": 8437,
+      "clicks": 89,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-14",
+      "campaign": "network-return",
+      "spend": 544.45,
+      "impressions": 1138,
+      "clicks": 23,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-15",
+      "campaign": "search-design",
+      "spend": 3304.61,
+      "impressions": 768,
+      "clicks": 49,
+      "conversions": 3
+    },
+    {
+      "date": "2026-06-15",
+      "campaign": "search-brand",
+      "spend": 433.63,
+      "impressions": 105,
+      "clicks": 14,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-15",
+      "campaign": "network-interests",
+      "spend": 1636.34,
+      "impressions": 7994,
+      "clicks": 90,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-15",
+      "campaign": "network-return",
+      "spend": 560.04,
+      "impressions": 1066,
+      "clicks": 23,
+      "conversions": 1
+    },
+    {
+      "date": "2026-06-16",
+      "campaign": "search-design",
+      "spend": 3367.01,
+      "impressions": 745,
+      "clicks": 52,
+      "conversions": 3
+    },
+    {
+      "date": "2026-06-16",
+      "campaign": "search-brand",
+      "spend": 391.56,
+      "impressions": 89,
+      "clicks": 13,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-16",
+      "campaign": "network-interests",
+      "spend": 1547.61,
+      "impressions": 6820,
+      "clicks": 84,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-16",
+      "campaign": "network-return",
+      "spend": 583.27,
+      "impressions": 974,
+      "clicks": 23,
+      "conversions": 1
+    },
+    {
+      "date": "2026-06-17",
+      "campaign": "search-design",
+      "spend": 2867.58,
+      "impressions": 614,
+      "clicks": 46,
+      "conversions": 3
+    },
+    {
+      "date": "2026-06-17",
+      "campaign": "search-brand",
+      "spend": 329.92,
+      "impressions": 70,
+      "clicks": 11,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-17",
+      "campaign": "network-interests",
+      "spend": 1410.42,
+      "impressions": 5595,
+      "clicks": 74,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-17",
+      "campaign": "network-return",
+      "spend": 606.02,
+      "impressions": 907,
+      "clicks": 23,
+      "conversions": 1
+    },
+    {
+      "date": "2026-06-18",
+      "campaign": "search-design",
+      "spend": 2441.96,
+      "impressions": 521,
+      "clicks": 40,
+      "conversions": 3
+    },
+    {
+      "date": "2026-06-18",
+      "campaign": "search-brand",
+      "spend": 306.37,
+      "impressions": 62,
+      "clicks": 10,
+      "conversions": 1
+    },
+    {
+      "date": "2026-06-18",
+      "campaign": "network-interests",
+      "spend": 1529.75,
+      "impressions": 5679,
+      "clicks": 77,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-18",
+      "campaign": "network-return",
+      "spend": 674.28,
+      "impressions": 962,
+      "clicks": 25,
+      "conversions": 1
+    },
+    {
+      "date": "2026-06-19",
+      "campaign": "search-design",
+      "spend": 2514.6,
+      "impressions": 550,
+      "clicks": 41,
+      "conversions": 3
+    },
+    {
+      "date": "2026-06-19",
+      "campaign": "search-brand",
+      "spend": 381.92,
+      "impressions": 77,
+      "clicks": 12,
+      "conversions": 1
+    },
+    {
+      "date": "2026-06-19",
+      "campaign": "network-interests",
+      "spend": 1953.5,
+      "impressions": 7220,
+      "clicks": 95,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-19",
+      "campaign": "network-return",
+      "spend": 810.31,
+      "impressions": 1189,
+      "clicks": 30,
+      "conversions": 1
+    },
+    {
+      "date": "2026-06-20",
+      "campaign": "search-design",
+      "spend": 2775.87,
+      "impressions": 636,
+      "clicks": 44,
+      "conversions": 3
+    },
+    {
+      "date": "2026-06-20",
+      "campaign": "search-brand",
+      "spend": 464.06,
+      "impressions": 97,
+      "clicks": 14,
+      "conversions": 1
+    },
+    {
+      "date": "2026-06-20",
+      "campaign": "network-interests",
+      "spend": 2216.0,
+      "impressions": 8679,
+      "clicks": 106,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-20",
+      "campaign": "network-return",
+      "spend": 793.55,
+      "impressions": 1282,
+      "clicks": 30,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-21",
+      "campaign": "search-design",
+      "spend": 2956.69,
+      "impressions": 711,
+      "clicks": 45,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-21",
+      "campaign": "search-brand",
+      "spend": 477.91,
+      "impressions": 106,
+      "clicks": 14,
+      "conversions": 1
+    },
+    {
+      "date": "2026-06-21",
+      "campaign": "network-interests",
+      "spend": 2056.68,
+      "impressions": 8865,
+      "clicks": 99,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-21",
+      "campaign": "network-return",
+      "spend": 662.76,
+      "impressions": 1215,
+      "clicks": 26,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-22",
+      "campaign": "search-design",
+      "spend": 3413.34,
+      "impressions": 839,
+      "clicks": 50,
+      "conversions": 3
+    },
+    {
+      "date": "2026-06-22",
+      "campaign": "search-brand",
+      "spend": 482.29,
+      "impressions": 113,
+      "clicks": 14,
+      "conversions": 1
+    },
+    {
+      "date": "2026-06-22",
+      "campaign": "network-interests",
+      "spend": 1839.62,
+      "impressions": 8656,
+      "clicks": 91,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-22",
+      "campaign": "network-return",
+      "spend": 562.66,
+      "impressions": 1141,
+      "clicks": 23,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-23",
+      "campaign": "search-design",
+      "spend": 3913.29,
+      "impressions": 936,
+      "clicks": 56,
+      "conversions": 3
+    },
+    {
+      "date": "2026-06-23",
+      "campaign": "search-brand",
+      "spend": 475.67,
+      "impressions": 112,
+      "clicks": 14,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-23",
+      "campaign": "network-interests",
+      "spend": 1728.76,
+      "impressions": 8429,
+      "clicks": 89,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-23",
+      "campaign": "network-return",
+      "spend": 593.2,
+      "impressions": 1235,
+      "clicks": 25,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-24",
+      "campaign": "search-design",
+      "spend": 3708.99,
+      "impressions": 829,
+      "clicks": 53,
+      "conversions": 3
+    },
+    {
+      "date": "2026-06-24",
+      "campaign": "search-brand",
+      "spend": 427.48,
+      "impressions": 97,
+      "clicks": 13,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-24",
+      "campaign": "network-interests",
+      "spend": 1624.88,
+      "impressions": 7712,
+      "clicks": 87,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-24",
+      "campaign": "network-return",
+      "spend": 635.63,
+      "impressions": 1249,
+      "clicks": 27,
+      "conversions": 1
+    },
+    {
+      "date": "2026-06-25",
+      "campaign": "search-design",
+      "spend": 3015.49,
+      "impressions": 629,
+      "clicks": 44,
+      "conversions": 3
+    },
+    {
+      "date": "2026-06-25",
+      "campaign": "search-brand",
+      "spend": 347.06,
+      "impressions": 75,
+      "clicks": 11,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-25",
+      "campaign": "network-interests",
+      "spend": 1549.92,
+      "impressions": 6887,
+      "clicks": 85,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-25",
+      "campaign": "network-return",
+      "spend": 671.16,
+      "impressions": 1184,
+      "clicks": 28,
+      "conversions": 1
+    },
+    {
+      "date": "2026-06-26",
+      "campaign": "search-design",
+      "spend": 2707.82,
+      "impressions": 546,
+      "clicks": 41,
+      "conversions": 3
+    },
+    {
+      "date": "2026-06-26",
+      "campaign": "search-brand",
+      "spend": 365.35,
+      "impressions": 77,
+      "clicks": 12,
+      "conversions": 1
+    },
+    {
+      "date": "2026-06-26",
+      "campaign": "network-interests",
+      "spend": 1752.14,
+      "impressions": 7249,
+      "clicks": 96,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-26",
+      "campaign": "network-return",
+      "spend": 745.88,
+      "impressions": 1182,
+      "clicks": 30,
+      "conversions": 1
+    },
+    {
+      "date": "2026-06-27",
+      "campaign": "search-design",
+      "spend": 2978.97,
+      "impressions": 612,
+      "clicks": 47,
+      "conversions": 3
+    },
+    {
+      "date": "2026-06-27",
+      "campaign": "search-brand",
+      "spend": 449.29,
+      "impressions": 93,
+      "clicks": 15,
+      "conversions": 1
+    },
+    {
+      "date": "2026-06-27",
+      "campaign": "network-interests",
+      "spend": 2134.34,
+      "impressions": 8408,
+      "clicks": 114,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-27",
+      "campaign": "network-return",
+      "spend": 854.96,
+      "impressions": 1270,
+      "clicks": 33,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-28",
+      "campaign": "search-design",
+      "spend": 3258.3,
+      "impressions": 712,
+      "clicks": 53,
+      "conversions": 3
+    },
+    {
+      "date": "2026-06-28",
+      "campaign": "search-brand",
+      "spend": 483.93,
+      "impressions": 103,
+      "clicks": 16,
+      "conversions": 1
+    },
+    {
+      "date": "2026-06-28",
+      "campaign": "network-interests",
+      "spend": 2240.45,
+      "impressions": 8751,
+      "clicks": 115,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-28",
+      "campaign": "network-return",
+      "spend": 802.23,
+      "impressions": 1191,
+      "clicks": 30,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-29",
+      "campaign": "search-design",
+      "spend": 3293.74,
+      "impressions": 782,
+      "clicks": 54,
+      "conversions": 3
+    },
+    {
+      "date": "2026-06-29",
+      "campaign": "search-brand",
+      "spend": 468.31,
+      "impressions": 104,
+      "clicks": 15,
+      "conversions": 1
+    },
+    {
+      "date": "2026-06-29",
+      "campaign": "network-interests",
+      "spend": 1986.05,
+      "impressions": 8041,
+      "clicks": 98,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-29",
+      "campaign": "network-return",
+      "spend": 676.77,
+      "impressions": 1070,
+      "clicks": 25,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-30",
+      "campaign": "search-design",
+      "spend": 3477.83,
+      "impressions": 887,
+      "clicks": 56,
+      "conversions": 3
+    },
+    {
+      "date": "2026-06-30",
+      "campaign": "search-brand",
+      "spend": 455.53,
+      "impressions": 106,
+      "clicks": 14,
+      "conversions": 1
+    },
+    {
+      "date": "2026-06-30",
+      "campaign": "network-interests",
+      "spend": 1851.14,
+      "impressions": 7985,
+      "clicks": 89,
+      "conversions": 2
+    },
+    {
+      "date": "2026-06-30",
+      "campaign": "network-return",
+      "spend": 642.76,
+      "impressions": 1123,
+      "clicks": 24,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-01",
+      "campaign": "search-design",
+      "spend": 2841.77,
+      "impressions": 589,
+      "clicks": 44,
+      "conversions": 3
+    },
+    {
+      "date": "2026-07-01",
+      "campaign": "search-brand",
+      "spend": 424.52,
+      "impressions": 83,
+      "clicks": 13,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-01",
+      "campaign": "network-interests",
+      "spend": 1574.29,
+      "impressions": 6215,
+      "clicks": 82,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-01",
+      "campaign": "network-return",
+      "spend": 487.98,
+      "impressions": 830,
+      "clicks": 21,
+      "conversions": 1
+    },
+    {
+      "date": "2026-07-02",
+      "campaign": "search-design",
+      "spend": 2912.08,
+      "impressions": 633,
+      "clicks": 44,
+      "conversions": 3
+    },
+    {
+      "date": "2026-07-02",
+      "campaign": "search-brand",
+      "spend": 354.72,
+      "impressions": 76,
+      "clicks": 11,
+      "conversions": 1
+    },
+    {
+      "date": "2026-07-02",
+      "campaign": "network-interests",
+      "spend": 1273.35,
+      "impressions": 5626,
+      "clicks": 69,
+      "conversions": 1
+    },
+    {
+      "date": "2026-07-02",
+      "campaign": "network-return",
+      "spend": 427.82,
+      "impressions": 808,
+      "clicks": 19,
+      "conversions": 1
+    },
+    {
+      "date": "2026-07-03",
+      "campaign": "search-design",
+      "spend": 2920.08,
+      "impressions": 693,
+      "clicks": 44,
+      "conversions": 3
+    },
+    {
+      "date": "2026-07-03",
+      "campaign": "search-brand",
+      "spend": 343.59,
+      "impressions": 83,
+      "clicks": 11,
+      "conversions": 1
+    },
+    {
+      "date": "2026-07-03",
+      "campaign": "network-interests",
+      "spend": 1277.02,
+      "impressions": 6421,
+      "clicks": 72,
+      "conversions": 1
+    },
+    {
+      "date": "2026-07-03",
+      "campaign": "network-return",
+      "spend": 490.77,
+      "impressions": 1024,
+      "clicks": 22,
+      "conversions": 1
+    },
+    {
+      "date": "2026-07-04",
+      "campaign": "search-design",
+      "spend": 2732.84,
+      "impressions": 704,
+      "clicks": 42,
+      "conversions": 3
+    },
+    {
+      "date": "2026-07-04",
+      "campaign": "search-brand",
+      "spend": 329.71,
+      "impressions": 88,
+      "clicks": 11,
+      "conversions": 1
+    },
+    {
+      "date": "2026-07-04",
+      "campaign": "network-interests",
+      "spend": 1400.95,
+      "impressions": 7692,
+      "clicks": 81,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-04",
+      "campaign": "network-return",
+      "spend": 589.75,
+      "impressions": 1288,
+      "clicks": 26,
+      "conversions": 1
+    },
+    {
+      "date": "2026-07-05",
+      "campaign": "search-design",
+      "spend": 2321.52,
+      "impressions": 620,
+      "clicks": 37,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-05",
+      "campaign": "search-brand",
+      "spend": 317.93,
+      "impressions": 88,
+      "clicks": 11,
+      "conversions": 1
+    },
+    {
+      "date": "2026-07-05",
+      "campaign": "network-interests",
+      "spend": 1486.61,
+      "impressions": 8160,
+      "clicks": 86,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-05",
+      "campaign": "network-return",
+      "spend": 634.8,
+      "impressions": 1337,
+      "clicks": 27,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-06",
+      "campaign": "search-design",
+      "spend": 2227.6,
+      "impressions": 581,
+      "clicks": 37,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-06",
+      "campaign": "search-brand",
+      "spend": 312.37,
+      "impressions": 83,
+      "clicks": 11,
+      "conversions": 1
+    },
+    {
+      "date": "2026-07-06",
+      "campaign": "network-interests",
+      "spend": 1594.01,
+      "impressions": 8011,
+      "clicks": 90,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-06",
+      "campaign": "network-return",
+      "spend": 637.08,
+      "impressions": 1207,
+      "clicks": 26,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-07",
+      "campaign": "search-design",
+      "spend": 2625.27,
+      "impressions": 646,
+      "clicks": 45,
+      "conversions": 3
+    },
+    {
+      "date": "2026-07-07",
+      "campaign": "search-brand",
+      "spend": 400.86,
+      "impressions": 96,
+      "clicks": 14,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-07",
+      "campaign": "network-interests",
+      "spend": 1805.38,
+      "impressions": 7973,
+      "clicks": 98,
+      "conversions": 3
+    },
+    {
+      "date": "2026-07-07",
+      "campaign": "network-return",
+      "spend": 658.12,
+      "impressions": 1104,
+      "clicks": 26,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-08",
+      "campaign": "search-design",
+      "spend": 3005.47,
+      "impressions": 695,
+      "clicks": 52,
+      "conversions": 3
+    },
+    {
+      "date": "2026-07-08",
+      "campaign": "search-brand",
+      "spend": 442.91,
+      "impressions": 96,
+      "clicks": 15,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-08",
+      "campaign": "network-interests",
+      "spend": 1840.41,
+      "impressions": 7267,
+      "clicks": 96,
+      "conversions": 3
+    },
+    {
+      "date": "2026-07-08",
+      "campaign": "network-return",
+      "spend": 641.4,
+      "impressions": 987,
+      "clicks": 25,
+      "conversions": 1
+    },
+    {
+      "date": "2026-07-09",
+      "campaign": "search-design",
+      "spend": 2938.46,
+      "impressions": 651,
+      "clicks": 50,
+      "conversions": 4
+    },
+    {
+      "date": "2026-07-09",
+      "campaign": "search-brand",
+      "spend": 400.0,
+      "impressions": 81,
+      "clicks": 13,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-09",
+      "campaign": "network-interests",
+      "spend": 1575.66,
+      "impressions": 5900,
+      "clicks": 80,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-09",
+      "campaign": "network-return",
+      "spend": 559.12,
+      "impressions": 846,
+      "clicks": 22,
+      "conversions": 1
+    },
+    {
+      "date": "2026-07-10",
+      "campaign": "search-design",
+      "spend": 2802.08,
+      "impressions": 616,
+      "clicks": 46,
+      "conversions": 3
+    },
+    {
+      "date": "2026-07-10",
+      "campaign": "search-brand",
+      "spend": 351.16,
+      "impressions": 71,
+      "clicks": 11,
+      "conversions": 1
+    },
+    {
+      "date": "2026-07-10",
+      "campaign": "network-interests",
+      "spend": 1446.37,
+      "impressions": 5540,
+      "clicks": 73,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-10",
+      "campaign": "network-return",
+      "spend": 567.45,
+      "impressions": 911,
+      "clicks": 23,
+      "conversions": 1
+    },
+    {
+      "date": "2026-07-11",
+      "campaign": "search-design",
+      "spend": 2856.82,
+      "impressions": 649,
+      "clicks": 45,
+      "conversions": 3
+    },
+    {
+      "date": "2026-07-11",
+      "campaign": "search-brand",
+      "spend": 358.47,
+      "impressions": 76,
+      "clicks": 11,
+      "conversions": 1
+    },
+    {
+      "date": "2026-07-11",
+      "campaign": "network-interests",
+      "spend": 1675.5,
+      "impressions": 7027,
+      "clicks": 86,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-11",
+      "campaign": "network-return",
+      "spend": 663.25,
+      "impressions": 1194,
+      "clicks": 28,
+      "conversions": 1
+    },
+    {
+      "date": "2026-07-12",
+      "campaign": "search-design",
+      "spend": 2885.6,
+      "impressions": 694,
+      "clicks": 44,
+      "conversions": 3
+    },
+    {
+      "date": "2026-07-12",
+      "campaign": "search-brand",
+      "spend": 422.89,
+      "impressions": 98,
+      "clicks": 13,
+      "conversions": 1
+    },
+    {
+      "date": "2026-07-12",
+      "campaign": "network-interests",
+      "spend": 1900.73,
+      "impressions": 9026,
+      "clicks": 101,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-12",
+      "campaign": "network-return",
+      "spend": 729.77,
+      "impressions": 1492,
+      "clicks": 32,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-13",
+      "campaign": "search-design",
+      "spend": 2791.86,
+      "impressions": 704,
+      "clicks": 42,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-13",
+      "campaign": "search-brand",
+      "spend": 413.01,
+      "impressions": 104,
+      "clicks": 13,
+      "conversions": 1
+    },
+    {
+      "date": "2026-07-13",
+      "campaign": "network-interests",
+      "spend": 1859.63,
+      "impressions": 9789,
+      "clicks": 103,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-13",
+      "campaign": "network-return",
+      "spend": 670.0,
+      "impressions": 1488,
+      "clicks": 30,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-14",
+      "campaign": "search-design",
+      "spend": 3028.95,
+      "impressions": 770,
+      "clicks": 46,
+      "conversions": 3
+    },
+    {
+      "date": "2026-07-14",
+      "campaign": "search-brand",
+      "spend": 428.02,
+      "impressions": 112,
+      "clicks": 14,
+      "conversions": 1
+    },
+    {
+      "date": "2026-07-14",
+      "campaign": "network-interests",
+      "spend": 1763.08,
+      "impressions": 9575,
+      "clicks": 101,
+      "conversions": 3
+    },
+    {
+      "date": "2026-07-14",
+      "campaign": "network-return",
+      "spend": 583.36,
+      "impressions": 1286,
+      "clicks": 26,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-15",
+      "campaign": "search-design",
+      "spend": 3515.73,
+      "impressions": 862,
+      "clicks": 55,
+      "conversions": 3
+    },
+    {
+      "date": "2026-07-15",
+      "campaign": "search-brand",
+      "spend": 469.72,
+      "impressions": 120,
+      "clicks": 16,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-15",
+      "campaign": "network-interests",
+      "spend": 1740.52,
+      "impressions": 8971,
+      "clicks": 101,
+      "conversions": 3
+    },
+    {
+      "date": "2026-07-15",
+      "campaign": "network-return",
+      "spend": 600.06,
+      "impressions": 1205,
+      "clicks": 26,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-16",
+      "campaign": "search-design",
+      "spend": 3559.57,
+      "impressions": 831,
+      "clicks": 58,
+      "conversions": 4
+    },
+    {
+      "date": "2026-07-16",
+      "campaign": "search-brand",
+      "spend": 428.23,
+      "impressions": 103,
+      "clicks": 15,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-16",
+      "campaign": "network-interests",
+      "spend": 1658.96,
+      "impressions": 7713,
+      "clicks": 95,
+      "conversions": 3
+    },
+    {
+      "date": "2026-07-16",
+      "campaign": "network-return",
+      "spend": 624.95,
+      "impressions": 1101,
+      "clicks": 26,
+      "conversions": 1
+    },
+    {
+      "date": "2026-07-17",
+      "campaign": "search-design",
+      "spend": 3013.39,
+      "impressions": 680,
+      "clicks": 51,
+      "conversions": 4
+    },
+    {
+      "date": "2026-07-17",
+      "campaign": "search-brand",
+      "spend": 341.14,
+      "impressions": 77,
+      "clicks": 12,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-17",
+      "campaign": "network-interests",
+      "spend": 1499.42,
+      "impressions": 6275,
+      "clicks": 83,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-17",
+      "campaign": "network-return",
+      "spend": 649.32,
+      "impressions": 1026,
+      "clicks": 26,
+      "conversions": 1
+    },
+    {
+      "date": "2026-07-18",
+      "campaign": "search-design",
+      "spend": 2603.87,
+      "impressions": 586,
+      "clicks": 45,
+      "conversions": 3
+    },
+    {
+      "date": "2026-07-18",
+      "campaign": "search-brand",
+      "spend": 319.42,
+      "impressions": 69,
+      "clicks": 11,
+      "conversions": 1
+    },
+    {
+      "date": "2026-07-18",
+      "campaign": "network-interests",
+      "spend": 1638.24,
+      "impressions": 6416,
+      "clicks": 87,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-18",
+      "campaign": "network-return",
+      "spend": 741.36,
+      "impressions": 1116,
+      "clicks": 29,
+      "conversions": 1
+    },
+    {
+      "date": "2026-07-19",
+      "campaign": "search-design",
+      "spend": 2674.06,
+      "impressions": 617,
+      "clicks": 46,
+      "conversions": 3
+    },
+    {
+      "date": "2026-07-19",
+      "campaign": "search-brand",
+      "spend": 392.16,
+      "impressions": 83,
+      "clicks": 13,
+      "conversions": 1
+    },
+    {
+      "date": "2026-07-19",
+      "campaign": "network-interests",
+      "spend": 2104.96,
+      "impressions": 8208,
+      "clicks": 108,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-19",
+      "campaign": "network-return",
+      "spend": 870.43,
+      "impressions": 1348,
+      "clicks": 34,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-20",
+      "campaign": "search-design",
+      "spend": 2989.82,
+      "impressions": 722,
+      "clicks": 50,
+      "conversions": 3
+    },
+    {
+      "date": "2026-07-20",
+      "campaign": "search-brand",
+      "spend": 471.26,
+      "impressions": 104,
+      "clicks": 15,
+      "conversions": 1
+    },
+    {
+      "date": "2026-07-20",
+      "campaign": "network-interests",
+      "spend": 2377.79,
+      "impressions": 9825,
+      "clicks": 120,
+      "conversions": 3
+    },
+    {
+      "date": "2026-07-20",
+      "campaign": "network-return",
+      "spend": 852.43,
+      "impressions": 1452,
+      "clicks": 34,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-21",
+      "campaign": "search-design",
+      "spend": 3176.09,
+      "impressions": 806,
+      "clicks": 51,
+      "conversions": 3
+    },
+    {
+      "date": "2026-07-21",
+      "campaign": "search-brand",
+      "spend": 517.69,
+      "impressions": 121,
+      "clicks": 16,
+      "conversions": 1
+    },
+    {
+      "date": "2026-07-21",
+      "campaign": "network-interests",
+      "spend": 2205.35,
+      "impressions": 10029,
+      "clicks": 112,
+      "conversions": 3
+    },
+    {
+      "date": "2026-07-21",
+      "campaign": "network-return",
+      "spend": 700.67,
+      "impressions": 1355,
+      "clicks": 29,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-22",
+      "campaign": "search-design",
+      "spend": 3623.48,
+      "impressions": 940,
+      "clicks": 56,
+      "conversions": 3
+    },
+    {
+      "date": "2026-07-22",
+      "campaign": "search-brand",
+      "spend": 522.43,
+      "impressions": 129,
+      "clicks": 16,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-22",
+      "campaign": "network-interests",
+      "spend": 1954.41,
+      "impressions": 9702,
+      "clicks": 102,
+      "conversions": 3
+    },
+    {
+      "date": "2026-07-22",
+      "campaign": "network-return",
+      "spend": 602.86,
+      "impressions": 1290,
+      "clicks": 26,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-23",
+      "campaign": "search-design",
+      "spend": 4172.76,
+      "impressions": 1053,
+      "clicks": 63,
+      "conversions": 4
+    },
+    {
+      "date": "2026-07-23",
+      "campaign": "search-brand",
+      "spend": 515.26,
+      "impressions": 128,
+      "clicks": 16,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-23",
+      "campaign": "network-interests",
+      "spend": 1859.49,
+      "impressions": 9566,
+      "clicks": 101,
+      "conversions": 3
+    },
+    {
+      "date": "2026-07-23",
+      "campaign": "network-return",
+      "spend": 629.72,
+      "impressions": 1384,
+      "clicks": 28,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-24",
+      "campaign": "search-design",
+      "spend": 3979.78,
+      "impressions": 939,
+      "clicks": 60,
+      "conversions": 4
+    },
+    {
+      "date": "2026-07-24",
+      "campaign": "search-brand",
+      "spend": 467.51,
+      "impressions": 112,
+      "clicks": 15,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-24",
+      "campaign": "network-interests",
+      "spend": 1734.83,
+      "impressions": 8687,
+      "clicks": 98,
+      "conversions": 3
+    },
+    {
+      "date": "2026-07-24",
+      "campaign": "network-return",
+      "spend": 669.41,
+      "impressions": 1387,
+      "clicks": 30,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-25",
+      "campaign": "search-design",
+      "spend": 3182.95,
+      "impressions": 701,
+      "clicks": 49,
+      "conversions": 3
+    },
+    {
+      "date": "2026-07-25",
+      "campaign": "search-brand",
+      "spend": 388.76,
+      "impressions": 89,
+      "clicks": 13,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-25",
+      "campaign": "network-interests",
+      "spend": 1659.17,
+      "impressions": 7778,
+      "clicks": 96,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-25",
+      "campaign": "network-return",
+      "spend": 727.02,
+      "impressions": 1353,
+      "clicks": 32,
+      "conversions": 1
+    },
+    {
+      "date": "2026-07-26",
+      "campaign": "search-design",
+      "spend": 2879.54,
+      "impressions": 613,
+      "clicks": 46,
+      "conversions": 3
+    },
+    {
+      "date": "2026-07-26",
+      "campaign": "search-brand",
+      "spend": 375.14,
+      "impressions": 83,
+      "clicks": 13,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-26",
+      "campaign": "network-interests",
+      "spend": 1885.62,
+      "impressions": 8231,
+      "clicks": 109,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-26",
+      "campaign": "network-return",
+      "spend": 801.22,
+      "impressions": 1340,
+      "clicks": 34,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-27",
+      "campaign": "search-design",
+      "spend": 3184.0,
+      "impressions": 690,
+      "clicks": 53,
+      "conversions": 4
+    },
+    {
+      "date": "2026-07-27",
+      "campaign": "search-brand",
+      "spend": 482.63,
+      "impressions": 106,
+      "clicks": 17,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-27",
+      "campaign": "network-interests",
+      "spend": 2289.17,
+      "impressions": 9515,
+      "clicks": 129,
+      "conversions": 3
+    },
+    {
+      "date": "2026-07-27",
+      "campaign": "network-return",
+      "spend": 908.58,
+      "impressions": 1424,
+      "clicks": 37,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-28",
+      "campaign": "search-design",
+      "spend": 3496.19,
+      "impressions": 806,
+      "clicks": 60,
+      "conversions": 4
+    },
+    {
+      "date": "2026-07-28",
+      "campaign": "search-brand",
+      "spend": 516.01,
+      "impressions": 116,
+      "clicks": 18,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-28",
+      "campaign": "network-interests",
+      "spend": 2382.08,
+      "impressions": 9817,
+      "clicks": 129,
+      "conversions": 3
+    },
+    {
+      "date": "2026-07-28",
+      "campaign": "network-return",
+      "spend": 861.76,
+      "impressions": 1350,
+      "clicks": 34,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-29",
+      "campaign": "search-design",
+      "spend": 3526.58,
+      "impressions": 883,
+      "clicks": 61,
+      "conversions": 3
+    },
+    {
+      "date": "2026-07-29",
+      "campaign": "search-brand",
+      "spend": 503.06,
+      "impressions": 118,
+      "clicks": 17,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-29",
+      "campaign": "network-interests",
+      "spend": 2132.14,
+      "impressions": 9108,
+      "clicks": 111,
+      "conversions": 3
+    },
+    {
+      "date": "2026-07-29",
+      "campaign": "network-return",
+      "spend": 718.43,
+      "impressions": 1199,
+      "clicks": 28,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-30",
+      "campaign": "search-design",
+      "spend": 3708.42,
+      "impressions": 997,
+      "clicks": 63,
+      "conversions": 4
+    },
+    {
+      "date": "2026-07-30",
+      "campaign": "search-brand",
+      "spend": 493.44,
+      "impressions": 121,
+      "clicks": 16,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-30",
+      "campaign": "network-interests",
+      "spend": 1971.42,
+      "impressions": 8972,
+      "clicks": 100,
+      "conversions": 3
+    },
+    {
+      "date": "2026-07-30",
+      "campaign": "network-return",
+      "spend": 710.76,
+      "impressions": 1311,
+      "clicks": 28,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-31",
+      "campaign": "search-design",
+      "spend": 3907.58,
+      "impressions": 1075,
+      "clicks": 64,
+      "conversions": 4
+    },
+    {
+      "date": "2026-07-31",
+      "campaign": "search-brand",
+      "spend": 511.63,
+      "impressions": 129,
+      "clicks": 16,
+      "conversions": 2
+    },
+    {
+      "date": "2026-07-31",
+      "campaign": "network-interests",
+      "spend": 2099.46,
+      "impressions": 10090,
+      "clicks": 106,
+      "conversions": 3
+    },
+    {
+      "date": "2026-07-31",
+      "campaign": "network-return",
+      "spend": 812.46,
+      "impressions": 1639,
+      "clicks": 33,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-01",
+      "campaign": "search-design",
+      "spend": 3021.9,
+      "impressions": 682,
+      "clicks": 51,
+      "conversions": 4
+    },
+    {
+      "date": "2026-08-01",
+      "campaign": "search-brand",
+      "spend": 419.43,
+      "impressions": 90,
+      "clicks": 14,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-01",
+      "campaign": "network-interests",
+      "spend": 1638.05,
+      "impressions": 7049,
+      "clicks": 93,
+      "conversions": 3
+    },
+    {
+      "date": "2026-08-01",
+      "campaign": "network-return",
+      "spend": 511.64,
+      "impressions": 949,
+      "clicks": 24,
+      "conversions": 1
+    },
+    {
+      "date": "2026-08-02",
+      "campaign": "search-design",
+      "spend": 3035.94,
+      "impressions": 719,
+      "clicks": 50,
+      "conversions": 4
+    },
+    {
+      "date": "2026-08-02",
+      "campaign": "search-brand",
+      "spend": 384.6,
+      "impressions": 90,
+      "clicks": 13,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-02",
+      "campaign": "network-interests",
+      "spend": 1337.51,
+      "impressions": 6441,
+      "clicks": 79,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-02",
+      "campaign": "network-return",
+      "spend": 454.47,
+      "impressions": 936,
+      "clicks": 22,
+      "conversions": 1
+    },
+    {
+      "date": "2026-08-03",
+      "campaign": "search-design",
+      "spend": 3044.28,
+      "impressions": 787,
+      "clicks": 50,
+      "conversions": 4
+    },
+    {
+      "date": "2026-08-03",
+      "campaign": "search-brand",
+      "spend": 343.88,
+      "impressions": 90,
+      "clicks": 12,
+      "conversions": 1
+    },
+    {
+      "date": "2026-08-03",
+      "campaign": "network-interests",
+      "spend": 1318.02,
+      "impressions": 7224,
+      "clicks": 81,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-03",
+      "campaign": "network-return",
+      "spend": 511.65,
+      "impressions": 1163,
+      "clicks": 25,
+      "conversions": 1
+    },
+    {
+      "date": "2026-08-04",
+      "campaign": "search-design",
+      "spend": 2865.36,
+      "impressions": 804,
+      "clicks": 48,
+      "conversions": 3
+    },
+    {
+      "date": "2026-08-04",
+      "campaign": "search-brand",
+      "spend": 329.99,
+      "impressions": 96,
+      "clicks": 12,
+      "conversions": 1
+    },
+    {
+      "date": "2026-08-04",
+      "campaign": "network-interests",
+      "spend": 1459.82,
+      "impressions": 8737,
+      "clicks": 92,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-04",
+      "campaign": "network-return",
+      "spend": 624.3,
+      "impressions": 1486,
+      "clicks": 30,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-05",
+      "campaign": "search-design",
+      "spend": 2417.65,
+      "impressions": 703,
+      "clicks": 42,
+      "conversions": 3
+    },
+    {
+      "date": "2026-08-05",
+      "campaign": "search-brand",
+      "spend": 318.2,
+      "impressions": 96,
+      "clicks": 12,
+      "conversions": 1
+    },
+    {
+      "date": "2026-08-05",
+      "campaign": "network-interests",
+      "spend": 1554.17,
+      "impressions": 9299,
+      "clicks": 98,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-05",
+      "campaign": "network-return",
+      "spend": 668.66,
+      "impressions": 1535,
+      "clicks": 31,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-06",
+      "campaign": "search-design",
+      "spend": 2319.84,
+      "impressions": 660,
+      "clicks": 42,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-06",
+      "campaign": "search-brand",
+      "spend": 338.68,
+      "impressions": 98,
+      "clicks": 13,
+      "conversions": 1
+    },
+    {
+      "date": "2026-08-06",
+      "campaign": "network-interests",
+      "spend": 1673.63,
+      "impressions": 9168,
+      "clicks": 103,
+      "conversions": 3
+    },
+    {
+      "date": "2026-08-06",
+      "campaign": "network-return",
+      "spend": 674.39,
+      "impressions": 1393,
+      "clicks": 30,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-07",
+      "campaign": "search-design",
+      "spend": 2729.64,
+      "impressions": 732,
+      "clicks": 51,
+      "conversions": 3
+    },
+    {
+      "date": "2026-08-07",
+      "campaign": "search-brand",
+      "spend": 420.29,
+      "impressions": 110,
+      "clicks": 16,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-07",
+      "campaign": "network-interests",
+      "spend": 1876.02,
+      "impressions": 9031,
+      "clicks": 111,
+      "conversions": 3
+    },
+    {
+      "date": "2026-08-07",
+      "campaign": "network-return",
+      "spend": 673.45,
+      "impressions": 1231,
+      "clicks": 29,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-08",
+      "campaign": "search-design",
+      "spend": 3128.49,
+      "impressions": 788,
+      "clicks": 59,
+      "conversions": 4
+    },
+    {
+      "date": "2026-08-08",
+      "campaign": "search-brand",
+      "spend": 460.52,
+      "impressions": 109,
+      "clicks": 17,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-08",
+      "campaign": "network-interests",
+      "spend": 1917.09,
+      "impressions": 8251,
+      "clicks": 109,
+      "conversions": 3
+    },
+    {
+      "date": "2026-08-08",
+      "campaign": "network-return",
+      "spend": 659.06,
+      "impressions": 1106,
+      "clicks": 28,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-09",
+      "campaign": "search-design",
+      "spend": 3073.25,
+      "impressions": 742,
+      "clicks": 57,
+      "conversions": 4
+    },
+    {
+      "date": "2026-08-09",
+      "campaign": "search-brand",
+      "spend": 423.43,
+      "impressions": 93,
+      "clicks": 15,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-09",
+      "campaign": "network-interests",
+      "spend": 1644.32,
+      "impressions": 6711,
+      "clicks": 91,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-09",
+      "campaign": "network-return",
+      "spend": 582.9,
+      "impressions": 962,
+      "clicks": 25,
+      "conversions": 1
+    },
+    {
+      "date": "2026-08-10",
+      "campaign": "search-design",
+      "spend": 2906.03,
+      "impressions": 696,
+      "clicks": 52,
+      "conversions": 4
+    },
+    {
+      "date": "2026-08-10",
+      "campaign": "search-brand",
+      "spend": 380.74,
+      "impressions": 83,
+      "clicks": 13,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-10",
+      "campaign": "network-interests",
+      "spend": 1508.72,
+      "impressions": 6299,
+      "clicks": 83,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-10",
+      "campaign": "network-return",
+      "spend": 588.5,
+      "impressions": 1030,
+      "clicks": 26,
+      "conversions": 1
+    },
+    {
+      "date": "2026-08-11",
+      "campaign": "search-design",
+      "spend": 2970.4,
+      "impressions": 735,
+      "clicks": 51,
+      "conversions": 4
+    },
+    {
+      "date": "2026-08-11",
+      "campaign": "search-brand",
+      "spend": 388.66,
+      "impressions": 90,
+      "clicks": 13,
+      "conversions": 1
+    },
+    {
+      "date": "2026-08-11",
+      "campaign": "network-interests",
+      "spend": 1751.65,
+      "impressions": 8007,
+      "clicks": 98,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-11",
+      "campaign": "network-return",
+      "spend": 695.41,
+      "impressions": 1364,
+      "clicks": 32,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-12",
+      "campaign": "search-design",
+      "spend": 3008.34,
+      "impressions": 789,
+      "clicks": 50,
+      "conversions": 3
+    },
+    {
+      "date": "2026-08-12",
+      "campaign": "search-brand",
+      "spend": 417.81,
+      "impressions": 106,
+      "clicks": 14,
+      "conversions": 1
+    },
+    {
+      "date": "2026-08-12",
+      "campaign": "network-interests",
+      "spend": 1968.24,
+      "impressions": 10188,
+      "clicks": 114,
+      "conversions": 3
+    },
+    {
+      "date": "2026-08-12",
+      "campaign": "network-return",
+      "spend": 753.2,
+      "impressions": 1679,
+      "clicks": 36,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-13",
+      "campaign": "search-design",
+      "spend": 2927.24,
+      "impressions": 805,
+      "clicks": 48,
+      "conversions": 3
+    },
+    {
+      "date": "2026-08-13",
+      "campaign": "search-brand",
+      "spend": 437.2,
+      "impressions": 120,
+      "clicks": 15,
+      "conversions": 1
+    },
+    {
+      "date": "2026-08-13",
+      "campaign": "network-interests",
+      "spend": 1937.98,
+      "impressions": 11120,
+      "clicks": 117,
+      "conversions": 3
+    },
+    {
+      "date": "2026-08-13",
+      "campaign": "network-return",
+      "spend": 696.64,
+      "impressions": 1686,
+      "clicks": 34,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-14",
+      "campaign": "search-design",
+      "spend": 3141.31,
+      "impressions": 870,
+      "clicks": 52,
+      "conversions": 3
+    },
+    {
+      "date": "2026-08-14",
+      "campaign": "search-brand",
+      "spend": 448.78,
+      "impressions": 128,
+      "clicks": 16,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-14",
+      "campaign": "network-interests",
+      "spend": 1841.71,
+      "impressions": 10902,
+      "clicks": 115,
+      "conversions": 3
+    },
+    {
+      "date": "2026-08-14",
+      "campaign": "network-return",
+      "spend": 617.53,
+      "impressions": 1484,
+      "clicks": 30,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-15",
+      "campaign": "search-design",
+      "spend": 3694.59,
+      "impressions": 988,
+      "clicks": 63,
+      "conversions": 4
+    },
+    {
+      "date": "2026-08-15",
+      "campaign": "search-brand",
+      "spend": 484.81,
+      "impressions": 135,
+      "clicks": 18,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-15",
+      "campaign": "network-interests",
+      "spend": 1818.15,
+      "impressions": 10215,
+      "clicks": 115,
+      "conversions": 3
+    },
+    {
+      "date": "2026-08-15",
+      "campaign": "network-return",
+      "spend": 635.21,
+      "impressions": 1390,
+      "clicks": 30,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-16",
+      "campaign": "search-design",
+      "spend": 3716.09,
+      "impressions": 946,
+      "clicks": 66,
+      "conversions": 5
+    },
+    {
+      "date": "2026-08-16",
+      "campaign": "search-brand",
+      "spend": 445.25,
+      "impressions": 117,
+      "clicks": 17,
+      "conversions": 3
+    },
+    {
+      "date": "2026-08-16",
+      "campaign": "network-interests",
+      "spend": 1730.25,
+      "impressions": 8769,
+      "clicks": 108,
+      "conversions": 3
+    },
+    {
+      "date": "2026-08-16",
+      "campaign": "network-return",
+      "spend": 661.55,
+      "impressions": 1271,
+      "clicks": 30,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-17",
+      "campaign": "search-design",
+      "spend": 3144.03,
+      "impressions": 774,
+      "clicks": 58,
+      "conversions": 4
+    },
+    {
+      "date": "2026-08-17",
+      "campaign": "search-brand",
+      "spend": 365.13,
+      "impressions": 89,
+      "clicks": 14,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-17",
+      "campaign": "network-interests",
+      "spend": 1557.93,
+      "impressions": 7107,
+      "clicks": 94,
+      "conversions": 3
+    },
+    {
+      "date": "2026-08-17",
+      "campaign": "network-return",
+      "spend": 664.44,
+      "impressions": 1144,
+      "clicks": 29,
+      "conversions": 1
+    },
+    {
+      "date": "2026-08-18",
+      "campaign": "search-design",
+      "spend": 2707.39,
+      "impressions": 664,
+      "clicks": 51,
+      "conversions": 4
+    },
+    {
+      "date": "2026-08-18",
+      "campaign": "search-brand",
+      "spend": 346.33,
+      "impressions": 81,
+      "clicks": 13,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-18",
+      "campaign": "network-interests",
+      "spend": 1710.27,
+      "impressions": 7301,
+      "clicks": 99,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-18",
+      "campaign": "network-return",
+      "spend": 773.96,
+      "impressions": 1270,
+      "clicks": 33,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-19",
+      "campaign": "search-design",
+      "spend": 2826.59,
+      "impressions": 711,
+      "clicks": 53,
+      "conversions": 4
+    },
+    {
+      "date": "2026-08-19",
+      "campaign": "search-brand",
+      "spend": 415.13,
+      "impressions": 96,
+      "clicks": 15,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-19",
+      "campaign": "network-interests",
+      "spend": 2181.49,
+      "impressions": 9271,
+      "clicks": 122,
+      "conversions": 3
+    },
+    {
+      "date": "2026-08-19",
+      "campaign": "network-return",
+      "spend": 892.51,
+      "impressions": 1507,
+      "clicks": 38,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-20",
+      "campaign": "search-design",
+      "spend": 3072.11,
+      "impressions": 809,
+      "clicks": 56,
+      "conversions": 4
+    },
+    {
+      "date": "2026-08-20",
+      "campaign": "search-brand",
+      "spend": 490.0,
+      "impressions": 118,
+      "clicks": 17,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-20",
+      "campaign": "network-interests",
+      "spend": 2472.32,
+      "impressions": 11135,
+      "clicks": 136,
+      "conversions": 3
+    },
+    {
+      "date": "2026-08-20",
+      "campaign": "network-return",
+      "spend": 897.06,
+      "impressions": 1666,
+      "clicks": 39,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-21",
+      "campaign": "search-design",
+      "spend": 3313.78,
+      "impressions": 917,
+      "clicks": 58,
+      "conversions": 4
+    },
+    {
+      "date": "2026-08-21",
+      "campaign": "search-brand",
+      "spend": 534.31,
+      "impressions": 136,
+      "clicks": 18,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-21",
+      "campaign": "network-interests",
+      "spend": 2294.23,
+      "impressions": 11372,
+      "clicks": 127,
+      "conversions": 3
+    },
+    {
+      "date": "2026-08-21",
+      "campaign": "network-return",
+      "spend": 731.48,
+      "impressions": 1542,
+      "clicks": 33,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-22",
+      "campaign": "search-design",
+      "spend": 3799.19,
+      "impressions": 1074,
+      "clicks": 64,
+      "conversions": 4
+    },
+    {
+      "date": "2026-08-22",
+      "campaign": "search-brand",
+      "spend": 539.21,
+      "impressions": 145,
+      "clicks": 18,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-22",
+      "campaign": "network-interests",
+      "spend": 2039.14,
+      "impressions": 11034,
+      "clicks": 116,
+      "conversions": 3
+    },
+    {
+      "date": "2026-08-22",
+      "campaign": "network-return",
+      "spend": 638.17,
+      "impressions": 1489,
+      "clicks": 30,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-23",
+      "campaign": "search-design",
+      "spend": 4314.34,
+      "impressions": 1187,
+      "clicks": 71,
+      "conversions": 5
+    },
+    {
+      "date": "2026-08-23",
+      "campaign": "search-brand",
+      "spend": 531.81,
+      "impressions": 144,
+      "clicks": 18,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-23",
+      "campaign": "network-interests",
+      "spend": 1942.42,
+      "impressions": 10892,
+      "clicks": 115,
+      "conversions": 3
+    },
+    {
+      "date": "2026-08-23",
+      "campaign": "network-return",
+      "spend": 660.26,
+      "impressions": 1581,
+      "clicks": 32,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-24",
+      "campaign": "search-design",
+      "spend": 4138.0,
+      "impressions": 1064,
+      "clicks": 68,
+      "conversions": 5
+    },
+    {
+      "date": "2026-08-24",
+      "campaign": "search-brand",
+      "spend": 486.1,
+      "impressions": 127,
+      "clicks": 17,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-24",
+      "campaign": "network-interests",
+      "spend": 1818.95,
+      "impressions": 9928,
+      "clicks": 112,
+      "conversions": 3
+    },
+    {
+      "date": "2026-08-24",
+      "campaign": "network-return",
+      "spend": 716.5,
+      "impressions": 1619,
+      "clicks": 35,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-25",
+      "campaign": "search-design",
+      "spend": 3337.3,
+      "impressions": 801,
+      "clicks": 56,
+      "conversions": 4
+    },
+    {
+      "date": "2026-08-25",
+      "campaign": "search-brand",
+      "spend": 384.1,
+      "impressions": 96,
+      "clicks": 14,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-25",
+      "campaign": "network-interests",
+      "spend": 1728.3,
+      "impressions": 8831,
+      "clicks": 109,
+      "conversions": 3
+    },
+    {
+      "date": "2026-08-25",
+      "campaign": "network-return",
+      "spend": 750.37,
+      "impressions": 1522,
+      "clicks": 36,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-26",
+      "campaign": "search-design",
+      "spend": 2986.36,
+      "impressions": 693,
+      "clicks": 52,
+      "conversions": 4
+    },
+    {
+      "date": "2026-08-26",
+      "campaign": "search-brand",
+      "spend": 397.12,
+      "impressions": 96,
+      "clicks": 15,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-26",
+      "campaign": "network-interests",
+      "spend": 1952.12,
+      "impressions": 9288,
+      "clicks": 123,
+      "conversions": 3
+    },
+    {
+      "date": "2026-08-26",
+      "campaign": "network-return",
+      "spend": 843.17,
+      "impressions": 1537,
+      "clicks": 39,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-27",
+      "campaign": "search-design",
+      "spend": 3362.02,
+      "impressions": 794,
+      "clicks": 61,
+      "conversions": 4
+    },
+    {
+      "date": "2026-08-27",
+      "campaign": "search-brand",
+      "spend": 494.88,
+      "impressions": 118,
+      "clicks": 19,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-27",
+      "campaign": "network-interests",
+      "spend": 2376.92,
+      "impressions": 10769,
+      "clicks": 146,
+      "conversions": 3
+    },
+    {
+      "date": "2026-08-27",
+      "campaign": "network-return",
+      "spend": 946.21,
+      "impressions": 1616,
+      "clicks": 42,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-28",
+      "campaign": "search-design",
+      "spend": 3635.19,
+      "impressions": 913,
+      "clicks": 68,
+      "conversions": 5
+    },
+    {
+      "date": "2026-08-28",
+      "campaign": "search-brand",
+      "spend": 552.31,
+      "impressions": 135,
+      "clicks": 21,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-28",
+      "campaign": "network-interests",
+      "spend": 2490.33,
+      "impressions": 11186,
+      "clicks": 147,
+      "conversions": 4
+    },
+    {
+      "date": "2026-08-28",
+      "campaign": "network-return",
+      "spend": 906.87,
+      "impressions": 1548,
+      "clicks": 39,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-29",
+      "campaign": "search-design",
+      "spend": 3659.71,
+      "impressions": 999,
+      "clicks": 69,
+      "conversions": 4
+    },
+    {
+      "date": "2026-08-29",
+      "campaign": "search-brand",
+      "spend": 515.82,
+      "impressions": 132,
+      "clicks": 19,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-29",
+      "campaign": "network-interests",
+      "spend": 2220.43,
+      "impressions": 10339,
+      "clicks": 126,
+      "conversions": 3
+    },
+    {
+      "date": "2026-08-29",
+      "campaign": "network-return",
+      "spend": 753.27,
+      "impressions": 1370,
+      "clicks": 32,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-30",
+      "campaign": "search-design",
+      "spend": 3888.26,
+      "impressions": 1140,
+      "clicks": 72,
+      "conversions": 5
+    },
+    {
+      "date": "2026-08-30",
+      "campaign": "search-brand",
+      "spend": 509.29,
+      "impressions": 136,
+      "clicks": 18,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-30",
+      "campaign": "network-interests",
+      "spend": 2061.85,
+      "impressions": 10228,
+      "clicks": 114,
+      "conversions": 3
+    },
+    {
+      "date": "2026-08-30",
+      "campaign": "network-return",
+      "spend": 721.94,
+      "impressions": 1451,
+      "clicks": 31,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-31",
+      "campaign": "search-design",
+      "spend": 4089.06,
+      "impressions": 1226,
+      "clicks": 73,
+      "conversions": 5
+    },
+    {
+      "date": "2026-08-31",
+      "campaign": "search-brand",
+      "spend": 528.06,
+      "impressions": 145,
+      "clicks": 18,
+      "conversions": 2
+    },
+    {
+      "date": "2026-08-31",
+      "campaign": "network-interests",
+      "spend": 2180.5,
+      "impressions": 11422,
+      "clicks": 120,
+      "conversions": 4
+    },
+    {
+      "date": "2026-08-31",
+      "campaign": "network-return",
+      "spend": 835.72,
+      "impressions": 1838,
+      "clicks": 37,
+      "conversions": 2
+    }
+  ],
+  "setup": {
+    "title": "Реклама готова к запуску",
+    "date": "2026-05-31",
+    "status": "Ожидает согласования",
+    "summary": {
+      "title": "Подготовили основу для продвижения",
+      "text": "Собрали структуру, разделили Поиск и РСЯ, подготовили объявления и настроили измерение отправки формы. Кампании ожидают согласования запуска."
+    },
+    "objective": "Привлекать обращения на разработку дизайн-проекта. На Поиске работаем со сформированным спросом, в РСЯ знакомим аудиторию со студией и возвращаем посетителей сайта.",
+    "facts": [
+      {
+        "label": "Продукт",
+        "value": "Дизайн-проекты квартир"
+      },
+      {
+        "label": "География",
+        "value": "Москва и область"
+      },
+      {
+        "label": "Каналы",
+        "value": "Яндекс Поиск и РСЯ"
+      },
+      {
+        "label": "Сайт проекта",
+        "value": "aura.example"
+      }
+    ],
+    "nextStep": {
+      "title": "Согласовать запуск",
+      "text": "Кампании подготовлены и выключены. После согласования объявлений и пополнения рекламного кабинета можно назначить дату начала показов."
+    },
+    "ad": {
+      "domain": "aura.example",
+      "titles": [
+        "Дизайн интерьера от студии АУРА",
+        "Ваш интерьер начинается с проекта",
+        "Продуманный дизайн вашей квартиры"
+      ],
+      "texts": [
+        "Создаём интерьеры для жизни. Планировка, визуализация и рабочие чертежи. Обсудим ваш проект.",
+        "От первой идеи до готового дизайн-проекта. Посмотрите наши работы и познакомьтесь со студией."
+      ],
+      "sitelinks": [
+        "Наши проекты",
+        "Этапы работы",
+        "О студии",
+        "Контакты"
+      ]
+    },
+    "checks": [
+      {
+        "title": "Структура и условия показа",
+        "text": "Кампании разделены по каналам. География, бюджет и расписание указаны отдельно.",
+        "status": "Проверено",
+        "complete": true
+      },
+      {
+        "title": "Объявления и посадочные страницы",
+        "text": "Проверены тексты, ссылки, быстрые ссылки и соответствие страниц объявлению.",
+        "status": "Проверено",
+        "complete": true
+      },
+      {
+        "title": "Аналитика и отслеживание целей",
+        "text": "Проверена цель отправки формы и передача рекламных меток.",
+        "status": "Проверено",
+        "complete": true
+      },
+      {
+        "title": "Модерация объявлений",
+        "text": "Статусы нужно проверить после отправки на модерацию.",
+        "status": "Ожидает проверки",
+        "complete": false
+      },
+      {
+        "title": "Бюджет и начало показов",
+        "text": "Согласовать дату запуска и подтвердить пополнение рекламного кабинета.",
+        "status": "Нужно согласование",
+        "complete": false
+      }
+    ],
+    "work": [
+      {
+        "title": "Собрали семантику",
+        "text": "Разделили ключевые фразы по смыслу и добавили исключения."
+      },
+      {
+        "title": "Подготовили объявления",
+        "text": "Написали варианты заголовков и описаний, добавили быстрые ссылки."
+      },
+      {
+        "title": "Настроили измерение",
+        "text": "Выбрали цель и проверили передачу рекламных меток."
+      }
+    ],
+    "next": [
+      {
+        "title": "Первые дни",
+        "text": "Проверим начало показов, модерацию и поступление статистики."
+      },
+      {
+        "title": "Первая неделя",
+        "text": "Посмотрим запросы и площадки, уточним исключения."
+      },
+      {
+        "title": "После накопления данных",
+        "text": "Оценим стоимость выбранной цели и подготовим рекомендации."
+      }
+    ]
+  }
+}

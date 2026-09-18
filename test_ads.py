@@ -23,6 +23,9 @@ class FakeApi:
             raise value
         return value(params) if callable(value) else value
 
+    async def call_v501(self, service, method, params, *, client_login=None):
+        return await self.call(service, method, params, client_login=client_login)
+
     def params_for(self, service):
         return [params for name, params in self.calls if name == service]
 
@@ -66,6 +69,9 @@ def test_text_ad_fields_are_requested():
     read(api)
     params = api.params_for("ads")[0]
     assert "Href" in params["TextAdFieldNames"]
+    assert "AdExtensions" in params["TextAdFieldNames"]
+    assert "AdExtensionIds" not in params["TextAdFieldNames"]
+    assert "Href" in params["ResponsiveAdFieldNames"]
     assert "Id" in params["FieldNames"]
 
 
@@ -149,6 +155,7 @@ def test_landing_pages_group_ads_by_url():
     assert pages[0]["ads"] == 2
     assert pages[0]["campaigns"] == [100, 200]
     assert out["domains"] == ["shop.ru"]
+    assert out["counts_by_campaign"] == {"100": 1, "200": 2}
 
 
 def test_utm_is_parsed_and_missing_marks_are_counted():
@@ -202,12 +209,45 @@ def test_non_text_ad_survives_without_href():
 
 
 def test_extensions_are_reported_as_presence_not_ids():
-    api = fake([ad(1, SitelinkSetId=555, VCardId=777)])
+    api = fake([
+        ad(
+            1,
+            SitelinkSetId=555,
+            VCardId=777,
+            AdExtensions=[{"AdExtensionId": 11, "Type": "CALLOUT"}],
+        )
+    ])
     item = read(api)["ads"][0]
 
     assert item["sitelinks"] is True
     assert item["vcard"] is True
     assert item["image"] is False
+    assert item["extensions"] is True
+
+
+def test_responsive_ad_is_shaped_with_landing_page_and_variants():
+    raw = {
+        "Id": 9,
+        "CampaignId": 100,
+        "AdGroupId": 101,
+        "Type": "RESPONSIVE_AD",
+        "State": "ON",
+        "Status": "ACCEPTED",
+        "ResponsiveAd": {
+            "Titles": [{"Title": "Первый"}, {"Title": "Второй"}],
+            "Texts": [{"Text": "Основной текст"}],
+            "Href": "https://shop.ru/?utm_source=yandex",
+            "AdImages": {"Items": [{"ImageHash": "hash-1"}]},
+            "AdExtensions": [{"AdExtensionId": 11, "Type": "CALLOUT"}],
+        },
+    }
+    out = read(fake([raw]))
+    item = out["ads"][0]
+    assert item["titles"] == ["Первый", "Второй"]
+    assert item["texts"] == ["Основной текст"]
+    assert item["image"] is True
+    assert item["extensions"] is True
+    assert out["landing_pages"][0]["url"] == raw["ResponsiveAd"]["Href"]
 
 
 def test_long_lists_are_trimmed_but_landing_pages_stay_complete():

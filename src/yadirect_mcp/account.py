@@ -77,9 +77,16 @@ def _shape_modifier(item: dict[str, Any]) -> dict[str, Any]:
     for key, value in item.items():
         if not key.endswith("Adjustment") or not isinstance(value, dict):
             continue
-        out["percent"] = value.get("BidModifier")
+        bid_modifier = value.get("BidModifier")
+        out["bid_modifier"] = bid_modifier
+        out["percent"] = bid_modifier  # backward-compatible raw API multiplier
+        if isinstance(bid_modifier, (int, float)):
+            out["adjustment_percent"] = bid_modifier - 100
+            out["effect"] = "excluded" if bid_modifier == 0 else "adjusted"
         if "Enabled" in value:
             out["enabled"] = value.get("Enabled")
+            if value.get("Enabled") == "NO":
+                out["effect"] = "disabled"
         details = {
             k: v for k, v in value.items() if k not in {"BidModifier", "Enabled"}
         }

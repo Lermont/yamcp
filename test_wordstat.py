@@ -7,6 +7,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 
@@ -281,6 +282,13 @@ async def test_min_shows_does_not_masquerade_as_missing_demand(tmp_path):
         )
     assert out["rows"] == 0
     assert "note" not in out["phrases"][0]
+    assert out["phrases"][0]["shows"] == 165395
+    assert out["phrases"][0]["data_status"] == "observed"
+    metadata = json.loads(Path(out["metadata_path"]).read_text(encoding="utf-8"))
+    assert metadata["sha256"] == hashlib.sha256(Path(out["path"]).read_bytes()).hexdigest()
+    assert metadata["phrases"][0]["shows"] == 165395
+    assert metadata["requested_phrases"] == ["окна пвх"]
+    assert metadata["collected_at"]
 
 
 @pytest.mark.asyncio
@@ -300,7 +308,7 @@ async def test_no_demand_and_no_answer_are_told_apart(tmp_path):
 
     assert "note" not in out["phrases"][0]
     assert out["phrases"][1]["shows"] is None
-    assert "спроса нет" in out["phrases"][1]["note"]
+    assert out["phrases"][1]["data_status"] == "no_results"
     assert out["phrases"][2]["shows"] is None
     assert "не вернул данных" in out["phrases"][2]["note"]
 
