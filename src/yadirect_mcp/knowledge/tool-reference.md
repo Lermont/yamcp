@@ -559,7 +559,10 @@ Preview/apply создания наборов быстрых ссылок, ут�
 
 Все тулы возвращают structuredContent и совместимый текстовый JSON; isError отмечает ошибку. direct_campaign_plan и direct_campaign_audit по умолчанию возвращают сводку, полный JSON сохраняется в artifact_path. save_artifact=false явно включает прежний полный ответ без файла. Preview direct_campaign_apply всегда сохраняет план и preflight без одноразового токена. Полный раздел читается direct_read_artifact по JSON Pointer; json_fragment продолжается через next_offset (символы, не строки). Сводка может сокращать вложенные массивы; перед подтверждением проверяйте полный план. direct_read_report автоматически возвращает raw_lines для повреждённого TSV: offset считает физические строки с 0, включая заголовок.
 
-Для нативного CallToolResult требуется mcp>=1.19.0,<2.0.0.
+Для нативного CallToolResult используется официальный mcp>=2.2.0,<3.
+Python-поля — structured_content/is_error; wire JSON сохраняет structuredContent/isError.
+На протоколе 2026-07-28 согласование записи использует InputRequiredResult и
+защищённый requestState; на 2025-11-25 остаётся обратный запрос формы.
 
 
 ## Кнопка и изображения РСЯ — политика 1.11.0

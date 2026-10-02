@@ -48,7 +48,8 @@ def test_big_id_wire_is_lossless_and_non_mutating(tmp_path):
     assert out["CampaignIds"]["Items"] == ["12"]
     assert out["count"] == 8 and out["ok"] is True and source["Id"] == BIG
     result = _in_server(
-        "import yadirect_mcp.server as s\nprint(s._ok({'Id': " + str(BIG) + "}).model_dump_json())",
+        "import yadirect_mcp.server as s\nprint(s._ok({'Id': " + str(BIG)
+        + "}).model_dump_json(by_alias=True))",
         str(tmp_path),
     )
     assert result["structuredContent"]["Id"] == str(BIG)
@@ -220,7 +221,9 @@ async def test_model_token_alone_or_declined_elicitation_cannot_authorize():
     plan = {"client_login": "client", "plan_hash": "hash"}
     with pytest.raises(PermissionError):
         await approval.elicit(None, plan, "apply")
-    host = SimpleNamespace(elicit=AsyncMock(return_value=SimpleNamespace(action="decline")))
+    from test_approval_compatibility import host as make_host
+
+    host = make_host("decline")
     with pytest.raises(PermissionError):
         await approval.elicit(host, plan, "apply")
     host.elicit.return_value = SimpleNamespace(action="accept", data=SimpleNamespace(approve=True))

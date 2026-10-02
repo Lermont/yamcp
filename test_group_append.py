@@ -346,23 +346,23 @@ async def test_mcp_append_preview_consent_job_and_readonly_reverification(monkey
     monkeypatch.setattr(approval, "REGISTRY", approval.ApprovalRegistry())
     raw = source()
     preview = await server.direct_campaign_repair("client", raw)
-    assert not preview.isError, preview
-    summary = preview.structuredContent
+    assert not preview.is_error, preview
+    summary = preview.structured_content
     assert summary["detail_omitted"] and summary["summary"]["new_groups"] == 1
     assert "new_groups" not in summary
     token = summary["confirmation_required"]
     changed = deepcopy(raw)
     changed["new_groups"][0]["name"] += " changed"
     for login, value in [("other", raw), ("client", changed)]:
-        assert (await server.direct_campaign_repair(login, value, token, ctx=host())).isError
+        assert (await server.direct_campaign_repair(login, value, token, ctx=host())).is_error
     assert (await server.direct_campaign_repair(
-        "client", raw, token, ctx=host("decline"))).isError
+        "client", raw, token, ctx=host("decline"))).is_error
     assert api.writes == []
     result = await server.direct_campaign_repair("client", raw, token, ctx=host())
-    assert not result.isError, result
-    saved = result.structuredContent
+    assert not result.is_error, result
+    saved = result.structured_content
     assert saved["readback"]["verified"], saved
-    assert (await server.direct_campaign_repair("client", raw, token, ctx=host())).isError
+    assert (await server.direct_campaign_repair("client", raw, token, ctx=host())).is_error
     count = len(api.writes)
     check = await verification.run(api, tmp_path, "client", saved["job_id"])
     assert check["readback"]["verified"], check
