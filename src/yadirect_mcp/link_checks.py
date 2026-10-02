@@ -18,11 +18,18 @@ def _values(campaign: dict, group: dict, ad: dict, device: str) -> dict[str, str
     strategy = (campaign.get("bidding_strategy") or {}).get("Search") or {}
     search = strategy.get("BiddingStrategyType", "SERVING_OFF") != "SERVING_OFF"
     name = str(campaign.get("name") or "Тестовая кампания")
+    # New objects have no Direct IDs yet. Repeating HTTP requests with invented
+    # IDs adds no evidence. Keep one representative ID while retaining every
+    # group's/ad's identity in inventory; live checks still render actual IDs.
+    synthetic = campaign.get("synthetic_object_ids") is True
+    campaign_id = "1" if synthetic else str(campaign.get("id") or 1)
+    ad_id = "1" if synthetic else str(ad.get("id") or 1)
+    group_id = "1" if synthetic else str(group.get("id") or 1)
     return {
-        "campaign_id": str(campaign.get("id") or 1), "campaign_name": name,
+        "campaign_id": campaign_id, "campaign_name": name,
         "campaign_name_lat": "Test_Campaign", "campaign_type": "type1",
-        "ad_id": str(ad.get("id") or 1), "banner_id": str(ad.get("id") or 1),
-        "gbid": str(group.get("id") or 1), "keyword": "тестовый запрос",
+        "ad_id": ad_id, "banner_id": ad_id,
+        "gbid": group_id, "keyword": "тестовый запрос",
         "phrase_id": "1", "retargeting_id": "1", "adtarget_id": "1",
         "creative_id": "1", "coef_goal_context_id": "1",
         "source_type": "search" if search else "context",
@@ -130,6 +137,8 @@ def summary(pages: list[dict]) -> dict[str, Any]:
         "all_ok": not failures, "devices": ["desktop", "mobile"],
         "scope": sorted({kind for page in pages for kind in page.get("link_kinds", [])}),
         "dynamic_values": "representative_with_live_ids_when_available",
+        "content_review_required": bool(pages),
+        "http_success_is_readiness": False,
     }
 
 
@@ -153,12 +162,16 @@ async def check_plan(api: Any, plan: dict[str, Any]) -> dict[str, Any]:
         raw = item["campaign"]
         typed = raw["UnifiedCampaign"]
         campaigns.append({"id": ci, "name": raw["Name"],
+                          "synthetic_object_ids": True,
                           "tracking_params": typed.get("TrackingParams"),
                           "bidding_strategy": typed.get("BiddingStrategy")})
         for group in item["groups"]:
             gid = len(groups) + 1
             groups.append({"id": gid, "campaign_id": ci,
                            "region_ids": group["ad_group"].get("RegionIds", [])})
+            if group.get("neuro_ad"):
+                ads.append({"id": len(ads) + 1, "campaign_id": ci, "ad_group_id": gid,
+                            "href": group["neuro_ad"]["href"]})
             for ai, ad in enumerate(group["ads"]):
                 value = products.payload(ad)
                 ads.append({"id": len(ads) + 1, "campaign_id": ci, "ad_group_id": gid,

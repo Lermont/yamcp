@@ -1,7 +1,7 @@
 """Guarded updates for existing UnifiedCampaign objects.
 
-The repair plan is intentionally narrow: campaign negatives/priority goals,
-ResponsiveAd assets and autotargeting settings. It never resumes campaigns.
+The repair plan supports campaign names/negatives/goals, ResponsiveAd assets,
+autotargeting and append-only Search/Network groups. It never resumes campaigns.
 """
 
 from __future__ import annotations
@@ -17,24 +17,37 @@ from . import (
     adgroups,
     ads,
     assets,
+    audience_group,
+    audience_link,
     bundle,
     campaign_setup,
     campaigns,
     completeness,
+    conversion_repair,
     creative,
+    criteria_removal,
+    draft_group_merge,
     goals,
+    group_append,
     keywords,
     landing,
+    launch_checks,
     link_checks,
     phrases,
     policy,
     preflight_refs,
+    product_text_repair,
+    region_exclusions,
+    schedule,
     store,
 )
 from .identifiers import parse_id, wire
 
-TOP_LEVEL_FIELDS = {"campaigns", "ads", "autotargetings"}
-CAMPAIGN_FIELDS = {"id", "negative_keywords", "priority_goals"}
+TOP_LEVEL_FIELDS = {"campaigns", "ads", "autotargetings", "new_groups", "semantic_plan",
+                    "append_drafts_only", "business_profiles"}
+CAMPAIGN_FIELDS = {"id", "name", "negative_keywords", "priority_goals",
+                   "schedule", "alternative_texts_enabled", "conversion_strategy",
+                   "add_metrica_tag", "counter_ids"}
 AD_FIELDS = {
     "id",
     "titles",
@@ -44,6 +57,7 @@ AD_FIELDS = {
     "sitelink_set_id",
     "ad_extension_ids",
     "ad_image_hashes",
+    "business_id",
 }
 AUTOTARGETING_FIELDS = {"id", "categories", "brand_options"}
 
@@ -70,7 +84,24 @@ def normalize(raw: dict[str, Any], client_login: str) -> dict[str, Any]:
     if not isinstance(raw, dict):
         raise ValueError("repair_bundle должен быть объектом")
     source = deepcopy(raw)
+    if set(source) == {"remove_criteria"}:
+        return criteria_removal.normalize(source["remove_criteria"], client_login)
+    if set(source) == {"draft_group_merge"}:
+        return draft_group_merge.normalize(source["draft_group_merge"], client_login)
+    if set(source) == {"product_ad_texts"}:
+        return product_text_repair.normalize(source["product_ad_texts"], client_login)
+    if set(source) == {"audience_group"}:
+        return audience_group.normalize(source["audience_group"], client_login)
+    if set(source) == {"audience_link"}:
+        return audience_link.normalize(source["audience_link"], client_login)
+    if set(source) == {"region_exclusions"}:
+        return region_exclusions.normalize(source["region_exclusions"], client_login)
     _unknown(source, TOP_LEVEL_FIELDS, "repair_bundle")
+    if "append_drafts_only" in source:
+        if source["append_drafts_only"] is not True or not source.get("new_groups"):
+            raise ValueError("append_drafts_only: требуется true и new_groups")
+        if set(source) - {"append_drafts_only", "new_groups", "semantic_plan"}:
+            raise ValueError("append_drafts_only несовместим с изменениями существующих объектов")
 
     campaign_updates = []
     for index, item in enumerate(source.get("campaigns") or []):
@@ -79,6 +110,38 @@ def normalize(raw: dict[str, Any], client_login: str) -> dict[str, Any]:
             raise ValueError(f"{prefix} должен быть объектом")
         _unknown(item, CAMPAIGN_FIELDS, prefix)
         update: dict[str, Any] = {"Id": _positive_id(item.get("id"), f"{prefix}.id")}
+        if "counter_ids" in item:
+            values = item["counter_ids"]
+            if not isinstance(values, list) or not 1 <= len(values) <= 100:
+                raise ValueError(f"{prefix}.counter_ids: требуется 1-100 ID")
+            counters = [_positive_id(v, f"{prefix}.counter_ids") for v in values]
+            if len(set(counters)) != len(counters):
+                raise ValueError(f"{prefix}.counter_ids содержит дубли")
+            update["UnifiedCampaign"] = {"CounterIds": {"Items": counters}}
+        if "schedule" in item:
+            if item["schedule"] != "always_on":
+                raise ValueError(f"{prefix}.schedule: поддержан только явный always_on")
+            # Omission in update preserves the previous value. Empty Items resets all
+            # weekdays to 100%; null clears a previously configured holiday override.
+            update["TimeTargeting"] = {"Schedule": {"Items": []},
+                                       "ConsiderWorkingWeekends": "NO",
+                                       "HolidaysSchedule": None}
+        if "alternative_texts_enabled" in item:
+            if type(item["alternative_texts_enabled"]) is not bool:
+                raise ValueError(f"{prefix}.alternative_texts_enabled: требуется true или false")
+            update.setdefault("UnifiedCampaign", {})["Settings"] = [
+                {"Option": "ALTERNATIVE_TEXTS_ENABLED",
+                 "Value": "YES" if item["alternative_texts_enabled"] else "NO"}]
+        if "add_metrica_tag" in item:
+            if type(item["add_metrica_tag"]) is not bool:
+                raise ValueError(f"{prefix}.add_metrica_tag: требуется true или false")
+            update.setdefault("UnifiedCampaign", {}).setdefault("Settings", []).append(
+                {"Option": "ADD_METRICA_TAG", "Value": "YES" if item["add_metrica_tag"] else "NO"})
+        if "name" in item:
+            name = bundle._nonempty_string(item["name"], f"{prefix}.name")
+            if len(name) > 255:
+                raise ValueError(f"{prefix}.name длиннее 255 символов")
+            update["Name"] = name
         if "negative_keywords" in item:
             if not isinstance(item["negative_keywords"], list):
                 raise ValueError(f"{prefix}.negative_keywords должен быть массивом")
@@ -109,13 +172,21 @@ def normalize(raw: dict[str, Any], client_login: str) -> dict[str, Any]:
                             goal["value"],
                             f"{prefix}.priority_goals[{goal_index}].value",
                         ),
+                        "Operation": "SET",
                     }
                 )
-            update["UnifiedCampaign"] = {
+            update.setdefault("UnifiedCampaign", {}).update({
                 # Documented reset: null deletes PriorityGoals; [] is not the contract.
                 # https://yandex.com/dev/direct/doc/en/campaigns/update-unified-campaign
                 "PriorityGoals": {"Items": goals} if goals else None
-            }
+            })
+        if "conversion_strategy" in item:
+            selected = (update.get("UnifiedCampaign", {}).get("PriorityGoals") or {}).get(
+                "Items", [],
+            )
+            update.setdefault("UnifiedCampaign", {})["BiddingStrategy"] = (
+                conversion_repair.compile_strategy(item["conversion_strategy"], selected)
+            )
         if len(update) == 1:
             raise ValueError(f"{prefix} не содержит изменений")
         campaign_updates.append(update)
@@ -138,6 +209,9 @@ def normalize(raw: dict[str, Any], client_login: str) -> dict[str, Any]:
             responsive["SitelinkSetId"] = _positive_id(
                 responsive["SitelinkSetId"], f"{prefix}.sitelink_set_id",
             )
+        if "business_id" in item:
+            # Ads.update: BusinessId is not nillable; clearing is not supported here.
+            responsive["BusinessId"] = _positive_id(item["business_id"], f"{prefix}.business_id")
         extension_ids = None
         if "ad_extension_ids" in item:
             raw_ids = item["ad_extension_ids"]
@@ -199,9 +273,33 @@ def normalize(raw: dict[str, Any], client_login: str) -> dict[str, Any]:
                        ("autotargetings", autotargeting_updates)):
         if len({row["Id"] for row in rows}) != len(rows):
             raise ValueError(f"repair_bundle.{name} содержит дубли ID")
-    if not campaign_updates and not ad_updates and not autotargeting_updates:
+    referenced_businesses = {row["ResponsiveAd"]["BusinessId"] for row in ad_updates
+                             if "BusinessId" in row["ResponsiveAd"]}
+    business_profiles = None
+    if referenced_businesses:
+        if "business_profiles" not in source:
+            raise ValueError("ads[].business_id требует business_profiles: business_id, "
+                             "phone, address и has_office из согласованных контактов клиента")
+        business_profiles = launch_checks.normalize_businesses(
+            source["business_profiles"], referenced_businesses,
+        )
+    elif "business_profiles" in source:
+        raise ValueError("business_profiles допустим только вместе с ads[].business_id")
+    extra = {}
+    if "new_groups" in source:
+        added, reviewed, findings = group_append.normalize(
+            source["new_groups"], source.get("semantic_plan"),
+        )
+        extra = {"new_groups": added, "semantic_review": reviewed, "findings": findings}
+        if source.get("append_drafts_only"):
+            extra["append_drafts_only"] = True
+        extra["required_manual_actions"] = group_append.manual_actions(added)
+    elif "semantic_plan" in source:
+        raise ValueError("semantic_plan допустим только вместе с new_groups")
+    if not campaign_updates and not ad_updates and not autotargeting_updates and not extra:
         raise ValueError("repair_bundle не содержит изменений")
     plan: dict[str, Any] = {
+        **extra,
         "schema": "direct_campaign_repair_v1",
         "client_login": client_login,
         "api_version": "v501",
@@ -210,6 +308,9 @@ def normalize(raw: dict[str, Any], client_login: str) -> dict[str, Any]:
         "autotargetings": autotargeting_updates,
         "activated": False,
     }
+    if business_profiles is not None:
+        # Added only when used, so hashes of earlier plans stay unchanged.
+        plan["business_profiles"] = business_profiles
     canonical = json.dumps(
         plan, ensure_ascii=False, sort_keys=True, separators=(",", ":")
     ).encode("utf-8")
@@ -219,6 +320,14 @@ def normalize(raw: dict[str, Any], client_login: str) -> dict[str, Any]:
         "ads": len(ad_updates),
         "autotargetings": len(autotargeting_updates),
     }
+    if extra:
+        plan["summary"].update(
+            new_groups=len(added), new_ads=sum(len(g["ads"]) for g in added),
+            new_keywords=sum(k["Keyword"] != "---autotargeting"
+                             for g in added for k in g["keywords"]),
+            new_autotargetings=sum(k["Keyword"] == "---autotargeting"
+                                   for g in added for k in g["keywords"]),
+        )
     return plan
 
 
@@ -226,6 +335,7 @@ AD_FIELDS_MAP = {
     "Titles": "titles", "Texts": "texts", "Href": "href",
     "DisplayUrlPath": "display_url_path", "SitelinkSetId": "sitelink_set_id",
     "CalloutSetting": "ad_extension_ids", "AdImageHashes": "ad_image_hashes",
+    "BusinessId": "business_id",
 }
 PRESERVED_AD_FIELDS = {
     "campaign_id", "ad_group_id", "type", "subtype", "state", "age_label",
@@ -269,6 +379,27 @@ def _exact(payload: dict, key: str, wanted: list[int]) -> list[dict]:
 
 
 async def preflight(api: Any, plan: dict[str, Any]) -> dict[str, Any]:
+    if plan.get("remove_criteria"):
+        return await criteria_removal.preflight(api, plan)
+    if plan.get("draft_group_merge"):
+        return await draft_group_merge.preflight(api, plan)
+    if plan.get("product_ad_texts"):
+        return await product_text_repair.preflight(api, plan)
+    if plan.get("audience_group"):
+        return await audience_group.preflight(api, plan)
+    if plan.get("audience_link"):
+        return await audience_link.preflight(api, plan)
+    if plan.get("region_exclusions"):
+        return await region_exclusions.preflight(api, plan)
+    # Scope HTTP evidence for appended groups as well as existing-ad repairs.
+    token = landing.CACHE_SCOPE.set(plan["client_login"] + ":repair:" + plan["plan_hash"])
+    try:
+        return await _preflight(api, plan)
+    finally:
+        landing.CACHE_SCOPE.reset(token)
+
+
+async def _preflight(api: Any, plan: dict[str, Any]) -> dict[str, Any]:
     """Read ownership, final assets and inherited URLs before issuing any grant."""
     login = plan["client_login"]
     ad_ids = [row["Id"] for row in plan["ads"]]
@@ -285,7 +416,8 @@ async def preflight(api: Any, plan: dict[str, Any]) -> dict[str, Any]:
     if any(k.get("keyword") != "---autotargeting" or k.get("state") == "ARCHIVED"
            for k in keyword_rows):
         raise ValueError("Preflight: требуется существующий автотаргетинг")
-    campaign_ids = sorted({row["Id"] for row in plan["campaigns"]} | {
+    campaign_ids = sorted({g["campaign_id"] for g in plan.get("new_groups", [])} |
+                          {row["Id"] for row in plan["campaigns"]} | {
         parse_id(row.get("campaign_id"), "campaign_id") for row in ad_rows + keyword_rows
     })
     campaign_rows = _exact(await campaigns.read_settings(
@@ -294,9 +426,31 @@ async def preflight(api: Any, plan: dict[str, Any]) -> dict[str, Any]:
     if any(c.get("type") != "UNIFIED_CAMPAIGN" or c.get("state") == "ARCHIVED"
            for c in campaign_rows):
         raise ValueError("Preflight: требуется доступная неархивная ЕПК")
+    renames = {row["Id"]: row["Name"] for row in plan["campaigns"] if "Name" in row}
+    if renames:
+        all_campaigns = await campaigns.read_settings(
+            api, login, include_archived=True, limit=10000,
+        )
+        rows = group_append.complete(all_campaigns, "campaigns")
+        names = [(row["id"], renames.get(row["id"], row.get("name") or "").casefold())
+                 for row in rows]
+        for cid, name in renames.items():
+            if any(other != cid and value == name.casefold() for other, value in names):
+                raise ValueError("Preflight: кампания с таким именем уже существует")
+    appended = await group_append.preflight(api, plan, campaign_rows)
     for change in plan["campaigns"]:
+        current = next(row for row in campaign_rows if row["id"] == change["Id"])
+        counters = change.get("UnifiedCampaign", {}).get("CounterIds")
+        if counters is not None:
+            if current.get("state") != "OFF" or current.get("status") != "DRAFT":
+                raise ValueError("Привязка счётчиков разрешена только OFF/DRAFT кампании")
+            if not set(current.get("counter_ids") or []).issubset(counters["Items"]):
+                raise ValueError("Привязка счётчиков не должна удалять существующие")
+            if "BiddingStrategy" in change.get("UnifiedCampaign", {}):
+                raise ValueError("Сначала отдельно привяжите и проверьте счётчики")
+        await conversion_repair.preflight(api, change, current, login)
         selected = (change.get("UnifiedCampaign", {}).get("PriorityGoals") or {}).get("Items", [])
-        if selected:
+        if selected and "BiddingStrategy" not in change.get("UnifiedCampaign", {}):
             catalog = await goals.read(api, change["Id"])
             available = {parse_id(row["id"], "goal_id") for row in catalog["goals"]}
             if completeness.sources(goals=catalog) or not {
@@ -330,7 +484,7 @@ async def preflight(api: Any, plan: dict[str, Any]) -> dict[str, Any]:
     for row in sets.values():
         if not policy.SITELINKS_MINIMUM <= len(row["Sitelinks"]) <= policy.SITELINKS_MAXIMUM:
             raise ValueError("Preflight: требуется от 4 до 8 быстрых ссылок")
-    await preflight_refs.assets(api, login, references)
+    refs = await preflight_refs.assets(api, login, references)
     token = landing.CACHE_SCOPE.set(login + ":repair:" + plan["plan_hash"])
     try:
         pages = await link_checks.check_live(
@@ -344,18 +498,56 @@ async def preflight(api: Any, plan: dict[str, Any]) -> dict[str, Any]:
             {"url": p.get("url"), "check": p.get("site_check")}
             for p in pages if not (p.get("site_check") or {}).get("ok")
         ]))
+    business_check = _business_check(plan, refs, pages) if plan.get("business_profiles") else None
     before = {"campaigns": campaign_rows, "ads": ad_rows, "keywords": keyword_rows}
+    if appended:
+        before["append_inventory"] = appended["inventory"]
     # Exclude moderation/serving statuses that can change without a settings edit.
     guard = {key: [{k: v for k, v in row.items() if k not in {
         "status", "serving_status", "autotargeting_search_bid_is_auto",
-    }} for row in rows] for key, rows in {**before, "groups": group_rows}.items()}
+    }} for row in rows] for key, rows in {**{k: v for k, v in before.items()
+                                           if k != "append_inventory"},
+                                        "groups": group_rows}.items()}
     guard["sitelinks"] = sets
+    if appended:
+        guard["append_inventory"] = {k: group_append.stable(v)
+                                     for k, v in appended["inventory"].items()}
+        guard["append_sitelinks"] = appended["sitelinks"]
     source_hash = hashlib.sha256(json.dumps(
         guard, ensure_ascii=False, sort_keys=True, separators=(",", ":"),
     ).encode()).hexdigest()
     return {"status": "PASS", "client_login": login, "plan_hash": plan["plan_hash"],
             "source_hash": source_hash, "before": before,
-            "effective_link_checks": {**links, "pages": pages}}
+            "effective_link_checks": {**links, "pages": pages},
+            **({"business_contacts": business_check} if business_check else {}),
+            **({"append_preflight": appended} if appended else {})}
+
+
+def _business_check(plan: dict, refs: dict, pages: list[dict]) -> dict:
+    """Expected contacts match Businesses.get; the profile phone appears on the ad pages."""
+    expected = plan["business_profiles"]
+    ids = {row["business_id"] for row in expected}
+    rows = [row for row in refs.get("businesses", []) if row.get("Id") in ids]
+    contacts = launch_checks.check_businesses(expected, rows)
+    phone_by_business = {row["business_id"]: row["phone"] for row in expected}
+    matches = []
+    for ad in plan["ads"]:
+        business_id = ad["ResponsiveAd"].get("BusinessId")
+        if business_id is None:
+            continue
+        ad_pages = [page for page in pages
+                    if ad["Id"] in {parse_id(v, "ad_ids") for v in page.get("ad_ids", [])}]
+        site_phones = sorted({phone for page in ad_pages
+                              for phone in (page.get("site_check") or {}).get("phones", [])})
+        wanted = phone_by_business[business_id]
+        if wanted not in site_phones:
+            raise ValueError(
+                f"Preflight: телефон организации {business_id} не найден на страницах "
+                f"объявления {ad['Id']}; найдено: {site_phones or 'нет номеров'}"
+            )
+        matches.append({"ad_id": ad["Id"], "business_id": business_id, "phone": wanted,
+                        "pages": len(ad_pages)})
+    return {**contacts, "site_phone_matches": matches}
 
 
 async def _update(
@@ -387,6 +579,18 @@ async def _update(
 async def apply(
     api: Any, plan: dict[str, Any], *, expected_preflight: dict | None = None,
 ) -> dict[str, Any]:
+    if plan.get("remove_criteria"):
+        return await criteria_removal.apply(api, plan, expected_preflight)
+    if plan.get("draft_group_merge"):
+        return await draft_group_merge.apply(api, plan, expected_preflight)
+    if plan.get("product_ad_texts"):
+        return await product_text_repair.apply(api, plan, expected_preflight)
+    if plan.get("audience_group"):
+        return await audience_group.apply(api, plan, expected_preflight)
+    if plan.get("audience_link"):
+        return await audience_link.apply(api, plan, expected_preflight)
+    if plan.get("region_exclusions"):
+        return await region_exclusions.apply(api, plan, expected_preflight)
     login = plan["client_login"]
     checked = await preflight(api, plan)
     if expected_preflight is not None and (
@@ -424,14 +628,35 @@ async def apply(
             result["status"] = "partial"
             result["error"] = str(exc)
             break
+    if result["status"] == "complete" and plan.get("new_groups"):
+        result["added"] = await group_append.apply(api, plan)
+        result["required_manual_actions"] = group_append.manual_actions(
+            plan["new_groups"], result["added"],
+        )
+        if result["added"]["status"] != "complete":
+            result["status"] = "partial"
     return result
 
 
 async def readback(
     api: Any, plan: dict[str, Any], *, before: dict | None = None,
+    added: dict | None = None,
 ) -> dict[str, Any]:
+    if plan.get("remove_criteria"):
+        return await criteria_removal.readback(api, plan, before or {}, added)
+    if plan.get("draft_group_merge"):
+        return await draft_group_merge.readback(api, plan, before or {}, added)
+    if plan.get("product_ad_texts"):
+        return await product_text_repair.readback(api, plan, before or {})
+    if plan.get("audience_group"):
+        return await audience_group.readback(api, plan, before or {}, added)
+    if plan.get("audience_link"):
+        return await audience_link.readback(api, plan, before or {}, added)
+    if plan.get("region_exclusions"):
+        return await region_exclusions.readback(api, plan, before or {}, added)
     login = plan["client_login"]
-    campaign_ids = [row["Id"] for row in plan["campaigns"]]
+    campaign_ids = sorted({row["Id"] for row in plan["campaigns"]} |
+                          {g["campaign_id"] for g in plan.get("new_groups", [])})
     ad_ids = [row["Id"] for row in plan["ads"]]
     keyword_ids = [row["Id"] for row in plan["autotargetings"]]
     actual_campaigns = (
@@ -463,16 +688,48 @@ async def readback(
         if len({row["id"] for row in rows}) != len(rows):
             mismatches.append({"service": key, "reason": "duplicate_readback_ids"})
     before_campaigns = {row["id"]: row for row in (before or {}).get("campaigns", [])}
-    for expected in plan["campaigns"]:
+    expected_campaigns = {cid: {"Id": cid} for cid in campaign_ids}
+    expected_campaigns.update({row["Id"]: row for row in plan["campaigns"]})
+    for expected in expected_campaigns.values():
         actual = campaign_map.get(expected["Id"])
         if actual is None:
             mismatches.append({"service": "campaigns", "id": expected["Id"], "reason": "missing"})
             continue
         changed = set()
+        counters = expected.get("UnifiedCampaign", {}).get("CounterIds")
+        if counters is not None:
+            changed.add("counter_ids")
+            if sorted(actual.get("counter_ids") or []) != sorted(counters["Items"]):
+                mismatches.append({"service": "campaigns", "id": expected["Id"],
+                                   "reason": "counter_ids"})
+        if "Name" in expected:
+            changed.add("name")
+            if actual.get("name") != expected["Name"]:
+                mismatches.append({"service": "campaigns", "id": expected["Id"],
+                                   "reason": "name"})
         if "NegativeKeywords" in expected:
             changed.add("negative_keywords")
         if "PriorityGoals" in expected.get("UnifiedCampaign", {}):
             changed.add("priority_goals")
+        strategy = expected.get("UnifiedCampaign", {}).get("BiddingStrategy")
+        if strategy is not None:
+            changed.add("bidding_strategy")
+            if not conversion_repair.matches(actual.get("bidding_strategy"), strategy):
+                mismatches.append({"service": "campaigns", "id": expected["Id"],
+                                   "reason": "bidding_strategy"})
+        if "TimeTargeting" in expected:
+            changed.add("time_targeting")
+            if not schedule.matches(actual.get("time_targeting"), expected["TimeTargeting"]):
+                mismatches.append({"service": "campaigns", "id": expected["Id"],
+                                   "reason": "time_targeting"})
+        settings_patch = expected.get("UnifiedCampaign", {}).get("Settings")
+        if settings_patch:
+            changed.add("settings")
+            wanted_settings = {**before_campaigns.get(expected["Id"], {}).get("settings", {}),
+                               **{r["Option"]: r["Value"] for r in settings_patch}}
+            if actual.get("settings") != wanted_settings:
+                mismatches.append({"service": "campaigns", "id": expected["Id"],
+                                   "reason": "settings"})
         previous = before_campaigns.get(expected["Id"], {})
         for field in previous.keys() - changed - {"status"}:
             if actual.get(field) != previous[field]:
@@ -526,7 +783,12 @@ async def readback(
                 "id": expected["Id"],
                 "reason": "autotargeting",
             })
+    append_check = None
+    if plan.get("new_groups"):
+        append_check = await group_append.readback(api, plan, added, before or {})
+        mismatches.extend(append_check["mismatches"])
     return {
+        **({"added": append_check} if append_check else {}),
         "verified": not mismatches,
         "mismatches": mismatches,
         "counts": {

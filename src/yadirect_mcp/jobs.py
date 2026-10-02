@@ -127,12 +127,19 @@ class JournalAPI:
                     )
             raise
         # Incomplete write responses may hide committed IDs too.
-        action_key = {"add": "AddResults", "update": "UpdateResults"}.get(method)
+        action_key = {"add": "AddResults", "update": "UpdateResults",
+                      "delete": "DeleteResults"}.get(method)
         if action_key:
-            expected = len(next(iter(params.values())))
+            expected = (len(params["SelectionCriteria"]["Ids"]) if method == "delete"
+                        else len(next(iter(params.values()))))
             actions = result.get(action_key)
             if not isinstance(actions, list) or len(actions) != expected:
                 self.journal.payload["uncertain"] = True
+            elif method == "delete":
+                returned = [r.get("Id") for r in actions if not r.get("Errors")]
+                if (len(returned) != len(set(returned)) or any(x is None for x in returned)
+                        or not set(returned) <= set(params["SelectionCriteria"]["Ids"])):
+                    self.journal.payload["uncertain"] = True
         # Store before returning to the executor or making another remote call.
         self.journal.event(stage="response", sequence=sequence, result=result)
         return result
@@ -149,7 +156,9 @@ async def reconcile(api, service: str, method: str, params: dict, login: str) ->
     if not collection:
         return {"resolved": False, "reason": "Требуется отдельная сверка этого сервиса"}
     requested = params.get(collection, [])
-    if method == "update":
+    if method == "delete":
+        filters = [{"Ids": params["SelectionCriteria"]["Ids"]}]
+    elif method == "update":
         filters = [{"Ids": [row["Id"] for row in requested]}]
     elif service == "campaigns":
         filters = [{"States": ["ON", "OFF", "SUSPENDED", "ENDED", "CONVERTED", "ARCHIVED"]}]

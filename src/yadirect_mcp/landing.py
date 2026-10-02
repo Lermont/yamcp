@@ -1,4 +1,4 @@
-"""Bounded HTTP checks for landing pages used by campaign audit."""
+"""Bounded HTTP and static content checks for landing pages."""
 
 from __future__ import annotations
 
@@ -21,7 +21,9 @@ from weakref import WeakKeyDictionary
 import httpx
 
 MAX_PAGES = 30
-MAX_HTML_BYTES = 2_000_000
+# Inline image data can make otherwise small landing pages several MB.
+# Keep both compressed input and decoded HTML bounded.
+MAX_HTML_BYTES = 8_000_000
 MAX_CONCURRENT = 6
 MAX_REDIRECTS = 5
 BATCH_TIMEOUT_SECONDS = 40
@@ -196,7 +198,7 @@ async def _inspect(client: httpx.AsyncClient, url: str) -> dict[str, Any]:
             raw = await _bounded_body(response)
             truncated = len(raw) > MAX_HTML_BYTES
             html = raw[:MAX_HTML_BYTES].decode(response.encoding or "utf-8", errors="replace")
-            from . import product_markup
+            from . import businesses, landing_content, product_markup
             parser = _PageParser()
             parser.feed(html)
             title, h1 = _text(parser.title_parts), _text(parser.h1_parts)
@@ -205,12 +207,17 @@ async def _inspect(client: httpx.AsyncClient, url: str) -> dict[str, Any]:
                 r"страниц[аы]\s+не\s+найден|страница\s+отсутствует",
                 f"{title or ''} {h1 or ''}", re.I,
             ))
+            content = landing_content.inspect(html, truncated=truncated)
+            http_ok = 200 <= response.status_code < 300
             return {
                 "url": url,
                 "final_url": str(target),
                 "status_code": response.status_code,
-                "ok": 200 <= response.status_code < 300 and not error_marker,
-                "soft_404": 200 <= response.status_code < 300 and error_marker,
+                "http_ok": http_ok,
+                "ok": (http_ok and not error_marker and not content["placeholder"]
+                       and not truncated),
+                "soft_404": http_ok and error_marker,
+                "content": content,
                 "redirects": redirects,
                 "title": title,
                 "h1": h1,
@@ -223,6 +230,7 @@ async def _inspect(client: httpx.AsyncClient, url: str) -> dict[str, Any]:
                 "conversion_actions": {
                     "form": parser.has_form, "phone": parser.has_phone, "email": parser.has_email,
                 },
+                "phones": businesses.phones_in(html),
                 "html_truncated": truncated,
                 "product_markup": product_markup.present(html),
             }
@@ -230,7 +238,7 @@ async def _inspect(client: httpx.AsyncClient, url: str) -> dict[str, Any]:
 
 
 async def inspect_pages(
-    pages: list[dict[str, Any]], *, timeout_seconds: float = 12,
+    pages: list[dict[str, Any]], *, timeout_seconds: float = 20,
     max_pages: int = MAX_PAGES, user_agent: str = DESKTOP_USER_AGENT,
 ) -> list[dict[str, Any]]:
     unique = list(dict.fromkeys(str(row["url"]) for row in pages if row.get("url")))[:max_pages]
@@ -248,7 +256,10 @@ async def inspect_pages(
                 return {**deepcopy(cached[1]), "cache_hit": True}
             try:
                 async with slots:
-                    async with asyncio.timeout(max(timeout_seconds, BATCH_TIMEOUT_SECONDS)):
+                    # Include bounded waiting for the other per-host requests in this pool.
+                    async with asyncio.timeout(
+                        max(timeout_seconds, BATCH_TIMEOUT_SECONDS) * MAX_CONCURRENT
+                    ):
                         result = await _inspect(client, url)
                 if key[0] and result.get("ok") and not result.get("html_truncated"):
                     if len(_CACHE) >= 2000:
@@ -277,4 +288,18 @@ async def inspect_pages(
             except Exception as exc:  # noqa: BLE001 - isolate malformed HTML per page
                 log.exception("Ошибка разбора посадочной страницы")
                 return {"url": url, "ok": False, "error": str(exc)}
-        return list(await asyncio.gather(*(run(url) for url in unique)))
+        # URL fragments never reach HTTP. Inspect each transport URL only once,
+        # while retaining every advertising URL in the returned evidence.
+        transport = {url: url.split("#", 1)[0] for url in unique}
+        requested = list(dict.fromkeys(transport.values()))
+        checked = dict(zip(requested, await asyncio.gather(*(run(url) for url in requested)),
+                           strict=True))
+        result = []
+        for url in unique:
+            row = deepcopy(checked[transport[url]])
+            row.update(url=url, http_request_url=transport[url])
+            # Fragment navigation remains part of the separate browser review.
+            if "#" in url and row.get("final_url") and "#" not in row["final_url"]:
+                row["final_url"] += "#" + url.split("#", 1)[1]
+            result.append(row)
+        return result

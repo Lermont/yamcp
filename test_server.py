@@ -84,6 +84,9 @@ READ_TOOLS = [
     "direct_campaign_audit",
     "direct_adgroups",
     "direct_goal_catalog",
+    "direct_business_check",
+    "direct_retargeting_catalog",
+    "direct_audience_interests",
     "direct_regions",
     "direct_account_settings",
     "direct_ads",
@@ -93,6 +96,7 @@ READ_TOOLS = [
     "direct_read_report",
     "direct_read_artifact",
     "direct_wordstat",
+    "direct_forecast",
     "direct_runtime",
     "direct_pending_actions",
     "direct_product_source",
@@ -106,6 +110,7 @@ def test_report_mode_exposes_only_read_tools(tmp_path):
 def test_campaign_setup_mode_adds_guarded_write_tool(tmp_path):
     assert _tool_names("campaign_setup", str(tmp_path)) == [
         *READ_TOOLS,
+        "direct_manual_review",
         "direct_feed_create",
         "direct_publish_job",
         "direct_verify_job",
@@ -114,6 +119,7 @@ def test_campaign_setup_mode_adds_guarded_write_tool(tmp_path):
         "direct_campaign_apply",
         "direct_campaign_repair",
         "direct_ad_assets_create",
+        "direct_ad_resume",
     ]
 
 
@@ -180,7 +186,8 @@ def test_typed_preview_does_not_persist_one_time_confirmation(tmp_path):
     assert payload == {"token_on_disk": False, "status": "preview"}
 
 
-def test_typed_apply_generates_and_publishes_creation_report(tmp_path):
+@pytest.mark.parametrize("approval_mode", ["elicitation", "task_authorized"])
+def test_typed_apply_generates_and_publishes_creation_report(tmp_path, approval_mode):
     payload = _in_server(
         "import asyncio, json\n"
         "from pathlib import Path\n"
@@ -206,6 +213,7 @@ def test_typed_apply_generates_and_publishes_creation_report(tmp_path):
         "from types import SimpleNamespace\n"
         "class Host:\n"
         "    async def elicit(self, **kwargs):\n"
+        "        assert s.SETTINGS.approval_mode == 'elicitation'\n"
         "        return SimpleNamespace(action='accept', data=SimpleNamespace(approve=True))\n"
         "async def run():\n"
         "    source = source_bundle()\n"
@@ -220,6 +228,7 @@ def test_typed_apply_generates_and_publishes_creation_report(tmp_path):
         "'has_campaigns': 'Отчёт о создании рекламных кампаний' in html}))",
         str(tmp_path),
         YD_MODE="campaign_setup",
+        YD_APPROVAL_MODE=approval_mode,
         YD_CREATE_REPORT_SSH_HOST="reports.example.test",
         YD_CREATE_REPORT_REMOTE_ROOT="/var/www/reports",
         YD_CREATE_REPORT_PUBLIC_BASE_URL="https://bi-data.ru/elama",
@@ -322,11 +331,11 @@ def test_default_weekly_budget_reaches_instructions(tmp_path):
     for instructions in (with_budget, without_budget):
         assert "Поиск + РСЯ" in instructions
         assert "товарная кампания + Поиск" in instructions
-        assert "30000 RUB в месяц суммарно" in instructions
+        assert "30000 RUB с НДС на 14 дней суммарно" in instructions
         assert "не сокращай его до одного канала" in instructions
         assert "Не подменяй товарную кампанию обычной РСЯ" in instructions
         assert "всего 10000 рублей" not in instructions
-    assert "fallback не отменяет общий месячный лимит" in with_budget
+    assert "fallback не отменяет общий лимит на заданный период" in with_budget
 
 
 def test_mcp_native_results_annotations_and_local_reads(tmp_path):

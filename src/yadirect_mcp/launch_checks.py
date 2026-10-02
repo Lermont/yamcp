@@ -35,8 +35,8 @@ def normalize_budget(raw: Any) -> dict | None:
     ):
         raise ValueError("client_budget.amount: положительная сумма с точностью до микроединицы")
     period = raw["period"]
-    if not isinstance(period, str) or period not in {"weekly", "monthly"}:
-        raise ValueError("client_budget.period: weekly или monthly")
+    if not isinstance(period, str) or period not in {"weekly", "monthly", "two_weeks"}:
+        raise ValueError("client_budget.period: weekly, monthly или two_weeks")
     currency = raw["currency"]
     if not isinstance(currency, str) or not re.fullmatch(r"[A-Z]{3}", currency):
         raise ValueError("client_budget.currency: трёхбуквенный код валюты кабинета")
@@ -50,13 +50,16 @@ def normalize_budget(raw: Any) -> dict | None:
     weekly = amount / (1 + vat / 100)
     if period == "monthly":
         weekly = weekly * 12 / 52
+    elif period == "two_weeks":
+        weekly = weekly / 2
     micros = int((weekly * 1_000_000).to_integral_value(rounding=ROUND_FLOOR))
     if micros <= 0:
         raise ValueError("client_budget: недельный лимит меньше микроединицы")
     return {"amount": str(amount), "period": period, "currency": currency,
             "includes_vat": raw["includes_vat"], "vat_percent": str(vat),
             "scope": "planned_campaigns", "weekly_net_limit_micros": micros,
-            "conversion": "monthly_times_12_divided_by_52" if period == "monthly" else "weekly",
+            "conversion": ("monthly_times_12_divided_by_52" if period == "monthly"
+                           else "two_weeks_divided_by_2" if period == "two_weeks" else "weekly"),
             "calendar_month_spend_cap": False}
 
 
@@ -155,9 +158,11 @@ def check_businesses(expected: list[dict], actual: list[dict]) -> dict:
         if row.get("IsPublished") != "YES":
             raise ValueError("business_profiles: организация не опубликована")
         if phone(row.get("Phone")) != wanted["phone"]:
-            raise ValueError(f"business_profiles: телефон организации {row['Id']} не совпадает")
+            raise ValueError(f"business_profiles: телефон организации {row['Id']} не совпадает; "
+                             f"в профиле {row.get('Phone')!r}")
         if "Address" not in row or address(row["Address"]) != wanted["address"]:
-            raise ValueError(f"business_profiles: адрес организации {row['Id']} не совпадает")
+            raise ValueError(f"business_profiles: адрес организации {row['Id']} не совпадает; "
+                             f"в профиле {row.get('Address')!r}")
         if row.get("HasOffice") != ("YES" if wanted["has_office"] else "NO"):
             raise ValueError(f"business_profiles: HasOffice организации {row['Id']} не совпадает")
     return {"status": "PASS", "checked": len(expected), "profiles": actual}

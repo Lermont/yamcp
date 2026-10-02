@@ -5,14 +5,14 @@ import hashlib
 import json
 import time
 
-from . import jobs, publication, verification, workflow
+from . import jobs, manual_review, publication, workflow
 
 
 def pending(settings, client_login: str, *, offset: int = 0, limit: int = 100) -> dict:
     settings.check_login(client_login)
     if isinstance(offset, bool) or isinstance(limit, bool) or offset < 0 or not 1 <= limit <= 500:
         raise ValueError("offset >= 0; limit от 1 до 500")
-    rows, unreadable = [], 0
+    rows, unreadable, review_errors = [], 0, 0
     paths = sorted((settings.out_dir / "jobs").glob("*.json"))
     applied = set()
     for path in paths:
@@ -39,11 +39,7 @@ def pending(settings, client_login: str, *, offset: int = 0, limit: int = 100) -
             actions = []
             def add(rule, detail=None, *, owner=job["job_id"], target=actions):
                 action = {"rule": rule, **(detail or {})}
-                identity = json.dumps({key: action[key] for key in (
-                    "rule", "ad_id", "group_id", "campaign_id", "source_job_id") if key in action},
-                    sort_keys=True, ensure_ascii=False)
-                action["action_id"] = hashlib.sha256(
-                    (owner + ":" + identity).encode()).hexdigest()[:32]
+                action["action_id"] = workflow.action_id(owner, action)
                 target.append(action)
             if job.get("uncertain") or job["status"] in {"interrupted", "needs_reconciliation"}:
                 add("write.reconciliation", {"status": "attention_required"})
@@ -63,17 +59,24 @@ def pending(settings, client_login: str, *, offset: int = 0, limit: int = 100) -
             if job["kind"] == "assets" and result.get("status") == "readback_failed":
                 add("verification.assets", {"status": "failed"})
             if job["kind"] in {"apply", "repair"} and result.get("executed"):
-                checked = verification.latest(settings.out_dir, job)
-                state = checked.get("workflow") if checked else workflow.states(
-                    result, scope="campaign" if job["kind"] == "apply" else "repair")
+                current = manual_review.current(settings.out_dir, job)
+                state = current["workflow"]
+                reviewed = {a["action_id"]: a for a in current["manual_review"]["actions"]}
+                if not current["manual_review"]["complete"]:
+                    add("verification.ui_evidence", {"status": "attention_required",
+                                                     "error": current["manual_review"]["error"]})
+                    review_errors += 1
                 if state["api_verification"] != "verified":
                     add("verification.api", {"status": state["api_verification"],
                                              "tool": "direct_verify_job"})
-                # Never trust old manually overwritten status labels as UI proof.
-                for action in result.get("required_manual_actions", []):
+                for action in current["required_manual_actions"]:
                     if action.get("required"):
+                        receipt = reviewed.get(workflow.action_id(job["job_id"], action), {})
+                        if receipt.get("status") == "verified_by_reviewer":
+                            continue
                         add(action["rule"], {"status": "requires_explicit_instruction"
-                            if action["rule"].startswith("launch.") else "pending_ui",
+                            if action["rule"].startswith("launch.") else
+                            receipt.get("status", "pending_ui"),
                             **{key: action[key] for key in ("ad_id", "group_id", "campaign_id")
                                if key in action}})
                 report = result.get("creation_report")
@@ -97,6 +100,7 @@ def pending(settings, client_login: str, *, offset: int = 0, limit: int = 100) -
             "jobs": rows[offset:offset+limit],
             "total_pending_jobs": len(rows), "offset": offset, "limit": limit,
             "next_offset": offset + limit if offset + limit < len(rows) else None,
-            "complete": unreadable == 0, "unreadable_records": unreadable,
+            "complete": unreadable == 0 and review_errors == 0,
+            "unreadable_records": unreadable, "review_errors": review_errors,
             "login_locked": lock.exists(), "source": "local_job_journals",
             "live_account_checked": False}

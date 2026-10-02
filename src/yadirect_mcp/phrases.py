@@ -83,13 +83,20 @@ _STOP_WORDS = frozenset(
         "своим",
         "своими",
         "свой",
+        "all",
+        "the",
     ]
 )
 
 
 def canonical(value: str) -> str:
     value = " ".join(value.casefold().replace("ё", "е").split())
-    return re.sub(r"(?<!\w)[!+]([^\W_]+)", lambda m: m[1] if m[1] in _STOP_WORDS else m[0], value)
+    value = re.sub(r"(?<!\w)[!+]([^\W_]+)",
+                   lambda m: m[1] if m[1] in _STOP_WORDS else m[0], value)
+    # A bounded set of observed Direct normalizations. Preserve explicit word
+    # form operators; never stem arbitrary words or discard extra negatives.
+    forms = {"друзья": "друг", "бесплатный": "бесплатно"}
+    return " ".join(forms.get(token, token) for token in value.split())
 
 
 def equivalent(actual: list[str], expected: list[str]) -> bool:

@@ -75,7 +75,10 @@ async def test_unrelated_catalog_cannot_verify_goals():
                             "TextCampaign": {"CounterIds": {"Items": [999]}}}])
     with pytest.raises(ValueError, match="goal_catalog_campaign_id"):
         await executor.preflight(api, plan)
-    assert not any(call[0] == "v4" for call in api.calls)
+    # An unrelated campaign must never be used for GetStatGoals. A separate
+    # client-scoped catalog is allowed, but this fake lacks verified goal types.
+    assert not any(call[:2] == ("v4", "GetStatGoals") for call in api.calls)
+    assert ("v4", "GetRetargetingGoals", {"Logins": ["client"]}) in api.calls
 
 
 def test_direct_lowercase_normalization_of_excluded_sites_is_accepted():

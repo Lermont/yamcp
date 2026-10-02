@@ -22,6 +22,7 @@ from . import (
     audience_setup,
     campaign_setup,
     creative,
+    geotargeting,
     launch_checks,
     limits,
     negatives,
@@ -29,6 +30,7 @@ from . import (
     policy,
     products,
     profiles,
+    regional_modifiers,
     semantics,
     store,
 )
@@ -65,6 +67,7 @@ TOP_LEVEL_FIELDS = {
     "client_budget",
     "business_profiles",
     "region_ids",
+    "regional_adjustments",
     "counter_ids",
     "priority_goals",
     "goal_catalog_campaign_id",
@@ -97,6 +100,7 @@ CHANNEL_FIELDS = {
 }
 CAMPAIGN_VARIANT_FIELDS = (CHANNEL_FIELDS - {"groups"}) | {"channel"}
 GROUP_FIELDS = {
+    "neuro_ad",
     "semantic",
     "name",
     "region_ids",
@@ -696,8 +700,11 @@ def _strategy(
         source = {"type": source}
     if not isinstance(source, dict):
         raise ValueError(f"bundle.channels.{channel}.strategy должен быть объектом")
-    _reject_unknown(source, {"type", "goal_id", "bid_ceiling"},
+    _reject_unknown(source, {"type", "goal_id", "bid_ceiling", "placements"},
                     f"bundle.channels.{channel}.strategy")
+    product_search = source.get("placements") in {"search_only", "search_and_network"}
+    if "placements" in source and (channel != "product" or not product_search):
+        raise ValueError("strategy.placements: search_only/search_and_network только для product")
     strategy_type = str(source.get("type") or "maximum_clicks").strip().lower()
     aliases = {
         "maximum_clicks": "WB_MAXIMUM_CLICKS",
@@ -737,9 +744,9 @@ def _strategy(
             source["bid_ceiling"], f"bundle.channels.{channel}.strategy.bid_ceiling"
         )
     search_placements = {
-        "SearchResults": "YES" if channel == "search" else "NO",
+        "SearchResults": "YES" if channel == "search" or product_search else "NO",
         "ProductGallery": "YES" if channel == "product" else "NO",
-        "DynamicPlaces": "YES" if channel == "search" else "NO",
+        "DynamicPlaces": "YES" if channel == "search" or product_search else "NO",
         "Maps": "YES" if channel == "maps" else "NO",
         "SearchOrganizationList": "YES" if channel == "maps" else "NO",
     }
@@ -763,7 +770,7 @@ def _strategy(
             strategy_key: strategy_value,
             "PlacementTypes": {"Network": "YES", "Maps": "NO"},
         }
-    if channel == "product":
+    if channel == "product" and source.get("placements") != "search_only":
         network = {"BiddingStrategyType": "NETWORK_DEFAULT",
                    "PlacementTypes": {"Network": "YES", "Maps": "NO"}}
     return {"Search": search, "Network": network}
@@ -777,9 +784,21 @@ def _time_targeting(source: Any) -> dict[str, Any] | None:
         raise ValueError("bundle.schedule должен быть always_on или объектом")
     _reject_unknown(
         source,
-        {"days", "hours", "bid_percent", "consider_working_weekends", "holidays"},
+        {"days", "hours", "bid_percent", "weekly_bid_percents",
+         "consider_working_weekends", "holidays"},
         "bundle.schedule",
     )
+    grid = source.get("weekly_bid_percents")
+    if "weekly_bid_percents" in source:
+        if set(source) & {"days", "hours", "bid_percent"}:
+            raise ValueError("weekly_bid_percents несовместим с days, hours и bid_percent")
+        if (not isinstance(grid, list) or len(grid) != 7
+                or any(not isinstance(row, list) or len(row) != 24 for row in grid)
+                or any(type(value) is not int or not 0 <= value <= 200 or value % 10
+                       for row in grid for value in row)
+                or not any(value for row in grid for value in row)):
+            raise ValueError("weekly_bid_percents: 7 дней по 24 целых коэффициента 0–200, "
+                             "кратно 10; хотя бы один час включён")
     days = [int(value) for value in source.get("days", range(1, 8))]
     hours = [int(value) for value in source.get("hours", range(24))]
     if not days or any(value not in range(1, 8) for value in days):
@@ -814,16 +833,21 @@ def _time_targeting(source: Any) -> dict[str, Any] | None:
             if not 0 <= start < end <= 24 or not 10 <= percent <= 200 or percent % 10:
                 raise ValueError("Некорректные часы или коэффициент bundle.schedule.holidays")
             holiday_schedule.update(StartHour=start, EndHour=end, BidPercent=percent)
-    if (set(days) == set(range(1, 8)) and set(hours) == set(range(24))
-            and bid_percent == 100 and holiday_schedule is None):
+    holiday_is_default = holiday_schedule is None or holiday_schedule == {
+        "SuspendOnHolidays": "NO", "StartHour": 0, "EndHour": 24, "BidPercent": 100,
+    }
+    native_hours = (all(value == 100 for row in grid for value in row) if grid is not None
+                    else set(days) == set(range(1, 8)) and set(hours) == set(range(24))
+                    and bid_percent == 100)
+    if native_hours and holiday_is_default:
         return None
     result = {
         "Schedule": {
             "Items": [
-                ",".join(map(str, [day] + [
+                ",".join(map(str, [day] + (grid[day - 1] if grid is not None else [
                     bid_percent if day in days and hour in hours else 0
                     for hour in range(24)
-                ]))
+                ])))
                 # Omitted days default to 100% in the API, so include disabled days.
                 for day in range(1, 8)
             ]
@@ -923,6 +947,8 @@ def _normalize_bundle(
     }
     if not isinstance(settings, dict):
         raise ValueError("bundle.settings должен быть объектом")
+    if geotargeting.RETIRED_OPTION in settings:
+        raise ValueError(geotargeting.WRITE_ERROR)
     _reject_unknown(settings, allowed_settings, "bundle.settings")
     if any(not isinstance(value, bool) for value in settings.values()):
         raise ValueError("bundle.settings принимает только true/false")
@@ -931,7 +957,12 @@ def _normalize_bundle(
         "ALTERNATIVE_TEXTS_ENABLED": selected["alternative_texts_default"],
         **settings,
     }
-    bundle["client_budget"] = launch_checks.normalize_budget(bundle.get("client_budget"))
+    budget_source = bundle.get("client_budget")
+    if selected.get("profile", {}).get("start_defaults_version"):
+        from .planning import initial_budget
+
+        budget_source = initial_budget(budget_source)
+    bundle["client_budget"] = launch_checks.normalize_budget(budget_source)
     start_raw = _nonempty_string(_required(bundle, "start_date"), "bundle.start_date")
     try:
         start = date.fromisoformat(start_raw)
@@ -1248,6 +1279,11 @@ def compile_bundle(
                     ],
                 })
                 audience = audience_setup.compile_interest(source_group, channel)
+                neuro = creative.neuro_ad(
+                    source_group, default_enabled=selected.get("neuro_ads_default", False),
+                )
+                if neuro:
+                    compiled_groups[-1]["neuro_ad"] = neuro
                 if audience:
                     compiled_groups[-1]["audience"] = audience
                 findings.extend(group_findings)
@@ -1287,7 +1323,7 @@ def compile_bundle(
                 "group_count_reason": channel_source.get("group_count_reason"),
                 "bid_modifiers": audience_setup.age_modifiers(
                     bundle["age_min"], bundle.get("age_max")
-                ),
+                ) + regional_modifiers.compile_rows(bundle.get("regional_adjustments", [])),
             })
 
             if product_source is not None:
@@ -1448,7 +1484,8 @@ def compile_bundle(
             ),
             **semantics.counts(compiled_campaigns),
             "bid_modifiers": sum(
-                sum(len(row["DemographicsAdjustments"]) for row in item["bid_modifiers"])
+                sum(len(row.get("DemographicsAdjustments", []))
+                    + len(row.get("RegionalAdjustments", [])) for row in item["bid_modifiers"])
                 for item in compiled_campaigns
             ),
         },

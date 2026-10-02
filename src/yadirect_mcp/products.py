@@ -59,7 +59,8 @@ def url(value, label="url") -> str:
 
 
 def source(raw: dict, *, require_id=True) -> dict:
-    fields = {"type", "url", "feed_id", "sample_urls", "site_feed_verified", "review_reason"}
+    fields = {"type", "url", "feed_id", "sample_urls", "site_feed_verified", "review_reason",
+              "catalog_pages_verified", "catalog_count"}
     if (
         not isinstance(raw, dict)
         or raw.keys() - fields
@@ -79,6 +80,8 @@ def source(raw: dict, *, require_id=True) -> dict:
         raise ValueError("product_source.sample_urls: 1–10 проверяемых товарных/каталожных URL")
     result["sample_urls"] = list(dict.fromkeys(url(v, "sample_urls") for v in samples))
     if raw["type"] == "website":
+        if any(k in raw for k in ("catalog_pages_verified", "catalog_count")):
+            raise ValueError("catalog_pages_verified/catalog_count относятся к CSV-фиду")
         host = urlsplit(result["url"]).hostname
         if any(urlsplit(v).hostname != host for v in result["sample_urls"]):
             raise ValueError("sample_urls: для сайта нужен тот же hostname")
@@ -95,6 +98,16 @@ def source(raw: dict, *, require_id=True) -> dict:
             site_feed_verified=raw.get("site_feed_verified") is True,
             review_reason=raw.get("review_reason", ""),
         )
+    elif "catalog_pages_verified" in raw or "catalog_count" in raw:
+        if (raw.get("catalog_pages_verified") is not True
+                or type(raw.get("catalog_count")) is not int
+                or raw["catalog_count"] < 1
+                or not isinstance(raw.get("review_reason"), str)
+                or not raw["review_reason"].strip()
+                or "site_feed_verified" in raw):
+            raise ValueError("Каталожный CSV: нужна проверка страниц в UI, число и обоснование")
+        result.update(catalog_pages_verified=True, catalog_count=raw["catalog_count"],
+                      review_reason=raw["review_reason"].strip())
     elif any(k in raw for k in ("site_feed_verified", "review_reason")):
         raise ValueError("site_feed_verified/review_reason относятся только к источнику website")
     return result
@@ -190,17 +203,27 @@ def validate_campaigns(campaigns: list[dict]) -> None:
             continue
         src = source(campaign.get("product_source"))
         strategy = campaign["campaign"]["UnifiedCampaign"]["BiddingStrategy"]
-        if strategy["Search"].get("PlacementTypes") != {
+        gallery_network = strategy["Search"].get("PlacementTypes") == {
             "SearchResults": "NO",
             "ProductGallery": "YES",
             "DynamicPlaces": "NO",
             "Maps": "NO",
             "SearchOrganizationList": "NO",
-        } or strategy.get("Network") != {
+        } and strategy.get("Network") == {
             "BiddingStrategyType": "NETWORK_DEFAULT",
             "PlacementTypes": {"Network": "YES", "Maps": "NO"},
-        }:
-            raise ValueError("Товарный канал: галерея и РСЯ с общей стратегией")
+        }
+        product_search = strategy["Search"].get("PlacementTypes") == {
+            "SearchResults": "YES", "ProductGallery": "YES", "DynamicPlaces": "YES",
+            "Maps": "NO", "SearchOrganizationList": "NO",
+        } and strategy.get("Network") in (
+            {"BiddingStrategyType": "SERVING_OFF",
+             "PlacementTypes": {"Network": "NO", "Maps": "NO"}},
+            {"BiddingStrategyType": "NETWORK_DEFAULT",
+             "PlacementTypes": {"Network": "YES", "Maps": "NO"}},
+        )
+        if not (gallery_network or product_search):
+            raise ValueError("Товарный канал: галерея и РСЯ либо явные поисковые места")
         for group in campaign["groups"]:
             kinds = [kind(a) for a in group["ads"]]
             if not kinds or None in kinds or len(set(kinds)) != len(kinds):
@@ -241,14 +264,34 @@ async def check_sources(api, plan: dict) -> dict:
     for c in campaigns:
         src = c["product_source"]
         row = rows[src["feed_id"]]
+        # API NumberOfItems counts products, not catalogue pages. A processed
+        # ListingsCsv legitimately reports zero; positive catalogue count is
+        # verified in UI and bound into the plan, not invented from that zero.
+        listings_csv = (
+            row.get("BusinessType") == "OTHER" and row.get("FilterSchema") == "ListingsCsv"
+            and src.get("type") == "feed" and src.get("catalog_pages_verified") is True
+            and type(src.get("catalog_count")) is int and src["catalog_count"] > 0
+            and bool(src.get("review_reason", "").strip())
+            and all(kind(a) == "ListingAd" for g in c["groups"] for a in g["ads"])
+        )
         if (
             row.get("Status") != "DONE"
             or type(row.get("NumberOfItems")) is not int
-            or row["NumberOfItems"] <= 0
+            or row["NumberOfItems"] < 0
+            or (row["NumberOfItems"] == 0 and not listings_csv)
         ):
             raise ValueError("Фид ещё не обработан, пуст или содержит ошибку")
-        if row.get("BusinessType") != "RETAIL":
-            raise ValueError("Товарный источник должен иметь BusinessType=RETAIL")
+        # Yandex also classifies YML retail catalogues as OTHER. Limit that
+        # compatibility case to the observed YML schema, not arbitrary feeds.
+        retail_catalogue = row.get("BusinessType") == "RETAIL" or (
+            row.get("BusinessType") == "OTHER"
+            and row.get("FilterSchema") == "PerformanceDefault"
+        )
+        if not (retail_catalogue or listings_csv):
+            raise ValueError(
+                "Товарный источник: ожидается RETAIL либо OTHER с YML-схемой PerformanceDefault "
+                "или проверенным каталогом ListingsCsv"
+            )
         if src["type"] == "feed" and (
             row.get("SourceType") != "URL" or (row.get("UrlFeed") or {}).get("Url") != src["url"]
         ):
@@ -277,6 +320,8 @@ async def check_sources(api, plan: dict) -> dict:
                 "number_of_items": row["NumberOfItems"],
                 "source_type": src["type"],
                 "site_binding": "caller_reviewed" if src["type"] == "website" else "api_url",
+                **({"catalog_count": src["catalog_count"],
+                    "catalog_count_evidence": "caller_ui_reviewed"} if listings_csv else {}),
             }
         )
     return {"verified": True, "sources": checks}
@@ -301,3 +346,16 @@ def compare(expected: dict, actual: dict | None) -> bool:
         )
         for a, b in fields
     ) and set(actual.get("ad_extension_ids", [])) == set(value.get("AdExtensionIds", []))
+
+
+def placements_match(expected: dict, actual: dict, placement: str) -> bool:
+    """Network.get omits PlacementTypes; known mode defines its only placement."""
+    wanted, found = expected.get("PlacementTypes"), actual.get("PlacementTypes")
+    if wanted == found:
+        return True
+    mode = actual.get("BiddingStrategyType")
+    if (placement != "Network" or found is not None
+            or mode != expected.get("BiddingStrategyType")):
+        return False
+    return (mode == "NETWORK_DEFAULT" and wanted == {"Network": "YES", "Maps": "NO"}
+            or mode == "SERVING_OFF" and wanted == {"Network": "NO", "Maps": "NO"})

@@ -59,9 +59,8 @@ def classify_channel(campaign: dict[str, Any]) -> dict[str, Any]:
         )
     )
 
-    if (search_on and placements.get("ProductGallery") == "YES"
-            and placements.get("SearchResults") == "NO"
-            and placements.get("DynamicPlaces") == "NO" and not maps_on):
+    if (search_on and placements.get("ProductGallery") == "YES" and not maps_on
+            and (not network_on or network_type == "NETWORK_DEFAULT")):
         channel = "product"
     elif network_on and (regular_search_on or maps_on):
         channel = "mixed_search_network"
@@ -810,7 +809,8 @@ def audit_campaign(
         findings.append(_finding(
             "landing.effective_urls", policy.PASS if verified else policy.BLOCK,
             "Конечные URL с метками проверены, включая быстрые ссылки и мобильный вариант."
-            if verified else "Конечные URL с метками недоступны или проверены не полностью. "
+            if verified else "Конечные URL с метками недоступны, содержат заглушку "
+            "или проверены не полностью. "
             "Успешная проверка Href без меток недостаточна.",
             checks=checked_summary,
         ))
@@ -821,20 +821,34 @@ def audit_campaign(
     ]
     if relevant_site_checks:
         unavailable = [
-            row.get("url") for row in relevant_site_checks if not row.get("ok")
+            row.get("url") for row in relevant_site_checks
+            if not row.get("http_ok", row.get("ok"))
         ]
         findings.append(
             _finding(
                 "landing.http",
                 policy.BLOCK if unavailable else policy.PASS,
                 (
-                    "Все посадочные страницы доступны."
+                    "HTTP-проверка пройдена; полнота содержания оценивается отдельно."
                     if not unavailable
                     else "Часть посадочных страниц недоступна."
                 ),
                 urls=unavailable,
             )
         )
+        content_pages = [{"url": row.get("url"), **(row.get("content") or {})}
+                         for row in relevant_site_checks]
+        placeholders = [row for row in content_pages if row.get("placeholder")]
+        findings.append(_finding(
+            "landing.content", policy.BLOCK if placeholders else policy.MANUAL,
+            "На посадочных обнаружена заглушка о реконструкции или разработке. "
+            "Восстановите раздел либо оставьте связанные группы выключенными."
+            if placeholders else
+            "Проверьте в браузере полноту предложения, условия заказа и путь обращения "
+            "по назначению каждой страницы. HTTP 200 не подтверждает готовность; "
+            "отсутствие автоматических признаков заглушки не заменяет эту проверку.",
+            pages=content_pages,
+        ))
         counter_optional = clicks_without_goals and not counters
         missing_counter = [
             row.get("url")

@@ -1,5 +1,275 @@
 # Changelog
 
+## 2026-10-02 — единый выпуск накопленных исправлений
+
+- Объединены актуальные локальные доработки настройки кампаний, ретаргетинга,
+  проверки организаций, прогнозов, приёмки интерфейса и клиентских отчётов.
+- Сохранены исправления Git checkout для неизменяемых снимков политики и
+  форматирования дат отчёта на Windows.
+- В базу знаний включены исторические наблюдения из отдельной ветки Claude.
+  Для ResponsiveAd сохранены действующее обновление уточнений без удаления,
+  лимиты группы и запрет автоматического повтора частичной записи.
+
+## Unreleased — carousel review after image repair
+
+- `direct_verify_job` binds a carousel UI review to each repaired network ad,
+  using saved ad ownership and campaign placement. Missing snapshots fail closed.
+  Existing journals remain immutable; fresh API verification and normal evidence
+  receipts are still required. No advertising writes or launches are added.
+
+## 2026-10-02 — ретаргетинг по целям Метрики
+
+- direct_campaign_repair.audience_group принимает `goal_rules` вместо `segment_id`: RetargetingList по целям (ALL/ANY/NONE, срок 1–540 дней), проверка целей по каталогу клиента, повторное использование списка только при совпадении правил со сроками.
+- В режиме целей копия ResponsiveAd сохраняет BusinessId и видеодополнения; режим сегмента не изменён.
+
+## 2026-10-02 — профиль организации по телефону
+
+- direct_business_check (только чтение): Businesses.get по ID профилей и сверка
+  телефона профиля с номерами tel:/текста страниц сайта и/или ожидаемыми номерами.
+  Поиска по телефону в Direct API нет: недоступный профиль — BLOCK, а не «нет организации».
+- direct_campaign_repair: `ads[].business_id` вместе с обязательными
+  `business_profiles` (business_id, phone, address, has_office). Preflight сверяет
+  их с Businesses.get и требует телефон профиля на страницах объявления;
+  readback сверяет BusinessId. Очистка BusinessId не поддержана (не nillable в API).
+- Проверка посадочных возвращает найденные телефоны (`phones`). Старые планы и хеши
+  без business_profiles не меняются.
+
+## Unreleased — software downloads
+
+- Added opt-in software v3 profiles with the download KPI, preserving existing
+  profile snapshots and all campaign write guards. Downloads are not leads.
+- New profiles with only OFF/DRAFT campaigns can verify fresh goals in the
+  complete client-scoped Live catalog, requiring a real goal on the landing domain.
+- Readback accepts exact source variants mapped by Direct to the same keyword
+  ID within one group, and bounded negative-phrase normalization; unexpected drift fails.
+
+## 2026-10-01 — явное возобновление выбранных объявлений
+
+- direct_ad_resume: точные ID, команда запуска, preview/token, полный live-снимок,
+  блокировка, журнал и readback. DRAFT/REJECTED и неработающие кампании блокируются;
+  MODERATION требует отдельного флага. Бюджеты/контент не меняются, повторов нет.
+- Настройка/repair по-прежнему не запускают показы; report не содержит write tool.
+
+## 2026-10-01 — черновики групп в работающей кампании
+
+- Явный `append_drafts_only=true` разрешает только добавление `new_groups`
+  в ON ЕПК с сохранением настроек и состояния всех прежних объектов.
+- Смешанные изменения запрещены. Live preflight, хеш, одноразовый токен,
+  журнал, блокировка логина и независимая проверка сохраняются; readback
+  дополнительно требует DRAFT у новых объявлений. Модерация и запуск отсутствуют.
+- Добавлены проверки активной кампании, изменения снимка, неверного статуса
+  объявления и недопустимых комбинаций. Feature: `active_campaign_draft_append`.
+
+## 2026-10-01 — качество прогноза под бюджет
+
+- Добавлены direct://kb/forecast-quality и инструкции для обоих режимов MCP:
+  максимум релевантных кликов в бюджете, пофразовый выбор уровней с меньшим
+  расходом при равных кликах, сравнение порогов и соблюдение явного жёсткого CPC.
+- direct_forecast возвращает quality_contract, включая cached get: legacy
+  done/complete не означает готовый медиаплан; нужны отдельные клики/CPC/расход
+  всех объёмов трафика. Сохранённые артефакты и вызовы провайдера не меняются.
+- Закреплены сверка с Директом, полный список фраз на основной странице отчёта
+  и отсутствие внутренней истории правок в клиентском тексте.
+- Новая feature forecast_quality_requirements требует переподключения MCP.
+
+## 2026-10-01 — почасовые коэффициенты и справочник интересов
+
+- Устранено ложное расхождение readback AUDIENCE, когда Direct возвращает
+  служебный целочисленный `MembershipLifeSpan=0`; периоды RETARGETING не ослаблены.
+
+- Добавлена типизированная недельная сетка `schedule.weekly_bid_percents` с
+  проверкой 7×24 значений и сохранением штатного круглосуточного значения по умолчанию.
+- Добавлен read-only `direct_audience_interests`: полный живой справочник,
+  проверка усечения/дублей, фильтр названий краткосрочных интересов.
+- Запуск рекламы и протокол подтверждения не изменены; требуется новый MCP-процесс.
+
+## 2026-10-01
+- Unified client report: optional six-section acceptance snapshot, independent
+  setup/showing statuses, verification methods and pending items. Legacy models,
+  supplementary checks and statistical history remain available; missing evidence
+  never implies readiness or a launch. No automatic publication or account changes.
+- Add guarded `direct_manual_review` receipts for saved UI button, carousel and
+  neuro-ad checks, with reviewer, exact object IDs, checked fields and copied
+  evidence hashes. Pending actions and setup status distinguish API verification
+  from reviewer attestation. Related MCP writes, failed rechecks, expiry, explicit
+  revocation and corrupt evidence invalidate receipts; original jobs stay immutable.
+- Типизированные региональные коэффициенты новых кампаний с проверкой справочника и readback.
+- Привязка счётчиков к OFF/DRAFT через repair без удаления прежних и изменения стратегии.
+
+- Fix independent audience-group verification: allow the two read-only Live
+  goal-catalog methods through ReadOnlyAPI; reject all other Live methods.
+
+- Guarded `draft_group_merge` repair for identical OFF/DRAFT Search groups;
+  verifies the retained replacement before deleting redundant draft objects.
+  Delete responses and uncertain outcomes are journaled with ID-scoped readback.
+
+## Unreleased — first measured campaign goal verification
+
+- Audience readback accepts only explicitly suspended native autotargeting
+  placeholders; active or unknown-state autotargeting and manual keywords still
+  fail verification. No campaign or criterion state is changed by this check.
+
+- Share HTTP evidence for new-ad URLs differing only in invented object IDs;
+  preserve all object references, distinct tracking values and live-ID checks.
+
+- Verify real conversion goals through the complete client-scoped Live catalog
+  when no campaign with the planned counter exists. Reject segments, unavailable
+  goals, foreign clients, duplicate IDs and unrelated landing domains. Preserve
+  manual counter mapping, preflight, confirmation and independent readback.
+
+## 2026-09-29 — fallback text for product ads
+
+- Added guarded `direct_campaign_repair.product_ad_texts` with exact feed binding,
+  complete ownership reads, unchanged preview check and independent readback.
+  Only `DefaultTexts` changes; no launch, budget, source or filter mutation.
+
+## 2026-09-29
+
+- Reject the retired geo option before API calls, including saved compiled plans;
+  keep historical payloads and hashes intact. Reverification compares supported
+  settings only. Expose current geo guidance outside frozen policies and in report
+  briefs so the retired switch is not presented as a new client audit finding.
+
+- Accept processed ListingsCsv sources for ListingAd only, with explicit UI catalogue
+  count/evidence in the hashed plan; zero product count is not treated as catalogue count.
+
+- Explicit product `strategy.placements` supports catalog ads on search and gallery:
+  `search_only` excludes networks; `search_and_network` includes networks using the
+  same weekly budget. Previous placement defaults and policy hashes are unchanged.
+- Ecommerce v4 may document consultative lead/order goals and a lower-value cart
+  auxiliary goal through `profile_context.conversion_goal_reason`. Cart alone, equal
+  or higher cart value, unsupported goal kinds and legacy profile overrides fail closed.
+- Guarded append-only region exclusions for owned stopped UPC groups. The obsolete
+  `ENABLE_AREA_OF_INTEREST_TARGETING` switch cannot disable current geo algorithms.
+  Validate excluded regions against included ancestors before writes (API 5120).
+  Explicit `add_metrica_tag` campaign repair preserves the remaining settings.
+- Guarded conversion strategy and weekly-budget repair for existing individual
+  UnifiedCampaigns, preserving placements and serving state, with goal preflight
+  and independent strategy readback.
+
+## Unreleased — monthly search forecast
+
+- Add `direct_forecast` with persisted create/get lifecycle, explicit geography,
+  RUB auction data, completeness flag and own temporary report cleanup.
+- Forecast uses Live 4 and never creates, edits or launches advertising campaigns.
+
+## 2026-09-28 — клиентская подача отчётов
+
+- Единое правило «от лица агентства непосредственно клиенту» для instructions,
+  `direct_policy.client_report_editorial` и brief, включая ожидание статистики.
+- В шаблоне и pipeline ограничения целей, данных и бюджета объясняются простыми
+  словами; внутренние свидетельства сверок остаются локально. Явные служебные
+  заметки в авторских полях и insight отклоняются без перезаписи отчёта.
+- Генератор настройки различает выполненные действия, план и непроверенные
+  параметры, не заявляет отсутствие расходов по факту отсутствия запуска.
+- Регрессии охватывают подачу, точность показателей, историю, разделы, полезные ID,
+  публичные адреса и сохранность отчёта при отклонении текста. Переподключение MCP
+  применяет новые instructions; массового обновления отчётов и изменений рекламы нет.
+
+## 2026-09-25 — добавление групп РСЯ и настройки генерации/расписания
+
+- `direct_campaign_repair.new_groups[].channel=network` добавляет группы,
+  ResponsiveAd с изображениями и критерии в остановленную ЕПК РСЯ.
+  Проверки канала, изображений, семантики, принадлежности, дублей, частичных ошибок
+  и readback сохранены; UI-задачи связаны с фактически созданными ID.
+- Новые бизнес-профили v4: автотексты включены через API; одно нейрообъявление
+  на группу обязательно через UI с отдельной проверкой. Старые профили неизменны.
+- Полный график с праздниками 00:00–24:00 нормализуется в штатное 24/7.
+  Явный repair поддерживает `schedule=always_on` и `alternative_texts_enabled`;
+  сброс расписания удаляет прежние ограничения праздников без сетки часов.
+- Runtime, инструкции и база знаний обновлены. Новые проверки выполняются
+  с подменённым API; существующие кабинеты автоматически не меняются.
+
+## 2026-09-24 — стартовые профили v3
+
+- Конверсии с оплатой за клики без требования истории; без Метрики/целей — клики.
+- Бюджет по умолчанию 30 000 RUB с НДС 22% на 14 дней; period=two_weeks.
+- YD_APPROVAL_MODE=task_authorized для конкретного поручения без повторных форм;
+  технические проверки сохранены. По умолчанию остальных установок — elicitation.
+- Instructions, direct_policy, runtime и база знаний обновлены; v1/v2/legacy
+  и прежние хеши сохранены. Кампании и отчёты вести в D:/yadirect-reports через MCP.
+
+## 2026-09-22 — подтверждение кампаний в отчётах по трафику
+
+Сборщик больше не требует доступности Campaigns.get для каждой кампании,
+если запрашиваются только показы, клики и расход (`measurement=null`).
+Отсутствующие ID подтверждаются отдельным CAMPAIGN_PERFORMANCE_REPORT того же
+клиента и периода; его полные итоги сверяются с дневными строками. Исходный TSV,
+параметры и SHA-256 сохраняются в приватном состоянии отчёта. Неполная/повторная
+выборка настроек, неподтверждённые ID, ошибка API и расхождение итогов блокируют
+новую версию. Настройки, цели и атрибуция не выдумываются; ограничение явно видно
+в отчёте. Для конверсий проверка настроек всех кампаний остаётся обязательной.
+Строки объявлений с недоступным ID (`--`) сохраняются в статистике;
+получение текущего текста выполняется только для реальных ID объявлений.
+
+Даты статистики Reports относятся к Москве; TimeZone кампании задаёт расписание
+показов и не запрещает сбор при другом часовом поясе. Источник:
+https://yandex.com/support/direct/ru/troubleshooting/shows .
+
+После переподключения `direct_runtime.features` содержит
+`traffic_reports_campaign_identity` и `reports_moscow_statistics_timezone`.
+Если `restart_required=true`, используйте новый процесс MCP; не считайте
+изменение исходников обновлением уже подключённого процесса.
+
+## 2026-09-21 — длительная проверка посадочных
+
+Для `direct_campaign_repair` с `new_groups` preview выполняется в фоне.
+Ответ `running` содержит `job_id`; `direct_write_job` возвращает итоговый preview
+с артефактом и одноразовым токеном, связанным с полным live preflight. Ошибка
+проверки не выдаёт токен; apply по-прежнему требует MCP elicitation и повторно
+читает состояние кабинета. Запись не запускается из preview.
+
+HTTP-проверка не загружает повторно одну страницу для разных `#якорей`:
+все исходные ссылки остаются в результате, а якоря проверяются в браузере.
+Разные query-параметры и устройства проверяются отдельно. Кеш ограничен точным
+планом и 15 минутами; для новых групп он теперь действует и между preview/apply.
+Сетевой тайм-аут составляет 20 секунд; общий бюджет страницы учитывает очередь
+из шести запросов к одному хосту. Непроверенные URL остаются BLOCK.
+
+## 2026-09-21 — посадочные со встроенными изображениями
+
+Лимит полного HTML увеличен с 2 до 8 МБ для страниц с изображениями data URI.
+Сжатый поток и распакованный HTML остаются ограниченными; превышение лимита,
+повреждённое сжатие, заглушки и небезопасные адреса по-прежнему блокируют проверку.
+Содержательная проверка в браузере остаётся обязательной. После переподключения
+`direct_runtime.features` содержит `landing_html_8mb`.
+
+## 2026-09-21 — группы в существующей поисковой кампании
+
+`direct_campaign_repair` принимает `campaigns[].name` для переименования и
+`new_groups` с `semantic_plan` для добавления поисковых групп, ResponsiveAd,
+ключей и автотаргетинга в существующую остановленную ЕПК. Бюджет и стратегия
+не меняются. Новая кампания, импорт XLSX и повторное создание прежних групп
+не требуются. Поддержка добавления ограничена текстовым Поиском без РСЯ.
+
+Сохраняются live preflight, неизменный SHA-256, одноразовое подтверждение,
+MCP elicitation, журнал, остановка при частичной ошибке и независимый readback.
+Проверяются принадлежность объектов, полная выборка, дубли групп/ключей,
+география, семантика, дополнения и конечные URL. Повторная проверка job
+использует сохранённые ID; неизвестный исход не разрешает повторный add.
+Для активации требуется переподключение MCP. `direct_runtime` покажет
+`protocol_revision=2026-09-21-search-append-v1` и
+`existing_search_groups_append` в `features`.
+
+## 2026-09-18 — совместимость товарных YML-фидов
+
+Товарная предпроверка принимает также `BusinessType=OTHER` со схемой
+`PerformanceDefault`: Директ возвращает такую классификацию для обработанных
+YML-каталогов. Другие схемы OTHER не принимаются. Проверки статуса DONE,
+непустого каталога, URL и доступных полей заголовков сохраняются.
+Для подключённого процесса требуется переподключение MCP.
+
+## 2026-09-18 — содержательная проверка посадочных
+
+- Добавлен обязательный обход разделов сайта по навигации, sitemap и рекламным
+  ссылкам с оценкой предложения, условий и пути обращения в браузере.
+- Заглушки о реконструкции/разработке при HTTP 200 блокируют проверку URL и
+  preflight. Статический анализ сохраняет свидетельство, но не выдаёт отсутствие
+  известной заглушки за полноту содержания; в аудите это отдельный MANUAL.
+- Правило доступно через instructions, direct_policy.landing_review и ресурс
+  direct://kb/landing-content. Снимки политик и существующие кампании не изменены.
+- Для активации кода и instructions требуется переподключение MCP.
+
 ## 2026-09-18 — подготовка публикации исходников
 
 - Локальная `.codex/` и собранный ZIP шаблона исключены из Git и sdist.
@@ -382,3 +652,42 @@
   включая быстрые ссылки, desktop/mobile и ошибки soft-404.
 - Приоритет разметки приведён к документации Direct; неизвестные параметры,
   непрочитанные наборы и превышение лимита проверки не выдают ложный PASS.
+
+
+## 2026-09-24 — каталог ретаргетинга
+Read-only MCP-инструмент direct_retargeting_catalog читает доступные одному
+клиенту цели и сегменты через официальный Live4 GetRetargetingGoals.
+Обычный direct_goal_catalog для целей оптимизации сохраняет прежний контракт.
+Проверки логина, полноты, дублей и принадлежности данных не пропускаются.
+Предпроверка retargeting_rules использует этот каталог и проверяет также
+служебную цель «посетил сайт» с заданным сроком. Типы segment/audience_segment
+с параметром days отклоняются: API игнорирует этот период для сегментов.
+Запись, проверка принадлежности кампании и независимый readback сохранены.
+Для сегментов добавлен явный аргумент {"segment_id": ID} внутри
+retargeting_rules[].goals[] без days. Live-каталог проверяет тип segment или
+audience_segment; для goal_id+days допускаются только цели. Сервер не обещает
+временной диапазон сегмента, которым API управлять не позволяет.
+
+
+### Привязка существующего сегмента через repair
+direct_campaign_repair принимает отдельный пакет audience_link с точными
+ad_group_id, retargeting_list_id, segment_id. Только остановленная сетевая ЕПК,
+один доступный сегмент Метрики, точное правило ANY, без существующих аудиторий
+и без активных ключей/автотаргетинга. Иные изменения в том же пакете запрещены.
+Хеш связывает все ID; grant связывает live-снимок. Перед единственным
+AudienceTargets.add снимок повторно сравнивается. Общая блокировка логина,
+одноразовое подтверждение, журнал запроса/ответа и readback сохраняются.
+Повтор после неизвестного результата, замена условий и запуск не допускаются.
+
+
+### 25.09.2026 — отдельная группа сегмента в существующей РСЯ
+direct_campaign_repair принимает отдельный audience_group: campaign_id, source_ad_id, segment_id, name. Создаёт одну группу на выбранный доступный сегмент и клонирует принадлежащее кампании ResponsiveAd. Кампания может быть включена: бюджет, стратегия, состояние и прежние объекты сохраняются; новое объявление остаётся черновиком. Нет вызовов moderation/resume. Дубли, неполные выборки, чужие объекты и изменения после preview блокируют запись. Любой частичный add сохраняется в журнале и не повторяется. Автотаргетинг новой группы отключается до создания объявления; readback проверяет точное условие сегмента и сохранность прежних объектов. Кнопка и карусель требуют отдельной проверки интерфейса.
+# 01.10.2026 — перевод отдельной РСЯ на максимум конверсий
+
+- Ограниченный `conversion_strategy.channel=network` сохраняет выключенный
+  Поиск и переводит существующую индивидуальную РСЯ с максимума кликов или
+  конверсий на максимум конверсий с оплатой за клики. Цели проверяются по API.
+- Readback учитывает производный `BudgetType=WEEKLY_BUDGET` в обоих каналах.
+  Неподдержанные размещения, пакетные стратегии, смена канала и недоступные
+  цели отклоняются. Preview, одноразовое подтверждение, журнал и запрет
+  автоматического запуска сохраняются. Требуется новый MCP-процесс.

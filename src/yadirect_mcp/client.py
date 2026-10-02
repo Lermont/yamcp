@@ -541,7 +541,9 @@ class DirectClient:
             body["param"] = param
 
         resp = await self._http.post(
-            API_V4_URL,
+            ("https://api.direct.yandex.ru/live/v4/json/"
+             if method in {"GetRetargetingGoals", "CreateNewForecast", "GetForecast",
+                           "GetForecastList", "DeleteForecastReport"} else API_V4_URL),
             headers={"Content-Type": "application/json; charset=utf-8"},
             content=json.dumps(body, ensure_ascii=False).encode("utf-8"),
         )

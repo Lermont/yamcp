@@ -38,7 +38,9 @@ def test_runtime_has_identity_and_no_secrets(tmp_path, monkeypatch):
     settings, _, _ = fixture(tmp_path)
     info = runtime.describe(settings)
     assert "SECRET" not in json.dumps(info) and "token" not in info
-    assert info["protocol_revision"] == "2026-09-17-ops-p3"
+    assert info["protocol_revision"] == "2026-09-25-network-neuro-schedule-v4"
+    assert {"existing_network_groups_append", "creative_defaults_v4",
+            "native_always_on_schedule", "campaign_schedule_reset"}.issubset(info["features"])
     assert not info["restart_required"]
     monkeypatch.setattr(runtime, "fingerprint", lambda: "changed")
     assert runtime.describe(settings)["restart_required"]
@@ -192,7 +194,7 @@ async def run():
             'client_created':s._client is not None}
 print(json.dumps(asyncio.run(run())))""", str(tmp_path), YD_MODE="report")
     assert not result["client_created"]
-    assert result["runtime"]["protocol_revision"] == "2026-09-17-ops-p3"
+    assert result["runtime"]["protocol_revision"] == "2026-09-25-network-neuro-schedule-v4"
     assert result["pending"]["total_pending_jobs"] == 1
 
 

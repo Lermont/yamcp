@@ -9,7 +9,7 @@ import time
 import uuid
 from pathlib import Path
 
-from . import creative, executor, jobs, repair, workflow
+from . import creative, executor, group_append, jobs, manual_review, repair, workflow
 
 
 class ReadOnlyAPI:
@@ -25,6 +25,11 @@ class ReadOnlyAPI:
         if method != "get":
             raise PermissionError("Повторная проверка допускает только get")
         return await self.api.call_v501(service, method, params, **kwargs)
+
+    async def call_v4(self, method, param=None):
+        if method not in {"GetRetargetingGoals", "GetStatGoals"}:
+            raise PermissionError("Повторная проверка допускает только чтение каталога целей")
+        return await self.api.call_v4(method, param)
 
 
 def _native_ids(value, key=""):
@@ -110,7 +115,17 @@ async def run(api, out_dir: Path, client_login: str, job_id: str,
                 if before is None:
                     raise ValueError(
                         "В старом repair job нет снимка before; полная проверка невозможна")
-                check = await repair.readback(guarded, plan, before=before)
+                check = await repair.readback(
+                    guarded, plan, before=before, added=execution.get("added"),
+                )
+                if plan.get("new_groups"):
+                    execution["required_manual_actions"] = group_append.manual_actions(
+                        plan["new_groups"], execution.get("added") or {},
+                    )
+                execution["required_manual_actions"] = [
+                    *execution.get("required_manual_actions", []),
+                    *creative.repaired_carousel_actions(plan, before),
+                ]
         except Exception as exc:  # noqa: BLE001 - failed rechecks also supersede older success
             check = {"verified": False, "error": str(exc)}
         check.pop("objects", None)
@@ -124,6 +139,7 @@ async def run(api, out_dir: Path, client_login: str, job_id: str,
                   "job_id": job_id, "client_login": client_login, "plan_hash": job["plan_hash"],
                   "checked_at": time.time(), "source_journal_sha256": source_hash,
                   "original_status": original.get("status"), "readback": check,
+                  "required_manual_actions": execution.get("required_manual_actions", []),
                   "workflow": state, "setup_complete": state["setup"] == "complete",
                   "status": "verified" if check.get("verified") is True else "unverified",
                   "writes_performed": False}
@@ -131,6 +147,10 @@ async def run(api, out_dir: Path, client_login: str, job_id: str,
         directory.mkdir(parents=True, exist_ok=True)
         path = directory / (str(time.time_ns()) + "-" + record["verification_id"] + ".json")
         record["artifact_path"] = str(path)
+        jobs._atomic(path, record)
+        # Recompute from current receipts after storing this recheck, including failures.
+        current = manual_review.current(out_dir, job)
+        record.update(current)
         jobs._atomic(path, record)
         return record
     finally:

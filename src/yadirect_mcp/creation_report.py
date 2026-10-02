@@ -57,6 +57,7 @@ _STATUS_NAMES = {
 }
 _STRATEGY_NAMES = {
     "WB_MAXIMUM_CLICKS": "Максимум кликов с недельным бюджетом",
+    "WB_MAXIMUM_CONVERSION_RATE": "Максимум конверсий с оплатой за клики",
     "AVERAGE_CPC": "Средняя цена клика",
     "HIGHEST_POSITION": "Наивысшая доступная позиция",
     "SERVING_OFF": "Показы выключены",
@@ -538,35 +539,45 @@ def _render_campaign(campaign: dict[str, Any]) -> str:
     strategy = campaign.get("bidding_strategy") or {}
     search = strategy.get("Search") or {}
     network = strategy.get("Network") or {}
-    strategy_code = search.get("BiddingStrategyType")
-    strategy_name = _STRATEGY_NAMES.get(strategy_code, strategy_code or "Не определена")
+    active_strategy = network if search.get("BiddingStrategyType") == "SERVING_OFF" else search
+    strategy_code = active_strategy.get("BiddingStrategyType")
+    strategy_name = _STRATEGY_NAMES.get(strategy_code, "Название стратегии требует уточнения")
+    strategy_note = (
+        "Директ подбирает переходы с большей вероятностью достижения выбранных целей. "
+        "Это не гарантирует обращения или продажи."
+        if strategy_code == "WB_MAXIMUM_CONVERSION_RATE"
+        else "Расход ограничен настройками бюджета. Результат оцениваем по статистике "
+        "и качеству обращений."
+    )
     placements = search.get("PlacementTypes") or {}
     enabled_placements, disabled_placements = _names_by_switch(
         placements, _PLACEMENT_NAMES
     )
-    if not placements and strategy_code and strategy_code != "SERVING_OFF":
+    if not placements and search.get("BiddingStrategyType") not in {None, "SERVING_OFF"}:
         enabled_placements = ["Поиск Яндекса"]
     budgets = [
-        f"{_money_from_micros(value)} в неделю"
+        f"{_money_from_micros(value)} в неделю без НДС"
         for value in dict.fromkeys(_weekly_limits(strategy))
     ]
     network_code = network.get("BiddingStrategyType")
     network_note = (
-        "Выключена — кампания работает только на Поиске"
+        "Показы в рекламной сети выключены"
         if network_code == "SERVING_OFF"
-        else _STRATEGY_NAMES.get(network_code, network_code or "Не настроена")
+        else _STRATEGY_NAMES.get(network_code, "Настройки требуют уточнения")
     )
     settings = _campaign_settings(campaign["settings"])
     goals = [
         f"Цель {row.get('GoalId')}"
         for row in campaign["priority_goals"]
     ]
-    goals_note = goals or ["Отдельные цели не выбраны: стратегия оптимизирует клики"]
+    goals_note = goals or ["В этом отчёте нет сведений о выбранных целях"]
     attribution = {
         "AUTO": "Автоматическая",
         "FC": "Первый переход",
         "LC": "Последний переход",
         "LSC": "Последний значимый переход",
+        "LSCCD": "Последний значимый переход, с учётом разных устройств",
+        "FCCD": "Первый переход, с учётом разных устройств",
     }.get(campaign.get("attribution_model"), campaign.get("attribution_model") or "Не указана")
     tracking_note = (
         "Включена: переходы размечаются для последующего анализа"
@@ -576,7 +587,7 @@ def _render_campaign(campaign: dict[str, Any]) -> str:
     return f"""
     <section class="campaign">
       <div class="object-head"><div><p class="eyebrow">Канал: {_e(campaign.get('channel_name'))}</p><h2>{_e(campaign.get('name'))}</h2></div><span class="id">ID {_e(campaign.get('id'))}</span></div>
-      <p class="explain">Кампания привлекает посетителей из результатов поиска Яндекса. Показы в рекламной сети и дополнительных размещениях отключены.</p>
+      <p class="explain">Ниже мы приводим условия показа вашей рекламы и параметры бюджета на дату отчёта.</p>
       <div class="facts">
         <div><span>Тип кампании</span><strong>{_type_name(campaign.get('type'))}</strong></div>
         <div><span>Состояние</span><strong>{_status(campaign.get('state'))}</strong></div>
@@ -584,7 +595,7 @@ def _render_campaign(campaign: dict[str, Any]) -> str:
         <div><span>Период</span><strong>{_e(campaign.get('start_date'))} — {_e(campaign.get('end_date') or 'без даты окончания')}</strong></div>
       </div>
       <div class="settings-grid">
-        <div><span>Как расходуется бюджет</span><strong>{_e(strategy_name)}</strong><p>Директ старается получить максимум переходов в пределах заданного бюджета.</p></div>
+        <div><span>Как расходуется бюджет</span><strong>{_e(strategy_name)}</strong><p>{_e(strategy_note)}</p></div>
         <div><span>Лимит расходов</span>{_chips(budgets)}</div>
         <div><span>Где идут показы</span>{_chips(enabled_placements)}</div>
         <div><span>Где показы отключены</span>{_chips(disabled_placements, empty='Дополнительных ограничений нет')}</div>
@@ -618,10 +629,23 @@ def render(model: dict[str, Any]) -> str:
     activated = bool(model.get("activated"))
     launch_class = "ok" if activated else "warn"
     launch_note = (
-        "Показы запущены: объявления могут участвовать в аукционе."
+        "Мы включили показы. Объявления могут участвовать в аукционе при прохождении модерации."
         if activated
-        else "Кампании созданы как черновики. Показы и расход бюджета пока не начались."
+        else "Мы не запускали показы в рамках этой настройки. Состояние кампаний указано ниже."
     )
+    evidence_note = (
+        "Мы проверили сохранённые настройки вашей рекламы на дату отчёта."
+        if model.get("verified") is True
+        else "Проверка сохранённых настроек пока не завершена. Часть параметров ниже "
+        "может отражать план настройки; их сохранение ещё нужно подтвердить."
+    )
+    execution_label = {
+        "complete": "Настройка выполнена",
+        "completed": "Настройка выполнена",
+        "created": "Объекты созданы",
+        "partial": "Выполнена часть настройки",
+        "failed": "Настройку не удалось завершить",
+    }.get(model.get("execution_status"), "Результат требует уточнения")
     return f"""<!doctype html>
 <html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow"><title>Создание кампаний · {_e(model['client_login'])}</title>
@@ -629,12 +653,13 @@ def render(model: dict[str, Any]) -> str:
 :root{{--ink:#162033;--muted:#667085;--line:#dde3ec;--paper:#fff;--bg:#f3f6fa;--blue:#1258ca;--soft:#eaf1ff;--ok:#087f5b;--warn:#9a6700;--danger:#b42318}}
 *{{box-sizing:border-box}}body{{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 Inter,Segoe UI,Arial,sans-serif}}main{{max-width:1180px;margin:auto;padding:42px 22px 80px}}h1,h2,h3,h4,p{{margin-top:0}}h1{{font-size:clamp(30px,5vw,52px);line-height:1.05;max-width:850px}}h2{{font-size:28px}}h3{{font-size:21px;margin-bottom:4px}}a{{color:var(--blue);overflow-wrap:anywhere}}code,pre{{font:13px/1.45 Consolas,monospace}}pre{{white-space:pre-wrap;overflow-wrap:anywhere;background:#111827;color:#e5e7eb;padding:14px;border-radius:10px}}.hero{{background:#0f2450;color:#fff;padding:38px;border-radius:24px;box-shadow:0 18px 45px #12244a26}}.hero p{{color:#c9d8fa}}.meta,.object-head,.facts,.settings-grid,.target-grid,.summary-grid,.ads-grid,.component-grid{{display:grid;gap:14px}}.meta{{grid-template-columns:repeat(4,minmax(0,1fr));margin-top:25px}}.meta span,.facts span,.settings-grid>div>span,.summary-grid span{{display:block;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em}}.meta strong{{color:#fff}}.summary-grid{{grid-template-columns:repeat(4,minmax(0,1fr));margin:22px 0}}.summary-grid>div,.settings-grid>div,.target-card{{background:var(--paper);border:1px solid var(--line);padding:16px;border-radius:14px}}.summary-grid strong{{display:inline-block;font-size:30px;margin-right:6px}}.summary-grid small{{color:var(--muted)}}.notice{{padding:14px 18px;border-radius:12px;margin:20px 0;background:#fff;border-left:5px solid}}.notice.ok{{border-color:var(--ok)}}.notice.warn{{border-color:var(--warn)}}.notice.danger{{border-color:var(--danger)}}.danger-text{{color:var(--danger);font-weight:700}}.campaign{{background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:26px;margin:28px 0;box-shadow:0 8px 24px #12244a0d}}.object-head{{grid-template-columns:1fr auto;align-items:start}}.id{{background:var(--soft);color:var(--blue);padding:6px 10px;border-radius:999px;font-weight:700}}.eyebrow{{color:var(--blue);font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}}.facts{{grid-template-columns:repeat(4,minmax(0,1fr));margin:16px 0}}.facts>div{{border-top:1px solid var(--line);padding-top:10px}}.settings-grid{{grid-template-columns:repeat(2,minmax(0,1fr));margin:20px 0}}.settings-grid strong,.settings-grid code{{display:block;margin-top:6px;overflow-wrap:anywhere}}.chips{{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}}.chip{{background:#eef2f7;border-radius:999px;padding:4px 9px;font-size:13px}}details{{border-top:1px solid var(--line);padding:12px 0}}summary{{cursor:pointer;font-weight:700}}.details-body{{padding-top:8px}}.group{{border:1px solid var(--line);border-radius:16px;padding:20px;margin-top:22px;background:#fbfcfe}}.target-grid{{grid-template-columns:repeat(2,minmax(0,1fr));margin:14px 0}}.target-card{{display:grid;gap:8px}}.section-title{{margin:24px 0 10px}}.table-wrap{{overflow-x:auto}}table{{width:100%;border-collapse:collapse;min-width:680px}}th,td{{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line)}}th{{font-size:12px;text-transform:uppercase;color:var(--muted)}}.ads-grid{{grid-template-columns:1fr}}.component-grid{{grid-template-columns:repeat(2,minmax(0,1fr));margin:14px 0}}.component-list{{background:#f7f9fc;border:1px solid var(--line);border-radius:12px;padding:14px}}.component-list ol{{margin:10px 0 0;padding-left:24px}}.component-list li{{padding:3px 0}}.ad-card{{border:1px solid var(--line);padding:18px;border-radius:14px;background:#fff}}.ad-card h4{{margin:12px 0 6px}}.ad-card p{{margin-bottom:8px}}.landing{{font-weight:600;display:grid;gap:4px}}.landing span,.label{{display:block;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em}}.explain{{background:var(--soft);padding:12px 14px;border-radius:10px}}.autotargeting-card p{{margin-bottom:4px}}.muted{{color:var(--muted)}}footer{{color:var(--muted);margin-top:35px;text-align:center}}@media(max-width:760px){{main{{padding:18px 12px 50px}}.hero,.campaign{{padding:20px;border-radius:16px}}.meta,.summary-grid,.facts,.settings-grid,.target-grid,.ads-grid,.component-grid{{grid-template-columns:1fr}}.object-head{{grid-template-columns:1fr}}.id{{justify-self:start}}}}@media print{{body{{background:#fff}}main{{max-width:none;padding:0}}.hero{{box-shadow:none}}details{{display:block}}summary{{list-style:none}}}}
 </style></head><body><main>
-<header class="hero"><p class="eyebrow">Яндекс Директ · итог настройки</p><h1>Отчёт о создании рекламных кампаний</h1><p>Что именно настроено и как это будет работать — без технических обозначений.</p><p>Клиентский кабинет: <strong>{_e(model['client_login'])}</strong></p>
-<div class="meta"><div><span>Дата отчёта</span><strong>{_e(model['generated_at'])}</strong></div><div><span>Результат работы</span><strong>{_e(model.get('execution_status'))}</strong></div><div><span>Показы</span><strong>{'Запущены' if activated else 'Пока не запущены'}</strong></div></div></header>
+<header class="hero"><p class="eyebrow">Яндекс Директ · итог настройки</p><h1>Отчёт о создании рекламных кампаний</h1><p>Мы подготовили для вас обзор структуры рекламы, объявлений и условий показа.</p><p>Ваш рекламный кабинет: <strong>{_e(model['client_login'])}</strong></p>
+<div class="meta"><div><span>Дата отчёта</span><strong>{_e(model['generated_at'])}</strong></div><div><span>Результат работы</span><strong>{_e(execution_label)}</strong></div><div><span>Запуск в рамках настройки</span><strong>{'Показы включены' if activated else 'Показы не включали'}</strong></div></div></header>
 <section class="summary-grid">{summary_cards}</section>
 <section class="notice {launch_class}"><strong>{_e(launch_note)}</strong></section>
+<section class="notice"><p>{_e(evidence_note)}</p></section>
 {campaigns}
-<footer>Подготовлено по фактическим настройкам рекламных кампаний в Яндекс Директе.</footer>
+<footer>Мы собрали здесь сведения о настройке вашей рекламы в Яндекс Директе.</footer>
 </main></body></html>"""
 
 

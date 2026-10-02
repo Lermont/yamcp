@@ -42,8 +42,11 @@ def compile_interest(source: dict[str, Any], channel: str) -> dict[str, Any] | N
                 raise ValueError("retargeting_rules.goals: от 1 до 10 целей")
             args = []
             for goal in rule["goals"]:
+                if isinstance(goal, dict) and set(goal) == {"segment_id"}:
+                    args.append({"ExternalId": parse_id(goal["segment_id"], "segment_id")})
+                    continue
                 if not isinstance(goal, dict) or set(goal) != {"goal_id", "days"}:
-                    raise ValueError("Цель ретаргетинга: goal_id и days")
+                    raise ValueError("Ретаргетинг: goal_id и days либо только segment_id")
                 days = goal["days"]
                 if type(days) is not int or not 1 <= days <= 540:
                     raise ValueError("Период ретаргетинга: от 1 до 540 дней")
@@ -109,13 +112,19 @@ async def preflight(api: Any, plan: dict[str, Any]) -> dict[str, Any]:
             row.get("Id") == campaign_id for row in ownership.get("Campaigns", [])
         ):
             raise ValueError("Кампания каталога целей не принадлежит клиенту")
-        catalog = await goals.read(api, campaign_id)
-        available = {row["id"] for row in catalog["goals"]}
-        wanted = {arg["ExternalId"] for spec in retargeting
-                  for rule in spec["retargeting_list"]["Rules"] for arg in rule["Arguments"]}
-        if wanted - available:
-            raise ValueError("Цели ретаргетинга отсутствуют в проверенном каталоге клиента")
-        checked_goals = sorted(wanted)
+        # GetStatGoals omits visit goals and segments used only for retargeting.
+        catalog = await goals.read_retargeting(api, plan["client_login"])
+        by_id = {row["id"]: row for row in catalog["goals"]}
+        arguments = [arg for spec in retargeting
+                     for rule in spec["retargeting_list"]["Rules"] for arg in rule["Arguments"]]
+        for arg in arguments:
+            row = by_id.get(arg["ExternalId"])
+            allowed = ({"goal"} if "MembershipLifeSpan" in arg
+                       else {"segment", "audience_segment"})
+            if row is None or row["type"] not in allowed:
+                raise ValueError("Ретаргетинг: ID или тип отсутствует в каталоге клиента; "
+                                 "days применим только к целям, segment_id только к сегментам")
+        checked_goals = sorted({arg["ExternalId"] for arg in arguments})
     interests = [spec for _, _, spec in specs if spec["retargeting_list"]["Type"] == "AUDIENCE"]
     if not interests:
         return {"status": policy.PASS, "interests": [], "retargeting_goal_ids": checked_goals}
@@ -217,11 +226,18 @@ async def readback(api: Any, plan: dict[str, Any], execution: dict[str, Any]) ->
     for offset in range(0, len(group_ids), 1000):
         response = await api.call_v501("keywords", "get", {
             "SelectionCriteria": {"AdGroupIds": group_ids[offset:offset + 1000]},
-            "FieldNames": ["Id", "AdGroupId"], "Page": {"Limit": 10000},
+            "FieldNames": ["Id", "AdGroupId", "Keyword", "State"], "Page": {"Limit": 10000},
         }, client_login=plan["client_login"])
         if response.get("LimitedBy") is not None:
             raise RuntimeError("keywords.get усекает проверку групп по интересам")
-        keyword_groups.update(row["AdGroupId"] for row in response.get("Keywords", []))
+        # Direct can materialize its native autotargeting row even in an
+        # audience-only group. Explicitly suspended native rows cannot serve;
+        # active/unknown-state rows and any manual keywords still fail closed.
+        keyword_groups.update(
+            row["AdGroupId"] for row in response.get("Keywords", [])
+            if not (row.get("Keyword") == "---autotargeting"
+                    and row.get("State") == "SUSPENDED")
+        )
     by_list = {row["Id"]: row for row in lists}
     checks = []
     by_position = {(row["campaign_index"], row["group_index"]): row for row in rows}
@@ -232,11 +248,16 @@ async def readback(api: Any, plan: dict[str, Any], execution: dict[str, Any]) ->
         target = actual[0] if len(actual) == 1 else {}
         actual_list = by_list.get(target.get("RetargetingListId"), {})
         expected_list = spec["retargeting_list"]
-        # API may return MembershipLifeSpan=null for non-Metrika segments.
+        # Interest segments have no goal lookback. Direct returns integer 0
+        # (or null) for that unused field; retain all other values so they fail
+        # comparison. Never normalize zero for actual RETARGETING goals.
         rules = [{"Operator": rule.get("Operator"), "Arguments": [
             {**{"ExternalId": arg.get("ExternalId")},
              **({"MembershipLifeSpan": arg["MembershipLifeSpan"]}
-                if arg.get("MembershipLifeSpan") is not None else {})}
+                if arg.get("MembershipLifeSpan") is not None
+                and not (expected_list["Type"] == "AUDIENCE"
+                         and type(arg.get("MembershipLifeSpan")) is int
+                         and arg["MembershipLifeSpan"] == 0) else {})}
             for arg in rule.get("Arguments", [])
         ]} for rule in actual_list.get("Rules", [])]
         matches = (

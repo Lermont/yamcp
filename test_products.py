@@ -666,3 +666,65 @@ def test_filter_argument_limit_is_checked_before_writes():
                 }
             ]
         )
+
+
+def test_product_source_accepts_yml_classified_as_other():
+    api = ProductAPI()
+    api.feeds[0].update(BusinessType="OTHER", FilterSchema="PerformanceDefault")
+    result = asyncio.run(products.check_sources(api, product_plan()))
+    assert result["verified"] and result["sources"][0]["feed_id"] == 900
+
+
+@pytest.mark.parametrize("schema", ["", None, "Universal", "ECOMMERCE"])
+def test_product_source_rejects_other_without_known_yml_schema(schema):
+    api = ProductAPI()
+    api.feeds[0].update(BusinessType="OTHER", FilterSchema=schema)
+    with pytest.raises(ValueError, match="YML"):
+        asyncio.run(products.check_sources(api, product_plan()))
+
+
+def catalog_csv_plan():
+    plan = product_plan()
+    c = next(c for c in plan["campaigns"] if c["channel"] == "product")
+    c["product_source"].update(catalog_pages_verified=True, catalog_count=2,
+                               review_reason="UI: два каталога, обе ссылки сверены")
+    for g in c["groups"]:
+        g["ads"] = [a for a in g["ads"] if "ListingAd" in a]
+    return plan
+
+
+def test_catalog_csv_zero_products_is_not_zero_catalogs():
+    api = ProductAPI(items=0)
+    api.feeds[0].update(BusinessType="OTHER", FilterSchema="ListingsCsv")
+    plan = catalog_csv_plan()
+    c = next(c for c in plan["campaigns"] if c["channel"] == "product")
+    assert products.source(c["product_source"])["catalog_count"] == 2
+    result = asyncio.run(products.check_sources(api, plan))
+    assert result["verified"]
+    assert result["sources"][0]["number_of_items"] == 0
+    assert result["sources"][0]["catalog_count_evidence"] == "caller_ui_reviewed"
+
+
+@pytest.mark.parametrize("change", ["new", "unknown_schema", "shopping", "unverified",
+                                     "zero", "boolean", "no_reason", "url"])
+def test_catalog_csv_guard_rejects_incomplete_or_different_source(change):
+    api = ProductAPI(items=0)
+    api.feeds[0].update(BusinessType="OTHER", FilterSchema="ListingsCsv")
+    plan = catalog_csv_plan()
+    c = next(c for c in plan["campaigns"] if c["channel"] == "product")
+    if change == "new":
+        api.feeds[0]["Status"] = "NEW"
+    elif change == "unknown_schema":
+        api.feeds[0]["FilterSchema"] = "UnknownCsv"
+    elif change == "shopping":
+        c["groups"][0]["ads"][0] = {"ShoppingAd": {}}
+    elif change == "unverified":
+        c["product_source"]["catalog_pages_verified"] = False
+    elif change in {"zero", "boolean"}:
+        c["product_source"]["catalog_count"] = 0 if change == "zero" else True
+    elif change == "no_reason":
+        c["product_source"]["review_reason"] = ""
+    elif change == "url":
+        api.feeds[0]["UrlFeed"]["Url"] = "https://elsewhere.test/catalog.csv"
+    with pytest.raises(ValueError):
+        asyncio.run(products.check_sources(api, plan))

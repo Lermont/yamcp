@@ -21,14 +21,17 @@ from . import (
     campaigns,
     completeness,
     creative,
+    geotargeting,
     keywords,
     launch_checks,
     link_checks,
+    new_account_goals,
     phrases,
     policy,
     preflight_refs,
     products,
     profiles,
+    regional_modifiers,
     regions,
     schedule,
     semantics,
@@ -120,7 +123,8 @@ def _planned_region_ids(plan: dict[str, Any]) -> list[int]:
         for group in campaign["groups"]
         for region_id in group["ad_group"]["RegionIds"]
         if int(region_id) != 0
-    })
+    } | {row["RegionId"] for c in plan["campaigns"]
+         for a in c.get("bid_modifiers", []) for row in a.get("RegionalAdjustments", [])})
 
 
 async def preflight(
@@ -169,7 +173,7 @@ async def preflight(
             "SelectionCriteria": {
                 "States": ["ON", "OFF", "SUSPENDED", "ENDED", "CONVERTED", "ARCHIVED"]
             },
-            "FieldNames": ["Id", "Name", "State"],
+            "FieldNames": ["Id", "Name", "State", "Status"],
             "TextCampaignFieldNames": ["CounterIds"],
             "UnifiedCampaignFieldNames": ["CounterIds"],
             "Page": {"Limit": 10000},
@@ -256,16 +260,33 @@ async def preflight(
             if row.get("id") is not None
         }
         missing_goals = sorted(goal_ids - available)
-        if missing_goals:
+        # Fresh counters may expose a new goal in the client-scoped Live
+        # catalog before GetStatGoals catches up. Only unlaunched new-account
+        # plans may use the same strict verification as a first campaign.
+        draft_only_new = (
+            plan.get("policy_snapshot", {}).get("profile", {}).get("stage") == "new"
+            and all(row.get("State") == "OFF" and row.get("Status") == "DRAFT"
+                    for row in existing.get("Campaigns", []))
+        )
+        if missing_goals and draft_only_new:
+            goal_check = await new_account_goals.verify(
+                api, client_login, goal_ids,
+                [products.payload(ad).get("Href", "") for c in plan["campaigns"]
+                 for g in c["groups"] for ad in g["ads"]],
+            )
+            goal_check.update(catalog_campaign_id=catalog_campaign_id,
+                              stat_catalog_missing=missing_goals)
+        elif missing_goals:
             raise ValueError(
                 "В каталоге GetStatGoals отсутствуют выбранные цели: "
                 + ", ".join(str(value) for value in missing_goals)
             )
-        goal_check = {
-            "status": policy.PASS,
-            "catalog_campaign_id": catalog_campaign_id,
-            "goal_ids": sorted(goal_ids),
-        }
+        else:
+            goal_check = {
+                "status": policy.PASS,
+                "catalog_campaign_id": catalog_campaign_id,
+                "goal_ids": sorted(goal_ids),
+            }
     elif goal_ids and plan.get("allow_unverified_goals"):
         goal_check = {
             "status": policy.WARNING,
@@ -276,11 +297,18 @@ async def preflight(
             ),
         }
     elif goal_ids:
-        raise ValueError(
-            "Нельзя проверить приоритетные цели: нет кампании с подходящим счётчиком "
-            "для GetStatGoals. Задайте goal_catalog_campaign_id или явно "
-            "allow_unverified_goals=true."
-        )
+        try:
+            goal_check = await new_account_goals.verify(
+                api, client_login, goal_ids,
+                [products.payload(ad).get("Href", "") for c in plan["campaigns"]
+                 for g in c["groups"] for ad in g["ads"]],
+            )
+        except ValueError as exc:
+            raise ValueError(
+                "Нельзя проверить приоритетные цели: нет подходящей кампании "
+                "для goal_catalog_campaign_id и клиентский каталог не подтвердил "
+                f"выбранные цели. {exc}"
+            ) from exc
     else:
         goal_check = {
             "status": policy.PASS,
@@ -566,6 +594,14 @@ def compare_readback(
         )
         expected_ages = {row["Age"] for item in planned.get("bid_modifiers", [])
                          for row in item.get("DemographicsAdjustments", [])}
+        regional_actions = planned.get("bid_modifiers", [])
+        if any(a.get("RegionalAdjustments") for a in regional_actions):
+            check("readback.regional_adjustments",
+                  modifiers_payload is not None and regional_modifiers.matches(
+                      regional_actions,
+                      (modifiers_payload or {}).get("bid_modifiers", {}).get("items", []),
+                      campaign_id),
+                  f"Региональные коэффициенты кампании {campaign_id} совпадают с планом.")
         if modifiers_payload is not None:
             actual_modifiers = (
                 modifiers_payload.get("bid_modifiers", {}).get("items", [])
@@ -610,8 +646,9 @@ def compare_readback(
         check(
             "readback.settings",
             all((actual.get("settings") or {}).get(row["Option"]) == row["Value"]
-                for row in expected_unified.get("Settings", [])),
-            f"Настройки кампании {campaign_id} совпадают с планом.",
+                for row in expected_unified.get("Settings", [])
+                if row["Option"] != geotargeting.RETIRED_OPTION),
+            f"Поддерживаемые настройки кампании {campaign_id} совпадают с планом.",
         )
         check(
             "readback.weekly_budget",
@@ -629,8 +666,8 @@ def compare_readback(
                 f"Стратегия {placement} кампании {campaign_id} совпадает с планом.",
             )
             if planned["channel"] == "product":
-                check("readback.product_placements", actual_strategy.get("PlacementTypes")
-                      == expected_strategy.get("PlacementTypes"),
+                check("readback.product_placements", products.placements_match(
+                      expected_strategy, actual_strategy, placement),
                       f"Места показа товарной кампании {campaign_id} совпадают с планом.")
             for key in ("WbMaximumClicks", "WbMaximumConversionRate"):
                 if key in expected_strategy:
@@ -842,6 +879,12 @@ def compare_readback(
                     ad_id=ad_id,
                 )
             if keyword_rows is not None:
+                accepted_phrases: dict[int, set[str]] = {}
+                for requested, returned in zip(planned_group["keywords"],
+                                               executed_group.get("keywords", []), strict=False):
+                    returned_id = _action_id(returned)
+                    if returned_id is not None:
+                        accepted_phrases.setdefault(returned_id, set()).add(requested["Keyword"])
                 for expected_keyword, action in zip(
                     planned_group["keywords"],
                     executed_group.get("keywords", []),
@@ -855,8 +898,7 @@ def compare_readback(
                         "AutotargetingSettings"
                     )
                     matches = actual_keyword is not None and (
-                        actual_keyword.get("keyword")
-                        == expected_keyword.get("Keyword")
+                        actual_keyword.get("keyword") in accepted_phrases[keyword_id]
                     )
                     if expected_settings is not None:
                         matches = matches and (
@@ -1169,6 +1211,13 @@ async def readback_launch_checks(api, plan: dict, actual_campaigns: list[dict]) 
 
 
 def validate_plan(plan: dict[str, Any]) -> None:
+    # Saved plans can bypass bundle normalization; reject before any API call.
+    # Do not rewrite approved payloads or their hashes to remove the old option.
+    for item in plan["campaigns"]:
+        regional_modifiers.validate_actions(item.get("bid_modifiers", []))
+        if any(row.get("Option") == geotargeting.RETIRED_OPTION
+               for row in item["campaign"]["UnifiedCampaign"].get("Settings", [])):
+            raise ValueError(geotargeting.WRITE_ERROR)
     selected_policy = policy.for_plan(plan)
     products.validate_campaigns(plan["campaigns"])
     if any(c["channel"] == "product" for c in plan["campaigns"]) and not selected_policy.get(
