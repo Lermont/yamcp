@@ -2,18 +2,30 @@
 
 from __future__ import annotations
 
-from datetime import date, timedelta
+from datetime import timedelta
 
 import pytest
 
-from yadirect_mcp import campaign_setup
+from yadirect_mcp import campaign_setup, policy
 
 
 def plan():
+    required_negatives = sorted(
+        {
+            value.casefold()
+            for value in policy.load_snapshot("search_negative_keywords")
+        }
+        - policy.RISKY_NEGATIVES
+    )
     campaign = {
         "Name": "Поиск | Москва",
-        "StartDate": (date.today() + timedelta(days=1)).isoformat(),
+        # Дата берётся тем же способом, что и проверка внутри модуля: иначе на
+        # машине восточнее Москвы «завтра» окажется сегодняшним днём Директа.
+        "StartDate": (campaign_setup.moscow_today() + timedelta(days=1)).isoformat(),
+        "NegativeKeywords": {"Items": required_negatives},
         "TextCampaign": {
+            "CounterIds": {"Items": [12345]},
+            "PriorityGoals": {"Items": [{"GoalId": 77, "Value": 1_000_000}]},
             "BiddingStrategy": {
                 "Search": {"BiddingStrategyType": "HIGHEST_POSITION"},
                 "Network": {"BiddingStrategyType": "SERVING_OFF"},
@@ -26,11 +38,18 @@ def plan():
             "RegionIds": [213],
             "Ads": [
                 {
-                    "TextAd": {
-                        "Title": "Услуга А в Москве",
-                        "Text": "Оставьте заявку на сайте",
+                    "ResponsiveAd": {
+                        "Titles": [
+                            "Услуга А для производственных компаний Москвы",
+                            "Комплексное решение для развития вашего бизнеса",
+                            "Получите консультацию и расчёт по вашему проекту",
+                        ],
+                        "Texts": [
+                            "Оставьте заявку на сайте",
+                            "Рассчитаем стоимость проекта",
+                            "Ответим на вопросы по услуге",
+                        ],
                         "Href": "https://example.test/a",
-                        "Mobile": "NO",
                     }
                 }
             ],
@@ -41,11 +60,18 @@ def plan():
             "RegionIds": [213],
             "Ads": [
                 {
-                    "TextAd": {
-                        "Title": "Услуга Б",
-                        "Text": "Узнайте стоимость онлайн",
+                    "ResponsiveAd": {
+                        "Titles": [
+                            "Услуга Б для компаний и производственных предприятий",
+                            "Стоимость услуги Б и условия для вашего бизнес-проекта",
+                            "Закажите услугу Б с консультацией специалиста",
+                        ],
+                        "Texts": [
+                            "Узнайте стоимость онлайн",
+                            "Получите персональный расчёт",
+                            "Оставьте заявку на консультацию",
+                        ],
                         "Href": "https://example.test/b",
-                        "Mobile": "YES",
                     }
                 }
             ],
@@ -58,6 +84,7 @@ def plan():
 class FakeApi:
     def __init__(self):
         self.calls = []
+        self.v501_services = []
 
     async def call(self, service, method, params, *, client_login):
         self.calls.append((service, method, params, client_login))
@@ -69,86 +96,122 @@ class FakeApi:
         }[service]
         return {"AddResults": [{"Id": value} for value in ids]}
 
+    async def call_v501(self, service, method, params, *, client_login):
+        self.v501_services.append(service)
+        return await self.call(
+            service, method, params, client_login=client_login
+        )
 
-def test_preview_normalizes_keywords_and_requires_confirmation():
+
+
+
+def test_raw_plan_hash_binds_login_and_payload():
     campaign, groups = plan()
-    out = campaign_setup.preview("client", campaign, groups)
+    first = campaign_setup.plan_hash("client", campaign, groups)
+    second = campaign_setup.plan_hash("other", campaign, groups)
+    changed = dict(campaign)
+    changed["Name"] = "Другое имя"
+    third = campaign_setup.plan_hash("client", changed, groups)
+    assert first != second
+    assert first != third
 
-    assert out["executed"] is False
-    assert out["summary"] == {
-        "campaigns": 1, "ad_groups": 2, "ads": 2, "keywords": 2
+
+
+
+def test_native_responsive_ad_is_preserved():
+    campaign, groups = plan()
+    groups[0]["Ads"][0] = {
+        "ResponsiveAd": {
+            "Titles": [
+                "Профессиональная услуга для развития вашего бизнеса",
+                "Комплексное решение задачи для вашей компании",
+                "Консультация и расчёт проекта для вашего бизнеса",
+            ],
+            "Texts": [
+                "Оставьте заявку на сайте",
+                "Узнайте условия сотрудничества",
+                "Получите консультацию",
+            ],
+            "Href": "https://example.test/a",
+        }
     }
-    assert out["ad_groups"][0]["Keywords"][0] == {"Keyword": "заказать услугу а"}
-    assert out["confirmation_required"] == "CREATE CAMPAIGN client"
-    # Нормализация не меняет входной объект вызывающей стороны.
-    assert groups[0]["Keywords"][0] == "заказать услугу а"
+    _, normalized = campaign_setup.normalize_plan(campaign, groups)
+    assert normalized[0]["Ads"][0] == groups[0]["Ads"][0]
 
 
-@pytest.mark.asyncio
-async def test_apply_links_created_ids_without_activating():
+def test_legacy_text_ad_is_rejected():
     campaign, groups = plan()
-    api = FakeApi()
-    out = await campaign_setup.apply(api, "client", campaign, groups)
+    groups[0]["Ads"][0] = {
+        "TextAd": {
+            "Title": "Услуга А в Москве",
+            "Text": "Оставьте заявку на сайте",
+            "Href": "https://example.test/a",
+            "Mobile": "NO",
+        }
+    }
+    with pytest.raises(ValueError, match="TextAd больше не поддерживается"):
+        campaign_setup.normalize_plan(campaign, groups)
 
-    assert [call[0] for call in api.calls] == [
-        "campaigns", "adgroups", "ads", "keywords"
+
+def test_raw_responsive_ad_requires_three_titles_near_the_character_limit():
+    campaign, groups = plan()
+    groups[0]["Ads"][0]["ResponsiveAd"]["Titles"] = [
+        "Короткий заголовок один",
+        "Короткий заголовок два",
+        "Короткий заголовок три",
     ]
-    group_payloads = api.calls[1][2]["AdGroups"]
-    assert [item["CampaignId"] for item in group_payloads] == [101, 101]
-    assert all("Ads" not in item and "Keywords" not in item for item in group_payloads)
-    ad_payloads = api.calls[2][2]["Ads"]
-    assert [item["AdGroupId"] for item in ad_payloads] == [201, 202]
-    keyword_payloads = api.calls[3][2]["Keywords"]
-    assert [item["AdGroupId"] for item in keyword_payloads] == [201, 201]
-    assert out["status"] == "complete"
-    assert out["campaign_id"] == 101
-    assert out["activated"] is False
+    with pytest.raises(ValueError, match="45–56 символов"):
+        campaign_setup.normalize_plan(campaign, groups)
 
 
-@pytest.mark.asyncio
-async def test_group_item_error_is_reported_as_partial_and_children_are_skipped():
+@pytest.mark.parametrize("count", [0, 1, 2, 8])
+def test_raw_responsive_ad_requires_three_to_seven_titles(count):
     campaign, groups = plan()
-
-    class PartialApi(FakeApi):
-        async def call(self, service, method, params, *, client_login):
-            self.calls.append((service, method, params, client_login))
-            if service == "campaigns":
-                return {"AddResults": [{"Id": 101}]}
-            if service == "adgroups":
-                return {"AddResults": [
-                    {"Id": 201},
-                    {"Errors": [{"Code": 1, "Message": "bad group"}]},
-                ]}
-            if service == "ads":
-                return {"AddResults": [{"Id": 301}]}
-            if service == "keywords":
-                return {"AddResults": [{"Id": 401}, {"Id": 402}]}
-            raise AssertionError(service)
-
-    out = await campaign_setup.apply(PartialApi(), "client", campaign, groups)
-    assert out["status"] == "partial"
-    assert out["summary"]["ad_groups"] == {"requested": 2, "created": 1}
-    assert out["summary"]["ads"] == {"requested": 2, "created": 1}
-    assert out["groups"][1]["errors"][0]["Message"] == "bad group"
+    groups[0]["Ads"][0]["ResponsiveAd"]["Titles"] = [
+        f"Вариант заголовка {index}" for index in range(count)
+    ]
+    with pytest.raises(ValueError, match="от 3 до 7 заголовков"):
+        campaign_setup.normalize_plan(campaign, groups)
 
 
-@pytest.mark.asyncio
-async def test_fatal_child_call_keeps_created_parent_ids():
+@pytest.mark.parametrize("count", [0, 1, 2, 4])
+def test_raw_responsive_ad_requires_exactly_three_texts(count):
     campaign, groups = plan()
+    groups[0]["Ads"][0]["ResponsiveAd"]["Texts"] = [
+        f"Вариант текста {index}" for index in range(count)
+    ]
+    with pytest.raises(ValueError, match="ровно 3 текста"):
+        campaign_setup.normalize_plan(campaign, groups)
 
-    class FailingAdsApi(FakeApi):
-        async def call(self, service, method, params, *, client_login):
-            if service == "ads":
-                raise RuntimeError("transport failed")
-            return await super().call(service, method, params, client_login=client_login)
 
-    out = await campaign_setup.apply(FailingAdsApi(), "client", campaign, groups)
-    assert out["status"] == "partial"
-    assert out["campaign_id"] == 101
-    assert [group["id"] for group in out["groups"]] == [201, 202]
-    assert out["fatal_error"] == {
-        "stage": "ads.add", "message": "transport failed"
-    }
+@pytest.mark.parametrize("field", ["Titles", "Texts"])
+def test_raw_responsive_ad_variants_must_be_unique(field):
+    campaign, groups = plan()
+    values = groups[0]["Ads"][0]["ResponsiveAd"][field]
+    values[1] = f" {values[0].upper()} "
+    with pytest.raises(ValueError, match="уникальными"):
+        campaign_setup.normalize_plan(campaign, groups)
+
+
+@pytest.mark.parametrize(
+    "ad",
+    [
+        {},
+        {"TextAd": {}, "ResponsiveAd": {}},
+        {"ResponsiveAd": "не объект"},
+    ],
+)
+def test_ad_requires_exactly_one_valid_supported_format(ad):
+    campaign, groups = plan()
+    groups[0]["Ads"][0] = ad
+    with pytest.raises(ValueError):
+        campaign_setup.normalize_plan(campaign, groups)
+
+
+
+
+
+
 
 
 @pytest.mark.parametrize(
@@ -164,3 +227,8 @@ def test_validation_blocks_unsafe_parent_ids_and_past_start(mutate, message):
     mutate(campaign, groups)
     with pytest.raises(ValueError, match=message):
         campaign_setup.normalize_plan(campaign, groups)
+
+
+def test_legacy_write_and_preview_entrypoints_are_removed():
+    assert not hasattr(campaign_setup, "apply")
+    assert not hasattr(campaign_setup, "preview")

@@ -1,0 +1,4944 @@
+[
+  {
+    "name": "basic",
+    "source": {
+      "semantic_plan": {
+        "profile": "small_business",
+        "business_directions": [
+          {
+            "id": "service",
+            "name": "Услуга"
+          }
+        ],
+        "sources": [
+          {
+            "id": "site",
+            "type": "website",
+            "reference": "https://example.test/service",
+            "collected_on": "2026-09-18",
+            "region_ids": []
+          },
+          {
+            "id": "ws",
+            "type": "wordstat",
+            "reference": "fixture://wordstat.tsv",
+            "collected_on": "2026-09-18",
+            "region_ids": [
+              213
+            ]
+          }
+        ],
+        "history": {
+          "status": "new_account",
+          "reason": "Тестовый новый кабинет"
+        },
+        "candidates": [
+          {
+            "id": "service",
+            "phrase": "заказать услугу",
+            "source_ids": [
+              "ws"
+            ],
+            "decision": "selected",
+            "reason": "Целевой запрос по услуге"
+          }
+        ]
+      },
+      "name": "Клиент | Услуга",
+      "start_date": "2026-09-19",
+      "age_min": 18,
+      "weekly_budget": {
+        "search": 3000,
+        "network": 4000,
+        "maps": 2000
+      },
+      "region_ids": [
+        213
+      ],
+      "counter_ids": [
+        12345
+      ],
+      "priority_goals": [
+        {
+          "goal_id": 77,
+          "value": 1500
+        }
+      ],
+      "allow_unverified_goals": true,
+      "office": false,
+      "manual_checks": {
+        "goals_reviewed": true,
+        "regions_verified": true,
+        "landing_pages_verified": true
+      },
+      "channels": {
+        "search": {
+          "groups": [
+            {
+              "name": "Услуга поиск",
+              "keywords": [
+                "заказать услугу"
+              ],
+              "ads": [
+                {
+                  "titles": [
+                    "Профессиональная услуга для развития вашего бизнеса 1",
+                    "Комплексное решение задачи для вашей компании 1",
+                    "Консультация и расчёт проекта для вашего бизнеса 1"
+                  ],
+                  "texts": [
+                    "Оставьте заявку на сайте",
+                    "Получите консультацию по услуге 1",
+                    "Узнайте условия сотрудничества 1"
+                  ],
+                  "href": "https://example.test/service",
+                  "action_button": {
+                    "text": "Узнать больше",
+                    "reason": "Условия услуги на посадочной"
+                  },
+                  "hypothesis": "Отдельная гипотеза объявления 1",
+                  "sitelink_set_id": 10,
+                  "ad_extension_ids": [
+                    20
+                  ]
+                },
+                {
+                  "titles": [
+                    "Профессиональная услуга для развития вашего бизнеса 2",
+                    "Комплексное решение задачи для вашей компании 2",
+                    "Консультация и расчёт проекта для вашего бизнеса 2"
+                  ],
+                  "texts": [
+                    "Оставьте заявку на сайте",
+                    "Получите консультацию по услуге 2",
+                    "Узнайте условия сотрудничества 2"
+                  ],
+                  "href": "https://example.test/service",
+                  "action_button": {
+                    "text": "Узнать больше",
+                    "reason": "Условия услуги на посадочной"
+                  },
+                  "hypothesis": "Отдельная гипотеза объявления 2",
+                  "sitelink_set_id": 10,
+                  "ad_extension_ids": [
+                    20
+                  ]
+                }
+              ],
+              "semantic": {
+                "direction_id": "service",
+                "intent": "Заказать услугу",
+                "offer": "Услуга",
+                "landing_url": "https://example.test/service",
+                "split_reason": "Единое предложение и покупательское намерение",
+                "brand_segment": "generic",
+                "business_source_ids": [
+                  "site"
+                ],
+                "candidate_ids": [
+                  "service"
+                ],
+                "keyword_count_reason": "Узкая тестовая семантика",
+                "source_geo_reason": "Географические варианты требуют отдельного исследования"
+              }
+            }
+          ],
+          "group_count_reason": "В тестовом бизнесе одно направление"
+        },
+        "network": {
+          "groups": [
+            {
+              "name": "Услуга РСЯ",
+              "keywords": [
+                "заказать услугу"
+              ],
+              "ads": [
+                {
+                  "titles": [
+                    "Профессиональная услуга для развития вашего бизнеса 3",
+                    "Комплексное решение задачи для вашей компании 3",
+                    "Консультация и расчёт проекта для вашего бизнеса 3"
+                  ],
+                  "texts": [
+                    "Оставьте заявку на сайте",
+                    "Получите консультацию по услуге 3",
+                    "Узнайте условия сотрудничества 3"
+                  ],
+                  "href": "https://example.test/service",
+                  "action_button": {
+                    "text": "Узнать больше",
+                    "reason": "Условия услуги на посадочной"
+                  },
+                  "hypothesis": "Отдельная гипотеза объявления 3",
+                  "sitelink_set_id": 10,
+                  "ad_extension_ids": [
+                    20
+                  ],
+                  "ad_image_hashes": [
+                    "hash-3-0",
+                    "hash-3-1",
+                    "hash-3-2"
+                  ]
+                },
+                {
+                  "titles": [
+                    "Профессиональная услуга для развития вашего бизнеса 4",
+                    "Комплексное решение задачи для вашей компании 4",
+                    "Консультация и расчёт проекта для вашего бизнеса 4"
+                  ],
+                  "texts": [
+                    "Оставьте заявку на сайте",
+                    "Получите консультацию по услуге 4",
+                    "Узнайте условия сотрудничества 4"
+                  ],
+                  "href": "https://example.test/service",
+                  "action_button": {
+                    "text": "Узнать больше",
+                    "reason": "Условия услуги на посадочной"
+                  },
+                  "hypothesis": "Отдельная гипотеза объявления 4",
+                  "sitelink_set_id": 10,
+                  "ad_extension_ids": [
+                    20
+                  ],
+                  "ad_image_hashes": [
+                    "hash-4-0",
+                    "hash-4-1",
+                    "hash-4-2"
+                  ]
+                },
+                {
+                  "titles": [
+                    "Профессиональная услуга для развития вашего бизнеса 5",
+                    "Комплексное решение задачи для вашей компании 5",
+                    "Консультация и расчёт проекта для вашего бизнеса 5"
+                  ],
+                  "texts": [
+                    "Оставьте заявку на сайте",
+                    "Получите консультацию по услуге 5",
+                    "Узнайте условия сотрудничества 5"
+                  ],
+                  "href": "https://example.test/service",
+                  "action_button": {
+                    "text": "Узнать больше",
+                    "reason": "Условия услуги на посадочной"
+                  },
+                  "hypothesis": "Отдельная гипотеза объявления 5",
+                  "sitelink_set_id": 10,
+                  "ad_extension_ids": [
+                    20
+                  ],
+                  "ad_image_hashes": [
+                    "hash-5-0",
+                    "hash-5-1",
+                    "hash-5-2"
+                  ]
+                }
+              ],
+              "semantic": {
+                "direction_id": "service",
+                "intent": "Заказать услугу",
+                "offer": "Услуга",
+                "landing_url": "https://example.test/service",
+                "split_reason": "Единое предложение и покупательское намерение",
+                "brand_segment": "generic",
+                "business_source_ids": [
+                  "site"
+                ],
+                "candidate_ids": [
+                  "service"
+                ],
+                "keyword_count_reason": "Узкая тестовая семантика",
+                "source_geo_reason": "Географические варианты требуют отдельного исследования"
+              }
+            }
+          ],
+          "group_count_reason": "В тестовом бизнесе одно направление"
+        }
+      }
+    },
+    "plan": {
+      "schema": "direct_campaign_bundle_v1",
+      "client_login": "client",
+      "api_version": "v501",
+      "policy": {
+        "name": "agency_default_v1",
+        "version": "1.12.0"
+      },
+      "manual_checks": {
+        "goals_reviewed": true,
+        "regions_verified": true,
+        "landing_pages_verified": true
+      },
+      "tracking_profile": "utm_v1",
+      "client_budget": null,
+      "business_profiles": [],
+      "goal_catalog_campaign_id": null,
+      "allow_unverified_goals": true,
+      "negative_keyword_selection": {
+        "profile": "custom",
+        "business_terms": [],
+        "selected": [],
+        "excluded": [],
+        "review_required": true,
+        "review_context": [],
+        "group_selections": []
+      },
+      "semantic_plan": {
+        "profile": "small_business",
+        "business_directions": [
+          {
+            "id": "service",
+            "name": "Услуга"
+          }
+        ],
+        "sources": [
+          {
+            "id": "site",
+            "type": "website",
+            "reference": "https://example.test/service",
+            "collected_on": "2026-09-18",
+            "region_ids": []
+          },
+          {
+            "id": "ws",
+            "type": "wordstat",
+            "reference": "fixture://wordstat.tsv",
+            "collected_on": "2026-09-18",
+            "region_ids": [
+              213
+            ]
+          }
+        ],
+        "history": {
+          "status": "new_account",
+          "reason": "Тестовый новый кабинет"
+        },
+        "candidates": [
+          {
+            "id": "service",
+            "phrase": "заказать услугу",
+            "source_ids": [
+              "ws"
+            ],
+            "decision": "selected",
+            "reason": "Целевой запрос по услуге"
+          }
+        ]
+      },
+      "semantic_review": {
+        "profile": "small_business",
+        "profile_reason": null,
+        "sources": [
+          {
+            "id": "site",
+            "type": "website",
+            "reference": "https://example.test/service",
+            "collected_on": "2026-09-18",
+            "region_ids": [],
+            "evidence_status": "provided_in_bundle"
+          },
+          {
+            "id": "ws",
+            "type": "wordstat",
+            "reference": "fixture://wordstat.tsv",
+            "collected_on": "2026-09-18",
+            "region_ids": [
+              213
+            ],
+            "evidence_status": "provided_in_bundle"
+          }
+        ],
+        "history": {
+          "status": "new_account",
+          "reason": "Тестовый новый кабинет"
+        },
+        "business_directions": [
+          {
+            "id": "service",
+            "name": "Услуга"
+          }
+        ],
+        "groups": [
+          {
+            "campaign_index": 0,
+            "group_index": 0,
+            "group": "Клиент | Услуга | Поиск / Услуга поиск",
+            "direction_id": "service",
+            "intent": "Заказать услугу",
+            "offer": "Услуга",
+            "landing_url": "https://example.test/service",
+            "split_reason": "Единое предложение и покупательское намерение",
+            "brand_segment": "generic",
+            "business_source_ids": [
+              "site"
+            ],
+            "candidate_ids": [
+              "service"
+            ],
+            "keyword_count_reason": "Узкая тестовая семантика",
+            "source_geo_reason": "Географические варианты требуют отдельного исследования",
+            "keywords_count": 1,
+            "candidates": [
+              {
+                "id": "service",
+                "phrase": "заказать услугу",
+                "source_ids": [
+                  "ws"
+                ],
+                "decision": "selected",
+                "reason": "Целевой запрос по услуге",
+                "evidence_kind": "query_source"
+              }
+            ],
+            "ad_hypotheses": [
+              "Отдельная гипотеза объявления 1",
+              "Отдельная гипотеза объявления 2"
+            ],
+            "review_status": "declared_requires_semantic_review"
+          },
+          {
+            "campaign_index": 1,
+            "group_index": 0,
+            "group": "Клиент | Услуга | РСЯ / Услуга РСЯ",
+            "direction_id": "service",
+            "intent": "Заказать услугу",
+            "offer": "Услуга",
+            "landing_url": "https://example.test/service",
+            "split_reason": "Единое предложение и покупательское намерение",
+            "brand_segment": "generic",
+            "business_source_ids": [
+              "site"
+            ],
+            "candidate_ids": [
+              "service"
+            ],
+            "keyword_count_reason": "Узкая тестовая семантика",
+            "source_geo_reason": "Географические варианты требуют отдельного исследования",
+            "keywords_count": 1,
+            "candidates": [
+              {
+                "id": "service",
+                "phrase": "заказать услугу",
+                "source_ids": [
+                  "ws"
+                ],
+                "decision": "selected",
+                "reason": "Целевой запрос по услуге",
+                "evidence_kind": "query_source"
+              }
+            ],
+            "ad_hypotheses": [
+              "Отдельная гипотеза объявления 3",
+              "Отдельная гипотеза объявления 4",
+              "Отдельная гипотеза объявления 5"
+            ],
+            "review_status": "declared_requires_semantic_review"
+          }
+        ],
+        "candidates": [
+          {
+            "id": "service",
+            "phrase": "заказать услугу",
+            "source_ids": [
+              "ws"
+            ],
+            "decision": "selected",
+            "reason": "Целевой запрос по услуге",
+            "evidence_kind": "query_source"
+          }
+        ],
+        "counts": {
+          "candidate_records": 1,
+          "found_unique_phrases": 1,
+          "selected_unique_phrases": 1,
+          "excluded_candidates": 0,
+          "pending_candidates": 0,
+          "selected_hypotheses": 0
+        },
+        "evidence_status": "provided_in_bundle"
+      },
+      "campaigns": [
+        {
+          "channel": "search",
+          "channel_variant": 0,
+          "campaign": {
+            "Name": "Клиент | Услуга | Поиск",
+            "StartDate": "2026-09-19",
+            "TimeZone": "Europe/Moscow",
+            "UnifiedCampaign": {
+              "BiddingStrategy": {
+                "Search": {
+                  "BiddingStrategyType": "WB_MAXIMUM_CLICKS",
+                  "WbMaximumClicks": {
+                    "WeeklySpendLimit": 3000000000
+                  },
+                  "PlacementTypes": {
+                    "SearchResults": "YES",
+                    "ProductGallery": "NO",
+                    "DynamicPlaces": "YES",
+                    "Maps": "NO",
+                    "SearchOrganizationList": "NO"
+                  }
+                },
+                "Network": {
+                  "BiddingStrategyType": "SERVING_OFF",
+                  "PlacementTypes": {
+                    "Network": "NO",
+                    "Maps": "NO"
+                  }
+                }
+              },
+              "Settings": [
+                {
+                  "Option": "ADD_METRICA_TAG",
+                  "Value": "YES"
+                },
+                {
+                  "Option": "ENABLE_SITE_MONITORING",
+                  "Value": "YES"
+                },
+                {
+                  "Option": "ALTERNATIVE_TEXTS_ENABLED",
+                  "Value": "NO"
+                }
+              ],
+              "TrackingParams": "type={source_type}&source={source}&block={position_type}&pos={position}&key={keyword}&campaign={campaign_id}&yd_campaign_name={campaign_name}&name_lat={campaign_name_lat}&retargeting={retargeting_id}&ad={ad_id}&phrase={phrase_id}&gbid={gbid}&device={device_type}&region={region_id}&region_name={region_name}&utm_source=yandex&utm_medium=cpc&utm_campaign={campaign_id}&utm_content={ad_id}&utm_term={phrase_id}",
+              "AttributionModel": "AUTO",
+              "CounterIds": {
+                "Items": [
+                  12345
+                ]
+              },
+              "PriorityGoals": {
+                "Items": [
+                  {
+                    "GoalId": 77,
+                    "Value": 1500000000
+                  }
+                ]
+              }
+            }
+          },
+          "groups": [
+            {
+              "ad_group": {
+                "Name": "Услуга поиск",
+                "RegionIds": [
+                  213
+                ],
+                "UnifiedAdGroup": {
+                  "OfferRetargeting": "NO"
+                }
+              },
+              "ads": [
+                {
+                  "ResponsiveAd": {
+                    "Titles": [
+                      "Профессиональная услуга для развития вашего бизнеса 1",
+                      "Комплексное решение задачи для вашей компании 1",
+                      "Консультация и расчёт проекта для вашего бизнеса 1"
+                    ],
+                    "Texts": [
+                      "Оставьте заявку на сайте",
+                      "Получите консультацию по услуге 1",
+                      "Узнайте условия сотрудничества 1"
+                    ],
+                    "Href": "https://example.test/service",
+                    "SitelinkSetId": 10,
+                    "AdExtensionIds": [
+                      20
+                    ]
+                  }
+                },
+                {
+                  "ResponsiveAd": {
+                    "Titles": [
+                      "Профессиональная услуга для развития вашего бизнеса 2",
+                      "Комплексное решение задачи для вашей компании 2",
+                      "Консультация и расчёт проекта для вашего бизнеса 2"
+                    ],
+                    "Texts": [
+                      "Оставьте заявку на сайте",
+                      "Получите консультацию по услуге 2",
+                      "Узнайте условия сотрудничества 2"
+                    ],
+                    "Href": "https://example.test/service",
+                    "SitelinkSetId": 10,
+                    "AdExtensionIds": [
+                      20
+                    ]
+                  }
+                }
+              ],
+              "keywords": [
+                {
+                  "Keyword": "заказать услугу"
+                },
+                {
+                  "Keyword": "---autotargeting",
+                  "AutotargetingSettings": {
+                    "Categories": {
+                      "Exact": "YES",
+                      "Narrow": "YES",
+                      "Alternative": "NO",
+                      "Accessory": "NO",
+                      "Broader": "NO"
+                    },
+                    "BrandOptions": {
+                      "WithoutBrands": "YES",
+                      "WithAdvertiserBrand": "NO",
+                      "WithCompetitorsBrand": "NO"
+                    }
+                  }
+                }
+              ],
+              "semantic": {
+                "direction_id": "service",
+                "intent": "Заказать услугу",
+                "offer": "Услуга",
+                "landing_url": "https://example.test/service",
+                "split_reason": "Единое предложение и покупательское намерение",
+                "brand_segment": "generic",
+                "business_source_ids": [
+                  "site"
+                ],
+                "candidate_ids": [
+                  "service"
+                ],
+                "keyword_count_reason": "Узкая тестовая семантика",
+                "source_geo_reason": "Географические варианты требуют отдельного исследования"
+              },
+              "ad_hypotheses": [
+                "Отдельная гипотеза объявления 1",
+                "Отдельная гипотеза объявления 2"
+              ],
+              "action_buttons": [
+                {
+                  "text": "Узнать больше",
+                  "reason": "Условия услуги на посадочной",
+                  "href": "https://example.test/service",
+                  "destination": "main"
+                },
+                {
+                  "text": "Узнать больше",
+                  "reason": "Условия услуги на посадочной",
+                  "href": "https://example.test/service",
+                  "destination": "main"
+                }
+              ]
+            }
+          ],
+          "group_count_reason": "В тестовом бизнесе одно направление",
+          "bid_modifiers": [
+            {
+              "DemographicsAdjustments": [
+                {
+                  "Age": "AGE_0_17",
+                  "BidModifier": 0
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "channel": "network",
+          "channel_variant": 0,
+          "campaign": {
+            "Name": "Клиент | Услуга | РСЯ",
+            "StartDate": "2026-09-19",
+            "TimeZone": "Europe/Moscow",
+            "ExcludedSites": {
+              "Items": [
+                "com.aaaudi.wordmaker",
+                "com.addswhilessuffers.binds",
+                "com.agedstudio.card.solitaire.klondike",
+                "com.aif.aifkitchen",
+                "com.alexanderkondrashov.slovari",
+                "com.allconnected.turbovpn",
+                "com.almondstudio.wordbyword",
+                "com.amberfog.reader",
+                "com.amberfog.vkfree",
+                "com.andr.gostivk",
+                "com.apalon.wallpapers",
+                "com.appgame7.candyfrenzy",
+                "com.appgame7.jigsaw.free",
+                "com.appteka.sportexpress",
+                "com.appyogi.vpnapp",
+                "com.ascellamobile.musicloudfree",
+                "com.atrix.rusvpn",
+                "com.avito.android",
+                "com.Balls",
+                "com.banderlogiapps.hd",
+                "com.basicvpnproxy.app",
+                "com.bcsofts.colorLinesReborn",
+                "com.bigcake.android.mergemania",
+                "com.bigcake.android.solitairedaily",
+                "com.bigduckgames.flow",
+                "com.bobr.vpn1",
+                "com.bobr.vpn1pro",
+                "com.bolsh.calorie",
+                "com.bonbeart.doors",
+                "com.bonbeart.doorsseasons.part2",
+                "com.boss.chat.egorshipcallvideo",
+                "com.breakcoder.blocksmerger",
+                "com.candl.athena",
+                "com.candylegend.legend",
+                "com.cardgame.collection.fishdom",
+                "com.clean.road",
+                "com.cleanmaster.mguard",
+                "com.cloudycastlegames.wordline",
+                "com.color.colorvpn",
+                "com.coloring.color.number.ios",
+                "com.coolmobilesolution.fastscannerfree",
+                "com.cootek.smartinputv5",
+                "com.cootek.smartinputv5.oem",
+                "com.corgi.VPNStart",
+                "com.craftgames.plntcrft",
+                "com.craftsman.go",
+                "com.crazylight.photoscanner.age",
+                "com.creativemobile.dragracing",
+                "com.devexpert.weather",
+                "com.dicedom.mergepuzzle",
+                "com.disoftware.android.vpngate",
+                "com.disoftware.android.vpngateclient",
+                "com.dmitry.social.nets.vkontakevkmini",
+                "com.dobar.vpn",
+                "com.droid27.senseflipclockweather",
+                "com.droid27.transparentclockweather",
+                "com.dropdom.blockpuzzle.hwwgame",
+                "com.easybrain.art.puzzle",
+                "com.easybrain.block.puzzle.games",
+                "com.easybrain.chamy",
+                "com.easybrain.jigsaw.puzzles",
+                "com.easybrain.killer.sudoku.free",
+                "com.easybrain.make.music",
+                "com.easybrain.nonogram",
+                "com.easybrain.nonogram.color",
+                "com.easybrain.number.puzzle.game",
+                "com.easybrain.solitaire",
+                "com.easybrain.solitaire.klondike.free",
+                "com.easybrain.sudoku.android",
+                "com.easybrain.sudoku.ios",
+                "com.easygames.race",
+                "com.echomoscow.EchoMsk",
+                "com.edadeal.android",
+                "com.emoji.keyboard.touchpal",
+                "com.europosit.pixelcoloring",
+                "com.evvsoft.preferance",
+                "com.fast.free.secure.unblock.vpn",
+                "com.fingersoft.failhard",
+                "com.fingersoft.hillclimb",
+                "com.fingersoft.hillclimbracing",
+                "com.fmarzana.vdlfree2",
+                "com.free.unlimited.fast.secure.vpn",
+                "com.free.vpn.hotspot.secure.vpnify",
+                "com.free.vpn.proxy.master.app",
+                "com.free.vpn.super.hotspot.open",
+                "com.free.vpn.turbo.fast.secure.govpn",
+                "com.freevpnplanet",
+                "com.fruitheroes.legend",
+                "com.fugo.wow",
+                "com.fugo.wowguru",
+                "com.fusee.RomanBuilder",
+                "com.gafv.puzzle.game.classic.blockpuzzle.wood",
+                "com.gamepie.airpolice",
+                "com.games.joinblocks",
+                "com.gemteam.stickerpackstg",
+                "com.gemteam.trmpclient",
+                "com.gethornet.Hornet",
+                "com.gjg.colorfill3d",
+                "com.GMA.Ball.Sort.Puzzle",
+                "com.gmail.heagoo.apkeditor",
+                "com.gramgames.tenten",
+                "com.gregorioapps.stfree",
+                "com.grydmitrij.ticketpdddemo",
+                "com.gym.racegame",
+                "com.hb.dialer.free",
+                "com.hide.me.vpn",
+                "com.hornet.android",
+                "com.hotspotvpn.super4-ios",
+                "com.hotspotvpn.super4-ios.lite",
+                "com.idownloaderapp.idl2free",
+                "com.igoodnewgames.airlines2",
+                "com.IguazuGames.Mahjong",
+                "com.ijinshan.kbatterydoctor_en",
+                "com.ilyondynamics.bubbleShooterClassic",
+                "com.imo.android.imoim",
+                "com.imo.android.imoimbeta",
+                "com.infolink.LimeHDTV",
+                "com.infolink.limeiptv",
+                "com.instavpns.max",
+                "com.intellectualflame.ledflashlight.washer",
+                "com.iphonease.ledflashlight.button",
+                "com.ivansoft.VPN",
+                "com.ivygames.morskoiboi",
+                "com.jagplay.client.android.app.thousand.hd",
+                "com.jewelblast.puzzlelegend",
+                "com.jewels.gems.android",
+                "com.k17.millionaire",
+                "com.kadka.forknsausage",
+                "com.karmangames.solitaire",
+                "com.karmangames.spider",
+                "com.kii.safe",
+                "com.krishnatechnoweb.vpnbrowser",
+                "com.linkdesks.jewelblastmania",
+                "com.lunappstudio.wordomaze",
+                "com.lyrebirdstudio.pipcamera",
+                "com.memory.brain.training.games",
+                "com.merge.animals",
+                "com.merigotech.chestofwords",
+                "com.merigotech.fillwords",
+                "com.mgc.runnergame",
+                "com.mind.quiz.brain.out",
+                "com.miui.cleaner",
+                "com.miui.videoplayer",
+                "com.mocomediallc.fastfriend",
+                "com.modulardreams.bubblewars",
+                "com.muscle.rush",
+                "com.mydevcorp.balda",
+                "com.nektome.chatruletka.voice",
+                "com.nektome.talk",
+                "com.netsecurity.bestvpn.bestvpn",
+                "com.newsstand.dating",
+                "com.ninegag.android.app",
+                "com.notvpn",
+                "com.now.vpn",
+                "com.onecwearable.keyboard",
+                "com.onecwireless.mahjong",
+                "com.onecwireless.solitaire1.free",
+                "com.openmygame.games.android.crossword.plants",
+                "com.openmygame.games.android.jigsawpuzzle",
+                "com.openmygame.games.android.wordpizza",
+                "com.openmygame.games.android.wordsearchsea",
+                "com.openmygame.games.ios.wordspizza",
+                "com.openmygame.games.kr.client",
+                "com.openmygame.magicwordsearch",
+                "com.opera.app.news",
+                "com.opera.browser",
+                "com.opera.mini.native",
+                "com.osinit.megavpn",
+                "com.outfit7.mytalkingangelafree",
+                "com.outfit7.mytalkingtomfree",
+                "com.outfit7.talkingangelafree",
+                "com.outfit7.talkingben",
+                "com.outfit7.talkingtom2free",
+                "com.outfit7.tomlovesangelafree",
+                "com.perm.kate",
+                "com.pixel.art.coloring.color.number",
+                "com.pixelduck.ru4pics1word",
+                "com.platovpn.vpn",
+                "com.playgendary.tom",
+                "com.playreap.fmdpropro",
+                "com.playstrom.bob",
+                "com.playstrom.dop4",
+                "com.promt.pmtappfree",
+                "com.puzzle.merge",
+                "com.quarterborrowresult.customer",
+                "com.rambler.horoscopes",
+                "com.reachjunction.card.game.solitaire",
+                "com.renualsoftware.minecraftpe.minecraftpeservers",
+                "com.rexplayer.app",
+                "com.romant.image",
+                "com.rusdev.pid",
+                "com.s-g-i.Edadeal",
+                "com.s2apps.game2048",
+                "com.sabzira.pianotiles",
+                "com.satoshi.vpns",
+                "com.scanword.journal",
+                "com.shadowbiz.semechki",
+                "com.shazam.android",
+                "com.simple.pro.fast.unlimited.private.vpn",
+                "com.slippy.linerusher",
+                "com.snail.VPNSnail",
+                "com.soodexlabs.sudoku2",
+                "com.spcards.cards2",
+                "com.spcomes.fruitforest",
+                "com.speed.svpn",
+                "com.speedy.vpn",
+                "com.sportexpress.ipad",
+                "com.sportexpress.iphone",
+                "com.stack.booklib2",
+                "com.stealthgame.master",
+                "com.stolitomson.vpn",
+                "com.supermastervpn.max",
+                "com.superproxyyvpn.max",
+                "com.supervpn.max",
+                "com.supervpn.vpn.free.proxy",
+                "com.surpax.ledflashlight.panel",
+                "com.sushirolls.app",
+                "com.swc.yaplakal",
+                "com.teamtol.livedota",
+                "com.thousandcardgame.android.huawei",
+                "com.tikvpn.tikvpn",
+                "com.tmarki.spidersol",
+                "com.tomato.pasbayan",
+                "com.tomato.scanword.collection",
+                "com.topface.topface",
+                "com.turbo.stars",
+                "com.ultralvpn.max",
+                "com.veraxen.blockpuzzle",
+                "com.vg.sanandreasstraight2compton",
+                "com.viber.voip",
+                "com.vpn-buck.proxy",
+                "com.vpn-buck.proxy.lite",
+                "com.vpn.free.hotspot.secure.vpnify",
+                "com.vpn.hedgehog",
+                "com.vpn.securevpnpro",
+                "com.vpnappvpn.VPNApp",
+                "com.vpnbeaver.vpn",
+                "com.vpnmaster.android",
+                "com.vpnproxyvpn.max",
+                "com.vpnredcat.vpn",
+                "com.vpnsatoshi.vpnsatoshiapp",
+                "com.waplog.social",
+                "com.whisperarts.kids.breastfeeding",
+                "com.wutapp.otkrytki",
+                "com.xoopsoft.apps.russia.free",
+                "com.xoopsoft.apps.seriea.free",
+                "com.yandex.browser",
+                "com.zigzag_mobile.skorolek",
+                "AdsNative",
+                "BidSwitch"
+              ]
+            },
+            "UnifiedCampaign": {
+              "BiddingStrategy": {
+                "Search": {
+                  "BiddingStrategyType": "SERVING_OFF",
+                  "PlacementTypes": {
+                    "SearchResults": "NO",
+                    "ProductGallery": "NO",
+                    "DynamicPlaces": "NO",
+                    "Maps": "NO",
+                    "SearchOrganizationList": "NO"
+                  }
+                },
+                "Network": {
+                  "BiddingStrategyType": "WB_MAXIMUM_CLICKS",
+                  "WbMaximumClicks": {
+                    "WeeklySpendLimit": 4000000000
+                  },
+                  "PlacementTypes": {
+                    "Network": "YES",
+                    "Maps": "NO"
+                  }
+                }
+              },
+              "Settings": [
+                {
+                  "Option": "ADD_METRICA_TAG",
+                  "Value": "YES"
+                },
+                {
+                  "Option": "ENABLE_SITE_MONITORING",
+                  "Value": "YES"
+                },
+                {
+                  "Option": "ALTERNATIVE_TEXTS_ENABLED",
+                  "Value": "NO"
+                }
+              ],
+              "TrackingParams": "type={source_type}&source={source}&block={position_type}&pos={position}&key={keyword}&campaign={campaign_id}&yd_campaign_name={campaign_name}&name_lat={campaign_name_lat}&retargeting={retargeting_id}&ad={ad_id}&phrase={phrase_id}&gbid={gbid}&device={device_type}&region={region_id}&region_name={region_name}&utm_source=yandex&utm_medium=cpc&utm_campaign={campaign_id}&utm_content={ad_id}&utm_term={phrase_id}",
+              "AttributionModel": "AUTO",
+              "CounterIds": {
+                "Items": [
+                  12345
+                ]
+              },
+              "PriorityGoals": {
+                "Items": [
+                  {
+                    "GoalId": 77,
+                    "Value": 1500000000
+                  }
+                ]
+              }
+            }
+          },
+          "groups": [
+            {
+              "ad_group": {
+                "Name": "Услуга РСЯ",
+                "RegionIds": [
+                  213
+                ],
+                "UnifiedAdGroup": {
+                  "OfferRetargeting": "NO"
+                }
+              },
+              "ads": [
+                {
+                  "ResponsiveAd": {
+                    "Titles": [
+                      "Профессиональная услуга для развития вашего бизнеса 3",
+                      "Комплексное решение задачи для вашей компании 3",
+                      "Консультация и расчёт проекта для вашего бизнеса 3"
+                    ],
+                    "Texts": [
+                      "Оставьте заявку на сайте",
+                      "Получите консультацию по услуге 3",
+                      "Узнайте условия сотрудничества 3"
+                    ],
+                    "Href": "https://example.test/service",
+                    "SitelinkSetId": 10,
+                    "AdImageHashes": [
+                      "hash-3-0",
+                      "hash-3-1",
+                      "hash-3-2"
+                    ],
+                    "AdExtensionIds": [
+                      20
+                    ]
+                  }
+                },
+                {
+                  "ResponsiveAd": {
+                    "Titles": [
+                      "Профессиональная услуга для развития вашего бизнеса 4",
+                      "Комплексное решение задачи для вашей компании 4",
+                      "Консультация и расчёт проекта для вашего бизнеса 4"
+                    ],
+                    "Texts": [
+                      "Оставьте заявку на сайте",
+                      "Получите консультацию по услуге 4",
+                      "Узнайте условия сотрудничества 4"
+                    ],
+                    "Href": "https://example.test/service",
+                    "SitelinkSetId": 10,
+                    "AdImageHashes": [
+                      "hash-4-0",
+                      "hash-4-1",
+                      "hash-4-2"
+                    ],
+                    "AdExtensionIds": [
+                      20
+                    ]
+                  }
+                },
+                {
+                  "ResponsiveAd": {
+                    "Titles": [
+                      "Профессиональная услуга для развития вашего бизнеса 5",
+                      "Комплексное решение задачи для вашей компании 5",
+                      "Консультация и расчёт проекта для вашего бизнеса 5"
+                    ],
+                    "Texts": [
+                      "Оставьте заявку на сайте",
+                      "Получите консультацию по услуге 5",
+                      "Узнайте условия сотрудничества 5"
+                    ],
+                    "Href": "https://example.test/service",
+                    "SitelinkSetId": 10,
+                    "AdImageHashes": [
+                      "hash-5-0",
+                      "hash-5-1",
+                      "hash-5-2"
+                    ],
+                    "AdExtensionIds": [
+                      20
+                    ]
+                  }
+                }
+              ],
+              "keywords": [
+                {
+                  "Keyword": "заказать услугу"
+                }
+              ],
+              "semantic": {
+                "direction_id": "service",
+                "intent": "Заказать услугу",
+                "offer": "Услуга",
+                "landing_url": "https://example.test/service",
+                "split_reason": "Единое предложение и покупательское намерение",
+                "brand_segment": "generic",
+                "business_source_ids": [
+                  "site"
+                ],
+                "candidate_ids": [
+                  "service"
+                ],
+                "keyword_count_reason": "Узкая тестовая семантика",
+                "source_geo_reason": "Географические варианты требуют отдельного исследования"
+              },
+              "ad_hypotheses": [
+                "Отдельная гипотеза объявления 3",
+                "Отдельная гипотеза объявления 4",
+                "Отдельная гипотеза объявления 5"
+              ],
+              "action_buttons": [
+                {
+                  "text": "Узнать больше",
+                  "reason": "Условия услуги на посадочной",
+                  "href": "https://example.test/service",
+                  "destination": "main"
+                },
+                {
+                  "text": "Узнать больше",
+                  "reason": "Условия услуги на посадочной",
+                  "href": "https://example.test/service",
+                  "destination": "main"
+                },
+                {
+                  "text": "Узнать больше",
+                  "reason": "Условия услуги на посадочной",
+                  "href": "https://example.test/service",
+                  "destination": "main"
+                }
+              ]
+            }
+          ],
+          "group_count_reason": "В тестовом бизнесе одно направление",
+          "bid_modifiers": [
+            {
+              "DemographicsAdjustments": [
+                {
+                  "Age": "AGE_0_17",
+                  "BidModifier": 0
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "required_manual_actions": [
+        {
+          "rule": "ads.action_button",
+          "required": true,
+          "status": "pending_ui",
+          "verification_method": "saved_ui_per_ad",
+          "requirements": {
+            "required_with_href": true,
+            "selection": "most_relevant_available_ui_label_for_offer",
+            "reason_required": true,
+            "destinations": [
+              "main",
+              "contacts"
+            ],
+            "default_href": "ad_href",
+            "contacts_url": "explicit_verified_same_site_page",
+            "api_supported": false,
+            "verification": "saved_ui_per_ad"
+          },
+          "requested": {
+            "text": "Узнать больше",
+            "reason": "Условия услуги на посадочной",
+            "href": "https://example.test/service",
+            "destination": "main"
+          },
+          "message": "Выбрать наиболее релевантный предложению текст из доступных кнопок интерфейса, явно заполнить URL (основной или проверенной страницы контактов), сохранить и повторно открыть объявление: проверить выбранный текст и полный URL. Публичный API не подтверждает сохранение кнопки.",
+          "campaign_index": 0,
+          "group_index": 0,
+          "ad_index": 0
+        },
+        {
+          "rule": "ads.action_button",
+          "required": true,
+          "status": "pending_ui",
+          "verification_method": "saved_ui_per_ad",
+          "requirements": {
+            "required_with_href": true,
+            "selection": "most_relevant_available_ui_label_for_offer",
+            "reason_required": true,
+            "destinations": [
+              "main",
+              "contacts"
+            ],
+            "default_href": "ad_href",
+            "contacts_url": "explicit_verified_same_site_page",
+            "api_supported": false,
+            "verification": "saved_ui_per_ad"
+          },
+          "requested": {
+            "text": "Узнать больше",
+            "reason": "Условия услуги на посадочной",
+            "href": "https://example.test/service",
+            "destination": "main"
+          },
+          "message": "Выбрать наиболее релевантный предложению текст из доступных кнопок интерфейса, явно заполнить URL (основной или проверенной страницы контактов), сохранить и повторно открыть объявление: проверить выбранный текст и полный URL. Публичный API не подтверждает сохранение кнопки.",
+          "campaign_index": 0,
+          "group_index": 0,
+          "ad_index": 1
+        },
+        {
+          "rule": "ads.action_button",
+          "required": true,
+          "status": "pending_ui",
+          "verification_method": "saved_ui_per_ad",
+          "requirements": {
+            "required_with_href": true,
+            "selection": "most_relevant_available_ui_label_for_offer",
+            "reason_required": true,
+            "destinations": [
+              "main",
+              "contacts"
+            ],
+            "default_href": "ad_href",
+            "contacts_url": "explicit_verified_same_site_page",
+            "api_supported": false,
+            "verification": "saved_ui_per_ad"
+          },
+          "requested": {
+            "text": "Узнать больше",
+            "reason": "Условия услуги на посадочной",
+            "href": "https://example.test/service",
+            "destination": "main"
+          },
+          "message": "Выбрать наиболее релевантный предложению текст из доступных кнопок интерфейса, явно заполнить URL (основной или проверенной страницы контактов), сохранить и повторно открыть объявление: проверить выбранный текст и полный URL. Публичный API не подтверждает сохранение кнопки.",
+          "campaign_index": 1,
+          "group_index": 0,
+          "ad_index": 0
+        },
+        {
+          "rule": "network.carousel",
+          "required": true,
+          "status": "pending_ui",
+          "verification_method": "saved_ui_per_ad",
+          "requirements": {
+            "required": true,
+            "minimum_images": 2,
+            "maximum_images": 10,
+            "main_image_required": true,
+            "minimum_side_px": 450,
+            "maximum_file_mb": 10,
+            "aspect_ratio_difference_exclusive_max": 0.15,
+            "verification": "saved_ui_per_ad",
+            "api_supported": false,
+            "ordinary_ad_image_hashes_satisfy_requirement": false
+          },
+          "message": "Добавить и сохранить карусель из 2–10 релевантных изображений, затем повторно открыть объявление и проверить число и порядок слайдов. AdImageHashes и обычное изображение не подтверждают карусель.",
+          "campaign_index": 1,
+          "group_index": 0,
+          "ad_index": 0
+        },
+        {
+          "rule": "ads.action_button",
+          "required": true,
+          "status": "pending_ui",
+          "verification_method": "saved_ui_per_ad",
+          "requirements": {
+            "required_with_href": true,
+            "selection": "most_relevant_available_ui_label_for_offer",
+            "reason_required": true,
+            "destinations": [
+              "main",
+              "contacts"
+            ],
+            "default_href": "ad_href",
+            "contacts_url": "explicit_verified_same_site_page",
+            "api_supported": false,
+            "verification": "saved_ui_per_ad"
+          },
+          "requested": {
+            "text": "Узнать больше",
+            "reason": "Условия услуги на посадочной",
+            "href": "https://example.test/service",
+            "destination": "main"
+          },
+          "message": "Выбрать наиболее релевантный предложению текст из доступных кнопок интерфейса, явно заполнить URL (основной или проверенной страницы контактов), сохранить и повторно открыть объявление: проверить выбранный текст и полный URL. Публичный API не подтверждает сохранение кнопки.",
+          "campaign_index": 1,
+          "group_index": 0,
+          "ad_index": 1
+        },
+        {
+          "rule": "network.carousel",
+          "required": true,
+          "status": "pending_ui",
+          "verification_method": "saved_ui_per_ad",
+          "requirements": {
+            "required": true,
+            "minimum_images": 2,
+            "maximum_images": 10,
+            "main_image_required": true,
+            "minimum_side_px": 450,
+            "maximum_file_mb": 10,
+            "aspect_ratio_difference_exclusive_max": 0.15,
+            "verification": "saved_ui_per_ad",
+            "api_supported": false,
+            "ordinary_ad_image_hashes_satisfy_requirement": false
+          },
+          "message": "Добавить и сохранить карусель из 2–10 релевантных изображений, затем повторно открыть объявление и проверить число и порядок слайдов. AdImageHashes и обычное изображение не подтверждают карусель.",
+          "campaign_index": 1,
+          "group_index": 0,
+          "ad_index": 1
+        },
+        {
+          "rule": "ads.action_button",
+          "required": true,
+          "status": "pending_ui",
+          "verification_method": "saved_ui_per_ad",
+          "requirements": {
+            "required_with_href": true,
+            "selection": "most_relevant_available_ui_label_for_offer",
+            "reason_required": true,
+            "destinations": [
+              "main",
+              "contacts"
+            ],
+            "default_href": "ad_href",
+            "contacts_url": "explicit_verified_same_site_page",
+            "api_supported": false,
+            "verification": "saved_ui_per_ad"
+          },
+          "requested": {
+            "text": "Узнать больше",
+            "reason": "Условия услуги на посадочной",
+            "href": "https://example.test/service",
+            "destination": "main"
+          },
+          "message": "Выбрать наиболее релевантный предложению текст из доступных кнопок интерфейса, явно заполнить URL (основной или проверенной страницы контактов), сохранить и повторно открыть объявление: проверить выбранный текст и полный URL. Публичный API не подтверждает сохранение кнопки.",
+          "campaign_index": 1,
+          "group_index": 0,
+          "ad_index": 2
+        },
+        {
+          "rule": "network.carousel",
+          "required": true,
+          "status": "pending_ui",
+          "verification_method": "saved_ui_per_ad",
+          "requirements": {
+            "required": true,
+            "minimum_images": 2,
+            "maximum_images": 10,
+            "main_image_required": true,
+            "minimum_side_px": 450,
+            "maximum_file_mb": 10,
+            "aspect_ratio_difference_exclusive_max": 0.15,
+            "verification": "saved_ui_per_ad",
+            "api_supported": false,
+            "ordinary_ad_image_hashes_satisfy_requirement": false
+          },
+          "message": "Добавить и сохранить карусель из 2–10 релевантных изображений, затем повторно открыть объявление и проверить число и порядок слайдов. AdImageHashes и обычное изображение не подтверждают карусель.",
+          "campaign_index": 1,
+          "group_index": 0,
+          "ad_index": 2
+        }
+      ],
+      "findings": [
+        {
+          "status": "MANUAL",
+          "rule": "ads.title_diversity",
+          "message": "bundle.channels.search.groups[0].ads[0]: рекомендуется до 7 содержательно разных заголовков; не добавляйте повторы ради количества."
+        },
+        {
+          "status": "MANUAL",
+          "rule": "ads.title_diversity",
+          "message": "bundle.channels.search.groups[0].ads[1]: рекомендуется до 7 содержательно разных заголовков; не добавляйте повторы ради количества."
+        },
+        {
+          "status": "MANUAL",
+          "rule": "ads.title_diversity",
+          "message": "bundle.channels.network.groups[0].ads[0]: рекомендуется до 7 содержательно разных заголовков; не добавляйте повторы ради количества."
+        },
+        {
+          "status": "MANUAL",
+          "rule": "ads.title_diversity",
+          "message": "bundle.channels.network.groups[0].ads[1]: рекомендуется до 7 содержательно разных заголовков; не добавляйте повторы ради количества."
+        },
+        {
+          "status": "MANUAL",
+          "rule": "ads.title_diversity",
+          "message": "bundle.channels.network.groups[0].ads[2]: рекомендуется до 7 содержательно разных заголовков; не добавляйте повторы ради количества."
+        },
+        {
+          "status": "MANUAL",
+          "rule": "search.negative_keywords",
+          "message": "Проверить минус-фразы по бизнесу и посадочной; общего обязательного списка нет.",
+          "evidence": {
+            "profile": "custom",
+            "business_terms": [],
+            "selected": [],
+            "excluded": [],
+            "review_required": true,
+            "review_context": [],
+            "group_selections": []
+          }
+        },
+        {
+          "status": "MANUAL",
+          "rule": "regions.api_lookup",
+          "message": "Регионы подтверждены пользователем; executor должен повторно проверить ID через API.",
+          "evidence": {
+            "regions": [
+              {
+                "id": 213,
+                "source": "bundle.channels.search.groups[0].region_ids"
+              },
+              {
+                "id": 213,
+                "source": "bundle.channels.network.groups[0].region_ids"
+              }
+            ]
+          }
+        },
+        {
+          "status": "MANUAL",
+          "rule": "structure.group_count",
+          "message": "Клиент | Услуга | Поиск: 1; стартовый ориентир 3–10. Зафиксируйте причину выбранного количества.",
+          "evidence": {
+            "target": "Клиент | Услуга | Поиск",
+            "count": 1,
+            "recommended": [
+              3,
+              10
+            ],
+            "reason": "В тестовом бизнесе одно направление"
+          }
+        },
+        {
+          "status": "MANUAL",
+          "rule": "semantics.keyword_count",
+          "message": "Клиент | Услуга | Поиск / Услуга поиск: 1; стартовый ориентир 10–30. Зафиксируйте причину выбранного количества.",
+          "evidence": {
+            "target": "Клиент | Услуга | Поиск / Услуга поиск",
+            "count": 1,
+            "recommended": [
+              10,
+              30
+            ],
+            "reason": "Узкая тестовая семантика"
+          }
+        },
+        {
+          "status": "MANUAL",
+          "rule": "structure.group_count",
+          "message": "Клиент | Услуга | РСЯ: 1; стартовый ориентир 2–5. Зафиксируйте причину выбранного количества.",
+          "evidence": {
+            "target": "Клиент | Услуга | РСЯ",
+            "count": 1,
+            "recommended": [
+              2,
+              5
+            ],
+            "reason": "В тестовом бизнесе одно направление"
+          }
+        },
+        {
+          "status": "MANUAL",
+          "rule": "semantics.keyword_count",
+          "message": "Клиент | Услуга | РСЯ / Услуга РСЯ: 1; стартовый ориентир 5–15. Зафиксируйте причину выбранного количества.",
+          "evidence": {
+            "target": "Клиент | Услуга | РСЯ / Услуга РСЯ",
+            "count": 1,
+            "recommended": [
+              5,
+              15
+            ],
+            "reason": "Узкая тестовая семантика"
+          }
+        },
+        {
+          "status": "MANUAL",
+          "rule": "semantics.content_review",
+          "message": "Проверить смысловую близость фраз, предложение и источники. Наличие ссылок не доказывает чтение источников или полноту спроса.",
+          "evidence": {}
+        }
+      ],
+      "summary": {
+        "client_budget": {
+          "status": "not_configured",
+          "scope": "planned_campaigns",
+          "weekly_net_total_micros": 7000000000
+        },
+        "tracking_profile": "utm_v1",
+        "alternative_texts_enabled": false,
+        "business_profiles_declared": 0,
+        "time_zone": "Europe/Moscow",
+        "weekly_budget_by_channel": {
+          "search": 3000.0,
+          "network": 4000.0
+        },
+        "weekly_budget_total": 7000.0,
+        "campaigns": 2,
+        "ad_groups": 2,
+        "ads": 5,
+        "keywords": 2,
+        "autotargeting": 1,
+        "criteria": 3,
+        "bid_modifiers": 2
+      },
+      "api_units_estimate": {
+        "scope": "successful_add_calls_only",
+        "rates_source": "https://yandex.ru/dev/direct/doc/ru/concepts/units",
+        "rates_verified_on": "2026-09-09",
+        "rates_current": true,
+        "estimated_units": 243,
+        "estimated_requests": 5,
+        "services": [
+          {
+            "service": "Campaigns.add",
+            "objects": 2,
+            "calls": 1,
+            "call_units": 10,
+            "object_units": 10,
+            "estimated_units": 20
+          },
+          {
+            "service": "BidModifiers.add",
+            "objects": 2,
+            "calls": 1,
+            "call_units": 15,
+            "object_units": 2,
+            "estimated_units": 17
+          },
+          {
+            "service": "AdGroups.add",
+            "objects": 2,
+            "calls": 1,
+            "call_units": 20,
+            "object_units": 40,
+            "estimated_units": 60
+          },
+          {
+            "service": "Ads.add",
+            "objects": 5,
+            "calls": 1,
+            "call_units": 20,
+            "object_units": 100,
+            "estimated_units": 120
+          },
+          {
+            "service": "Keywords.add",
+            "objects": 3,
+            "calls": 1,
+            "call_units": 20,
+            "object_units": 6,
+            "estimated_units": 26
+          }
+        ],
+        "not_included": [
+          "get-вызовы preflight и readback",
+          "вызовы Вордстата v4",
+          "штрафы за ошибочные операции",
+          "создание дополнений вне этого bundle"
+        ]
+      },
+      "ready": true,
+      "plan_hash": "23941ba04526f1ebb0c690869ee3cbf607e6912d3702bb74ecbc859f1f7fe212"
+    }
+  },
+  {
+    "name": "office",
+    "source": {
+      "semantic_plan": {
+        "profile": "small_business",
+        "business_directions": [
+          {
+            "id": "service",
+            "name": "Услуга"
+          }
+        ],
+        "sources": [
+          {
+            "id": "site",
+            "type": "website",
+            "reference": "https://example.test/service",
+            "collected_on": "2026-09-18",
+            "region_ids": []
+          },
+          {
+            "id": "ws",
+            "type": "wordstat",
+            "reference": "fixture://wordstat.tsv",
+            "collected_on": "2026-09-18",
+            "region_ids": [
+              213
+            ]
+          }
+        ],
+        "history": {
+          "status": "new_account",
+          "reason": "Тестовый новый кабинет"
+        },
+        "candidates": [
+          {
+            "id": "service",
+            "phrase": "заказать услугу",
+            "source_ids": [
+              "ws"
+            ],
+            "decision": "selected",
+            "reason": "Целевой запрос по услуге"
+          }
+        ]
+      },
+      "name": "Клиент | Услуга",
+      "start_date": "2026-09-19",
+      "age_min": 18,
+      "weekly_budget": {
+        "search": 3000,
+        "network": 4000,
+        "maps": 2000
+      },
+      "region_ids": [
+        213
+      ],
+      "counter_ids": [
+        12345
+      ],
+      "priority_goals": [
+        {
+          "goal_id": 77,
+          "value": 1500
+        }
+      ],
+      "allow_unverified_goals": true,
+      "office": true,
+      "manual_checks": {
+        "goals_reviewed": true,
+        "regions_verified": true,
+        "landing_pages_verified": true
+      },
+      "channels": {
+        "search": {
+          "groups": [
+            {
+              "name": "Услуга поиск",
+              "keywords": [
+                "заказать услугу"
+              ],
+              "ads": [
+                {
+                  "titles": [
+                    "Профессиональная услуга для развития вашего бизнеса 1",
+                    "Комплексное решение задачи для вашей компании 1",
+                    "Консультация и расчёт проекта для вашего бизнеса 1"
+                  ],
+                  "texts": [
+                    "Оставьте заявку на сайте",
+                    "Получите консультацию по услуге 1",
+                    "Узнайте условия сотрудничества 1"
+                  ],
+                  "href": "https://example.test/service",
+                  "action_button": {
+                    "text": "Узнать больше",
+                    "reason": "Условия услуги на посадочной"
+                  },
+                  "hypothesis": "Отдельная гипотеза объявления 1",
+                  "sitelink_set_id": 10,
+                  "ad_extension_ids": [
+                    20
+                  ]
+                },
+                {
+                  "titles": [
+                    "Профессиональная услуга для развития вашего бизнеса 2",
+                    "Комплексное решение задачи для вашей компании 2",
+                    "Консультация и расчёт проекта для вашего бизнеса 2"
+                  ],
+                  "texts": [
+                    "Оставьте заявку на сайте",
+                    "Получите консультацию по услуге 2",
+                    "Узнайте условия сотрудничества 2"
+                  ],
+                  "href": "https://example.test/service",
+                  "action_button": {
+                    "text": "Узнать больше",
+                    "reason": "Условия услуги на посадочной"
+                  },
+                  "hypothesis": "Отдельная гипотеза объявления 2",
+                  "sitelink_set_id": 10,
+                  "ad_extension_ids": [
+                    20
+                  ]
+                }
+              ],
+              "semantic": {
+                "direction_id": "service",
+                "intent": "Заказать услугу",
+                "offer": "Услуга",
+                "landing_url": "https://example.test/service",
+                "split_reason": "Единое предложение и покупательское намерение",
+                "brand_segment": "generic",
+                "business_source_ids": [
+                  "site"
+                ],
+                "candidate_ids": [
+                  "service"
+                ],
+                "keyword_count_reason": "Узкая тестовая семантика",
+                "source_geo_reason": "Географические варианты требуют отдельного исследования"
+              }
+            }
+          ],
+          "group_count_reason": "В тестовом бизнесе одно направление"
+        },
+        "network": {
+          "groups": [
+            {
+              "name": "Услуга РСЯ",
+              "keywords": [
+                "заказать услугу"
+              ],
+              "ads": [
+                {
+                  "titles": [
+                    "Профессиональная услуга для развития вашего бизнеса 3",
+                    "Комплексное решение задачи для вашей компании 3",
+                    "Консультация и расчёт проекта для вашего бизнеса 3"
+                  ],
+                  "texts": [
+                    "Оставьте заявку на сайте",
+                    "Получите консультацию по услуге 3",
+                    "Узнайте условия сотрудничества 3"
+                  ],
+                  "href": "https://example.test/service",
+                  "action_button": {
+                    "text": "Узнать больше",
+                    "reason": "Условия услуги на посадочной"
+                  },
+                  "hypothesis": "Отдельная гипотеза объявления 3",
+                  "sitelink_set_id": 10,
+                  "ad_extension_ids": [
+                    20
+                  ],
+                  "ad_image_hashes": [
+                    "hash-3-0",
+                    "hash-3-1",
+                    "hash-3-2"
+                  ]
+                },
+                {
+                  "titles": [
+                    "Профессиональная услуга для развития вашего бизнеса 4",
+                    "Комплексное решение задачи для вашей компании 4",
+                    "Консультация и расчёт проекта для вашего бизнеса 4"
+                  ],
+                  "texts": [
+                    "Оставьте заявку на сайте",
+                    "Получите консультацию по услуге 4",
+                    "Узнайте условия сотрудничества 4"
+                  ],
+                  "href": "https://example.test/service",
+                  "action_button": {
+                    "text": "Узнать больше",
+                    "reason": "Условия услуги на посадочной"
+                  },
+                  "hypothesis": "Отдельная гипотеза объявления 4",
+                  "sitelink_set_id": 10,
+                  "ad_extension_ids": [
+                    20
+                  ],
+                  "ad_image_hashes": [
+                    "hash-4-0",
+                    "hash-4-1",
+                    "hash-4-2"
+                  ]
+                },
+                {
+                  "titles": [
+                    "Профессиональная услуга для развития вашего бизнеса 5",
+                    "Комплексное решение задачи для вашей компании 5",
+                    "Консультация и расчёт проекта для вашего бизнеса 5"
+                  ],
+                  "texts": [
+                    "Оставьте заявку на сайте",
+                    "Получите консультацию по услуге 5",
+                    "Узнайте условия сотрудничества 5"
+                  ],
+                  "href": "https://example.test/service",
+                  "action_button": {
+                    "text": "Узнать больше",
+                    "reason": "Условия услуги на посадочной"
+                  },
+                  "hypothesis": "Отдельная гипотеза объявления 5",
+                  "sitelink_set_id": 10,
+                  "ad_extension_ids": [
+                    20
+                  ],
+                  "ad_image_hashes": [
+                    "hash-5-0",
+                    "hash-5-1",
+                    "hash-5-2"
+                  ]
+                }
+              ],
+              "semantic": {
+                "direction_id": "service",
+                "intent": "Заказать услугу",
+                "offer": "Услуга",
+                "landing_url": "https://example.test/service",
+                "split_reason": "Единое предложение и покупательское намерение",
+                "brand_segment": "generic",
+                "business_source_ids": [
+                  "site"
+                ],
+                "candidate_ids": [
+                  "service"
+                ],
+                "keyword_count_reason": "Узкая тестовая семантика",
+                "source_geo_reason": "Географические варианты требуют отдельного исследования"
+              }
+            }
+          ],
+          "group_count_reason": "В тестовом бизнесе одно направление"
+        },
+        "maps": {
+          "groups": [
+            {
+              "name": "Услуга Карты",
+              "keywords": [
+                "заказать услугу"
+              ],
+              "ads": [
+                {
+                  "titles": [
+                    "Профессиональная услуга для развития вашего бизнеса 7",
+                    "Комплексное решение задачи для вашей компании 7",
+                    "Консультация и расчёт проекта для вашего бизнеса 7"
+                  ],
+                  "texts": [
+                    "Оставьте заявку на сайте",
+                    "Получите консультацию по услуге 7",
+                    "Узнайте условия сотрудничества 7"
+                  ],
+                  "href": "https://example.test/service",
+                  "action_button": {
+                    "text": "Узнать больше",
+                    "reason": "Условия услуги на посадочной"
+                  },
+                  "hypothesis": "Отдельная гипотеза объявления 7",
+                  "sitelink_set_id": 10,
+                  "ad_extension_ids": [
+                    20
+                  ],
+                  "business_id": 999
+                },
+                {
+                  "titles": [
+                    "Профессиональная услуга для развития вашего бизнеса 8",
+                    "Комплексное решение задачи для вашей компании 8",
+                    "Консультация и расчёт проекта для вашего бизнеса 8"
+                  ],
+                  "texts": [
+                    "Оставьте заявку на сайте",
+                    "Получите консультацию по услуге 8",
+                    "Узнайте условия сотрудничества 8"
+                  ],
+                  "href": "https://example.test/service",
+                  "action_button": {
+                    "text": "Узнать больше",
+                    "reason": "Условия услуги на посадочной"
+                  },
+                  "hypothesis": "Отдельная гипотеза объявления 8",
+                  "sitelink_set_id": 10,
+                  "ad_extension_ids": [
+                    20
+                  ],
+                  "business_id": 999
+                }
+              ],
+              "semantic": {
+                "direction_id": "service",
+                "intent": "Заказать услугу",
+                "offer": "Услуга",
+                "landing_url": "https://example.test/service",
+                "split_reason": "Единое предложение и покупательское намерение",
+                "brand_segment": "generic",
+                "business_source_ids": [
+                  "site"
+                ],
+                "candidate_ids": [
+                  "service"
+                ],
+                "keyword_count_reason": "Узкая тестовая семантика",
+                "source_geo_reason": "Географические варианты требуют отдельного исследования"
+              }
+            }
+          ],
+          "group_count_reason": "В тестовом бизнесе одно направление"
+        }
+      },
+      "business_profiles": [
+        {
+          "business_id": 999,
+          "phone": "+7 (495) 123-45-67",
+          "address": "Москва, Тестовая 1",
+          "has_office": true
+        }
+      ]
+    },
+    "plan": {
+      "schema": "direct_campaign_bundle_v1",
+      "client_login": "client",
+      "api_version": "v501",
+      "policy": {
+        "name": "agency_default_v1",
+        "version": "1.12.0"
+      },
+      "manual_checks": {
+        "goals_reviewed": true,
+        "regions_verified": true,
+        "landing_pages_verified": true
+      },
+      "tracking_profile": "utm_v1",
+      "client_budget": null,
+      "business_profiles": [
+        {
+          "business_id": 999,
+          "phone": "74951234567",
+          "address": "москва, тестовая 1",
+          "has_office": true
+        }
+      ],
+      "goal_catalog_campaign_id": null,
+      "allow_unverified_goals": true,
+      "negative_keyword_selection": {
+        "profile": "custom",
+        "business_terms": [],
+        "selected": [],
+        "excluded": [],
+        "review_required": true,
+        "review_context": [],
+        "group_selections": []
+      },
+      "semantic_plan": {
+        "profile": "small_business",
+        "business_directions": [
+          {
+            "id": "service",
+            "name": "Услуга"
+          }
+        ],
+        "sources": [
+          {
+            "id": "site",
+            "type": "website",
+            "reference": "https://example.test/service",
+            "collected_on": "2026-09-18",
+            "region_ids": []
+          },
+          {
+            "id": "ws",
+            "type": "wordstat",
+            "reference": "fixture://wordstat.tsv",
+            "collected_on": "2026-09-18",
+            "region_ids": [
+              213
+            ]
+          }
+        ],
+        "history": {
+          "status": "new_account",
+          "reason": "Тестовый новый кабинет"
+        },
+        "candidates": [
+          {
+            "id": "service",
+            "phrase": "заказать услугу",
+            "source_ids": [
+              "ws"
+            ],
+            "decision": "selected",
+            "reason": "Целевой запрос по услуге"
+          }
+        ]
+      },
+      "semantic_review": {
+        "profile": "small_business",
+        "profile_reason": null,
+        "sources": [
+          {
+            "id": "site",
+            "type": "website",
+            "reference": "https://example.test/service",
+            "collected_on": "2026-09-18",
+            "region_ids": [],
+            "evidence_status": "provided_in_bundle"
+          },
+          {
+            "id": "ws",
+            "type": "wordstat",
+            "reference": "fixture://wordstat.tsv",
+            "collected_on": "2026-09-18",
+            "region_ids": [
+              213
+            ],
+            "evidence_status": "provided_in_bundle"
+          }
+        ],
+        "history": {
+          "status": "new_account",
+          "reason": "Тестовый новый кабинет"
+        },
+        "business_directions": [
+          {
+            "id": "service",
+            "name": "Услуга"
+          }
+        ],
+        "groups": [
+          {
+            "campaign_index": 0,
+            "group_index": 0,
+            "group": "Клиент | Услуга | Поиск / Услуга поиск",
+            "direction_id": "service",
+            "intent": "Заказать услугу",
+            "offer": "Услуга",
+            "landing_url": "https://example.test/service",
+            "split_reason": "Единое предложение и покупательское намерение",
+            "brand_segment": "generic",
+            "business_source_ids": [
+              "site"
+            ],
+            "candidate_ids": [
+              "service"
+            ],
+            "keyword_count_reason": "Узкая тестовая семантика",
+            "source_geo_reason": "Географические варианты требуют отдельного исследования",
+            "keywords_count": 1,
+            "candidates": [
+              {
+                "id": "service",
+                "phrase": "заказать услугу",
+                "source_ids": [
+                  "ws"
+                ],
+                "decision": "selected",
+                "reason": "Целевой запрос по услуге",
+                "evidence_kind": "query_source"
+              }
+            ],
+            "ad_hypotheses": [
+              "Отдельная гипотеза объявления 1",
+              "Отдельная гипотеза объявления 2"
+            ],
+            "review_status": "declared_requires_semantic_review"
+          },
+          {
+            "campaign_index": 1,
+            "group_index": 0,
+            "group": "Клиент | Услуга | РСЯ / Услуга РСЯ",
+            "direction_id": "service",
+            "intent": "Заказать услугу",
+            "offer": "Услуга",
+            "landing_url": "https://example.test/service",
+            "split_reason": "Единое предложение и покупательское намерение",
+            "brand_segment": "generic",
+            "business_source_ids": [
+              "site"
+            ],
+            "candidate_ids": [
+              "service"
+            ],
+            "keyword_count_reason": "Узкая тестовая семантика",
+            "source_geo_reason": "Географические варианты требуют отдельного исследования",
+            "keywords_count": 1,
+            "candidates": [
+              {
+                "id": "service",
+                "phrase": "заказать услугу",
+                "source_ids": [
+                  "ws"
+                ],
+                "decision": "selected",
+                "reason": "Целевой запрос по услуге",
+                "evidence_kind": "query_source"
+              }
+            ],
+            "ad_hypotheses": [
+              "Отдельная гипотеза объявления 3",
+              "Отдельная гипотеза объявления 4",
+              "Отдельная гипотеза объявления 5"
+            ],
+            "review_status": "declared_requires_semantic_review"
+          },
+          {
+            "campaign_index": 2,
+            "group_index": 0,
+            "group": "Клиент | Услуга | Карты / Услуга Карты",
+            "direction_id": "service",
+            "intent": "Заказать услугу",
+            "offer": "Услуга",
+            "landing_url": "https://example.test/service",
+            "split_reason": "Единое предложение и покупательское намерение",
+            "brand_segment": "generic",
+            "business_source_ids": [
+              "site"
+            ],
+            "candidate_ids": [
+              "service"
+            ],
+            "keyword_count_reason": "Узкая тестовая семантика",
+            "source_geo_reason": "Географические варианты требуют отдельного исследования",
+            "keywords_count": 1,
+            "candidates": [
+              {
+                "id": "service",
+                "phrase": "заказать услугу",
+                "source_ids": [
+                  "ws"
+                ],
+                "decision": "selected",
+                "reason": "Целевой запрос по услуге",
+                "evidence_kind": "query_source"
+              }
+            ],
+            "ad_hypotheses": [
+              "Отдельная гипотеза объявления 7",
+              "Отдельная гипотеза объявления 8"
+            ],
+            "review_status": "declared_requires_semantic_review"
+          }
+        ],
+        "candidates": [
+          {
+            "id": "service",
+            "phrase": "заказать услугу",
+            "source_ids": [
+              "ws"
+            ],
+            "decision": "selected",
+            "reason": "Целевой запрос по услуге",
+            "evidence_kind": "query_source"
+          }
+        ],
+        "counts": {
+          "candidate_records": 1,
+          "found_unique_phrases": 1,
+          "selected_unique_phrases": 1,
+          "excluded_candidates": 0,
+          "pending_candidates": 0,
+          "selected_hypotheses": 0
+        },
+        "evidence_status": "provided_in_bundle"
+      },
+      "campaigns": [
+        {
+          "channel": "search",
+          "channel_variant": 0,
+          "campaign": {
+            "Name": "Клиент | Услуга | Поиск",
+            "StartDate": "2026-09-19",
+            "TimeZone": "Europe/Moscow",
+            "UnifiedCampaign": {
+              "BiddingStrategy": {
+                "Search": {
+                  "BiddingStrategyType": "WB_MAXIMUM_CLICKS",
+                  "WbMaximumClicks": {
+                    "WeeklySpendLimit": 3000000000
+                  },
+                  "PlacementTypes": {
+                    "SearchResults": "YES",
+                    "ProductGallery": "NO",
+                    "DynamicPlaces": "YES",
+                    "Maps": "NO",
+                    "SearchOrganizationList": "NO"
+                  }
+                },
+                "Network": {
+                  "BiddingStrategyType": "SERVING_OFF",
+                  "PlacementTypes": {
+                    "Network": "NO",
+                    "Maps": "NO"
+                  }
+                }
+              },
+              "Settings": [
+                {
+                  "Option": "ADD_METRICA_TAG",
+                  "Value": "YES"
+                },
+                {
+                  "Option": "ENABLE_SITE_MONITORING",
+                  "Value": "YES"
+                },
+                {
+                  "Option": "ALTERNATIVE_TEXTS_ENABLED",
+                  "Value": "NO"
+                }
+              ],
+              "TrackingParams": "type={source_type}&source={source}&block={position_type}&pos={position}&key={keyword}&campaign={campaign_id}&yd_campaign_name={campaign_name}&name_lat={campaign_name_lat}&retargeting={retargeting_id}&ad={ad_id}&phrase={phrase_id}&gbid={gbid}&device={device_type}&region={region_id}&region_name={region_name}&utm_source=yandex&utm_medium=cpc&utm_campaign={campaign_id}&utm_content={ad_id}&utm_term={phrase_id}",
+              "AttributionModel": "AUTO",
+              "CounterIds": {
+                "Items": [
+                  12345
+                ]
+              },
+              "PriorityGoals": {
+                "Items": [
+                  {
+                    "GoalId": 77,
+                    "Value": 1500000000
+                  }
+                ]
+              }
+            }
+          },
+          "groups": [
+            {
+              "ad_group": {
+                "Name": "Услуга поиск",
+                "RegionIds": [
+                  213
+                ],
+                "UnifiedAdGroup": {
+                  "OfferRetargeting": "NO"
+                }
+              },
+              "ads": [
+                {
+                  "ResponsiveAd": {
+                    "Titles": [
+                      "Профессиональная услуга для развития вашего бизнеса 1",
+                      "Комплексное решение задачи для вашей компании 1",
+                      "Консультация и расчёт проекта для вашего бизнеса 1"
+                    ],
+                    "Texts": [
+                      "Оставьте заявку на сайте",
+                      "Получите консультацию по услуге 1",
+                      "Узнайте условия сотрудничества 1"
+                    ],
+                    "Href": "https://example.test/service",
+                    "SitelinkSetId": 10,
+                    "AdExtensionIds": [
+                      20
+                    ]
+                  }
+                },
+                {
+                  "ResponsiveAd": {
+                    "Titles": [
+                      "Профессиональная услуга для развития вашего бизнеса 2",
+                      "Комплексное решение задачи для вашей компании 2",
+                      "Консультация и расчёт проекта для вашего бизнеса 2"
+                    ],
+                    "Texts": [
+                      "Оставьте заявку на сайте",
+                      "Получите консультацию по услуге 2",
+                      "Узнайте условия сотрудничества 2"
+                    ],
+                    "Href": "https://example.test/service",
+                    "SitelinkSetId": 10,
+                    "AdExtensionIds": [
+                      20
+                    ]
+                  }
+                }
+              ],
+              "keywords": [
+                {
+                  "Keyword": "заказать услугу"
+                },
+                {
+                  "Keyword": "---autotargeting",
+                  "AutotargetingSettings": {
+                    "Categories": {
+                      "Exact": "YES",
+                      "Narrow": "YES",
+                      "Alternative": "NO",
+                      "Accessory": "NO",
+                      "Broader": "NO"
+                    },
+                    "BrandOptions": {
+                      "WithoutBrands": "YES",
+                      "WithAdvertiserBrand": "NO",
+                      "WithCompetitorsBrand": "NO"
+                    }
+                  }
+                }
+              ],
+              "semantic": {
+                "direction_id": "service",
+                "intent": "Заказать услугу",
+                "offer": "Услуга",
+                "landing_url": "https://example.test/service",
+                "split_reason": "Единое предложение и покупательское намерение",
+                "brand_segment": "generic",
+                "business_source_ids": [
+                  "site"
+                ],
+                "candidate_ids": [
+                  "service"
+                ],
+                "keyword_count_reason": "Узкая тестовая семантика",
+                "source_geo_reason": "Географические варианты требуют отдельного исследования"
+              },
+              "ad_hypotheses": [
+                "Отдельная гипотеза объявления 1",
+                "Отдельная гипотеза объявления 2"
+              ],
+              "action_buttons": [
+                {
+                  "text": "Узнать больше",
+                  "reason": "Условия услуги на посадочной",
+                  "href": "https://example.test/service",
+                  "destination": "main"
+                },
+                {
+                  "text": "Узнать больше",
+                  "reason": "Условия услуги на посадочной",
+                  "href": "https://example.test/service",
+                  "destination": "main"
+                }
+              ]
+            }
+          ],
+          "group_count_reason": "В тестовом бизнесе одно направление",
+          "bid_modifiers": [
+            {
+              "DemographicsAdjustments": [
+                {
+                  "Age": "AGE_0_17",
+                  "BidModifier": 0
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "channel": "network",
+          "channel_variant": 0,
+          "campaign": {
+            "Name": "Клиент | Услуга | РСЯ",
+            "StartDate": "2026-09-19",
+            "TimeZone": "Europe/Moscow",
+            "ExcludedSites": {
+              "Items": [
+                "com.aaaudi.wordmaker",
+                "com.addswhilessuffers.binds",
+                "com.agedstudio.card.solitaire.klondike",
+                "com.aif.aifkitchen",
+                "com.alexanderkondrashov.slovari",
+                "com.allconnected.turbovpn",
+                "com.almondstudio.wordbyword",
+                "com.amberfog.reader",
+                "com.amberfog.vkfree",
+                "com.andr.gostivk",
+                "com.apalon.wallpapers",
+                "com.appgame7.candyfrenzy",
+                "com.appgame7.jigsaw.free",
+                "com.appteka.sportexpress",
+                "com.appyogi.vpnapp",
+                "com.ascellamobile.musicloudfree",
+                "com.atrix.rusvpn",
+                "com.avito.android",
+                "com.Balls",
+                "com.banderlogiapps.hd",
+                "com.basicvpnproxy.app",
+                "com.bcsofts.colorLinesReborn",
+                "com.bigcake.android.mergemania",
+                "com.bigcake.android.solitairedaily",
+                "com.bigduckgames.flow",
+                "com.bobr.vpn1",
+                "com.bobr.vpn1pro",
+                "com.bolsh.calorie",
+                "com.bonbeart.doors",
+                "com.bonbeart.doorsseasons.part2",
+                "com.boss.chat.egorshipcallvideo",
+                "com.breakcoder.blocksmerger",
+                "com.candl.athena",
+                "com.candylegend.legend",
+                "com.cardgame.collection.fishdom",
+                "com.clean.road",
+                "com.cleanmaster.mguard",
+                "com.cloudycastlegames.wordline",
+                "com.color.colorvpn",
+                "com.coloring.color.number.ios",
+                "com.coolmobilesolution.fastscannerfree",
+                "com.cootek.smartinputv5",
+                "com.cootek.smartinputv5.oem",
+                "com.corgi.VPNStart",
+                "com.craftgames.plntcrft",
+                "com.craftsman.go",
+                "com.crazylight.photoscanner.age",
+                "com.creativemobile.dragracing",
+                "com.devexpert.weather",
+                "com.dicedom.mergepuzzle",
+                "com.disoftware.android.vpngate",
+                "com.disoftware.android.vpngateclient",
+                "com.dmitry.social.nets.vkontakevkmini",
+                "com.dobar.vpn",
+                "com.droid27.senseflipclockweather",
+                "com.droid27.transparentclockweather",
+                "com.dropdom.blockpuzzle.hwwgame",
+                "com.easybrain.art.puzzle",
+                "com.easybrain.block.puzzle.games",
+                "com.easybrain.chamy",
+                "com.easybrain.jigsaw.puzzles",
+                "com.easybrain.killer.sudoku.free",
+                "com.easybrain.make.music",
+                "com.easybrain.nonogram",
+                "com.easybrain.nonogram.color",
+                "com.easybrain.number.puzzle.game",
+                "com.easybrain.solitaire",
+                "com.easybrain.solitaire.klondike.free",
+                "com.easybrain.sudoku.android",
+                "com.easybrain.sudoku.ios",
+                "com.easygames.race",
+                "com.echomoscow.EchoMsk",
+                "com.edadeal.android",
+                "com.emoji.keyboard.touchpal",
+                "com.europosit.pixelcoloring",
+                "com.evvsoft.preferance",
+                "com.fast.free.secure.unblock.vpn",
+                "com.fingersoft.failhard",
+                "com.fingersoft.hillclimb",
+                "com.fingersoft.hillclimbracing",
+                "com.fmarzana.vdlfree2",
+                "com.free.unlimited.fast.secure.vpn",
+                "com.free.vpn.hotspot.secure.vpnify",
+                "com.free.vpn.proxy.master.app",
+                "com.free.vpn.super.hotspot.open",
+                "com.free.vpn.turbo.fast.secure.govpn",
+                "com.freevpnplanet",
+                "com.fruitheroes.legend",
+                "com.fugo.wow",
+                "com.fugo.wowguru",
+                "com.fusee.RomanBuilder",
+                "com.gafv.puzzle.game.classic.blockpuzzle.wood",
+                "com.gamepie.airpolice",
+                "com.games.joinblocks",
+                "com.gemteam.stickerpackstg",
+                "com.gemteam.trmpclient",
+                "com.gethornet.Hornet",
+                "com.gjg.colorfill3d",
+                "com.GMA.Ball.Sort.Puzzle",
+                "com.gmail.heagoo.apkeditor",
+                "com.gramgames.tenten",
+                "com.gregorioapps.stfree",
+                "com.grydmitrij.ticketpdddemo",
+                "com.gym.racegame",
+                "com.hb.dialer.free",
+                "com.hide.me.vpn",
+                "com.hornet.android",
+                "com.hotspotvpn.super4-ios",
+                "com.hotspotvpn.super4-ios.lite",
+                "com.idownloaderapp.idl2free",
+                "com.igoodnewgames.airlines2",
+                "com.IguazuGames.Mahjong",
+                "com.ijinshan.kbatterydoctor_en",
+                "com.ilyondynamics.bubbleShooterClassic",
+                "com.imo.android.imoim",
+                "com.imo.android.imoimbeta",
+                "com.infolink.LimeHDTV",
+                "com.infolink.limeiptv",
+                "com.instavpns.max",
+                "com.intellectualflame.ledflashlight.washer",
+                "com.iphonease.ledflashlight.button",
+                "com.ivansoft.VPN",
+                "com.ivygames.morskoiboi",
+                "com.jagplay.client.android.app.thousand.hd",
+                "com.jewelblast.puzzlelegend",
+                "com.jewels.gems.android",
+                "com.k17.millionaire",
+                "com.kadka.forknsausage",
+                "com.karmangames.solitaire",
+                "com.karmangames.spider",
+                "com.kii.safe",
+                "com.krishnatechnoweb.vpnbrowser",
+                "com.linkdesks.jewelblastmania",
+                "com.lunappstudio.wordomaze",
+                "com.lyrebirdstudio.pipcamera",
+                "com.memory.brain.training.games",
+                "com.merge.animals",
+                "com.merigotech.chestofwords",
+                "com.merigotech.fillwords",
+                "com.mgc.runnergame",
+                "com.mind.quiz.brain.out",
+                "com.miui.cleaner",
+                "com.miui.videoplayer",
+                "com.mocomediallc.fastfriend",
+                "com.modulardreams.bubblewars",
+                "com.muscle.rush",
+                "com.mydevcorp.balda",
+                "com.nektome.chatruletka.voice",
+                "com.nektome.talk",
+                "com.netsecurity.bestvpn.bestvpn",
+                "com.newsstand.dating",
+                "com.ninegag.android.app",
+                "com.notvpn",
+                "com.now.vpn",
+                "com.onecwearable.keyboard",
+                "com.onecwireless.mahjong",
+                "com.onecwireless.solitaire1.free",
+                "com.openmygame.games.android.crossword.plants",
+                "com.openmygame.games.android.jigsawpuzzle",
+                "com.openmygame.games.android.wordpizza",
+                "com.openmygame.games.android.wordsearchsea",
+                "com.openmygame.games.ios.wordspizza",
+                "com.openmygame.games.kr.client",
+                "com.openmygame.magicwordsearch",
+                "com.opera.app.news",
+                "com.opera.browser",
+                "com.opera.mini.native",
+                "com.osinit.megavpn",
+                "com.outfit7.mytalkingangelafree",
+                "com.outfit7.mytalkingtomfree",
+                "com.outfit7.talkingangelafree",
+                "com.outfit7.talkingben",
+                "com.outfit7.talkingtom2free",
+                "com.outfit7.tomlovesangelafree",
+                "com.perm.kate",
+                "com.pixel.art.coloring.color.number",
+                "com.pixelduck.ru4pics1word",
+                "com.platovpn.vpn",
+                "com.playgendary.tom",
+                "com.playreap.fmdpropro",
+                "com.playstrom.bob",
+                "com.playstrom.dop4",
+                "com.promt.pmtappfree",
+                "com.puzzle.merge",
+                "com.quarterborrowresult.customer",
+                "com.rambler.horoscopes",
+                "com.reachjunction.card.game.solitaire",
+                "com.renualsoftware.minecraftpe.minecraftpeservers",
+                "com.rexplayer.app",
+                "com.romant.image",
+                "com.rusdev.pid",
+                "com.s-g-i.Edadeal",
+                "com.s2apps.game2048",
+                "com.sabzira.pianotiles",
+                "com.satoshi.vpns",
+                "com.scanword.journal",
+                "com.shadowbiz.semechki",
+                "com.shazam.android",
+                "com.simple.pro.fast.unlimited.private.vpn",
+                "com.slippy.linerusher",
+                "com.snail.VPNSnail",
+                "com.soodexlabs.sudoku2",
+                "com.spcards.cards2",
+                "com.spcomes.fruitforest",
+                "com.speed.svpn",
+                "com.speedy.vpn",
+                "com.sportexpress.ipad",
+                "com.sportexpress.iphone",
+                "com.stack.booklib2",
+                "com.stealthgame.master",
+                "com.stolitomson.vpn",
+                "com.supermastervpn.max",
+                "com.superproxyyvpn.max",
+                "com.supervpn.max",
+                "com.supervpn.vpn.free.proxy",
+                "com.surpax.ledflashlight.panel",
+                "com.sushirolls.app",
+                "com.swc.yaplakal",
+                "com.teamtol.livedota",
+                "com.thousandcardgame.android.huawei",
+                "com.tikvpn.tikvpn",
+                "com.tmarki.spidersol",
+                "com.tomato.pasbayan",
+                "com.tomato.scanword.collection",
+                "com.topface.topface",
+                "com.turbo.stars",
+                "com.ultralvpn.max",
+                "com.veraxen.blockpuzzle",
+                "com.vg.sanandreasstraight2compton",
+                "com.viber.voip",
+                "com.vpn-buck.proxy",
+                "com.vpn-buck.proxy.lite",
+                "com.vpn.free.hotspot.secure.vpnify",
+                "com.vpn.hedgehog",
+                "com.vpn.securevpnpro",
+                "com.vpnappvpn.VPNApp",
+                "com.vpnbeaver.vpn",
+                "com.vpnmaster.android",
+                "com.vpnproxyvpn.max",
+                "com.vpnredcat.vpn",
+                "com.vpnsatoshi.vpnsatoshiapp",
+                "com.waplog.social",
+                "com.whisperarts.kids.breastfeeding",
+                "com.wutapp.otkrytki",
+                "com.xoopsoft.apps.russia.free",
+                "com.xoopsoft.apps.seriea.free",
+                "com.yandex.browser",
+                "com.zigzag_mobile.skorolek",
+                "AdsNative",
+                "BidSwitch"
+              ]
+            },
+            "UnifiedCampaign": {
+              "BiddingStrategy": {
+                "Search": {
+                  "BiddingStrategyType": "SERVING_OFF",
+                  "PlacementTypes": {
+                    "SearchResults": "NO",
+                    "ProductGallery": "NO",
+                    "DynamicPlaces": "NO",
+                    "Maps": "NO",
+                    "SearchOrganizationList": "NO"
+                  }
+                },
+                "Network": {
+                  "BiddingStrategyType": "WB_MAXIMUM_CLICKS",
+                  "WbMaximumClicks": {
+                    "WeeklySpendLimit": 4000000000
+                  },
+                  "PlacementTypes": {
+                    "Network": "YES",
+                    "Maps": "NO"
+                  }
+                }
+              },
+              "Settings": [
+                {
+                  "Option": "ADD_METRICA_TAG",
+                  "Value": "YES"
+                },
+                {
+                  "Option": "ENABLE_SITE_MONITORING",
+                  "Value": "YES"
+                },
+                {
+                  "Option": "ALTERNATIVE_TEXTS_ENABLED",
+                  "Value": "NO"
+                }
+              ],
+              "TrackingParams": "type={source_type}&source={source}&block={position_type}&pos={position}&key={keyword}&campaign={campaign_id}&yd_campaign_name={campaign_name}&name_lat={campaign_name_lat}&retargeting={retargeting_id}&ad={ad_id}&phrase={phrase_id}&gbid={gbid}&device={device_type}&region={region_id}&region_name={region_name}&utm_source=yandex&utm_medium=cpc&utm_campaign={campaign_id}&utm_content={ad_id}&utm_term={phrase_id}",
+              "AttributionModel": "AUTO",
+              "CounterIds": {
+                "Items": [
+                  12345
+                ]
+              },
+              "PriorityGoals": {
+                "Items": [
+                  {
+                    "GoalId": 77,
+                    "Value": 1500000000
+                  }
+                ]
+              }
+            }
+          },
+          "groups": [
+            {
+              "ad_group": {
+                "Name": "Услуга РСЯ",
+                "RegionIds": [
+                  213
+                ],
+                "UnifiedAdGroup": {
+                  "OfferRetargeting": "NO"
+                }
+              },
+              "ads": [
+                {
+                  "ResponsiveAd": {
+                    "Titles": [
+                      "Профессиональная услуга для развития вашего бизнеса 3",
+                      "Комплексное решение задачи для вашей компании 3",
+                      "Консультация и расчёт проекта для вашего бизнеса 3"
+                    ],
+                    "Texts": [
+                      "Оставьте заявку на сайте",
+                      "Получите консультацию по услуге 3",
+                      "Узнайте условия сотрудничества 3"
+                    ],
+                    "Href": "https://example.test/service",
+                    "SitelinkSetId": 10,
+                    "AdImageHashes": [
+                      "hash-3-0",
+                      "hash-3-1",
+                      "hash-3-2"
+                    ],
+                    "AdExtensionIds": [
+                      20
+                    ]
+                  }
+                },
+                {
+                  "ResponsiveAd": {
+                    "Titles": [
+                      "Профессиональная услуга для развития вашего бизнеса 4",
+                      "Комплексное решение задачи для вашей компании 4",
+                      "Консультация и расчёт проекта для вашего бизнеса 4"
+                    ],
+                    "Texts": [
+                      "Оставьте заявку на сайте",
+                      "Получите консультацию по услуге 4",
+                      "Узнайте условия сотрудничества 4"
+                    ],
+                    "Href": "https://example.test/service",
+                    "SitelinkSetId": 10,
+                    "AdImageHashes": [
+                      "hash-4-0",
+                      "hash-4-1",
+                      "hash-4-2"
+                    ],
+                    "AdExtensionIds": [
+                      20
+                    ]
+                  }
+                },
+                {
+                  "ResponsiveAd": {
+                    "Titles": [
+                      "Профессиональная услуга для развития вашего бизнеса 5",
+                      "Комплексное решение задачи для вашей компании 5",
+                      "Консультация и расчёт проекта для вашего бизнеса 5"
+                    ],
+                    "Texts": [
+                      "Оставьте заявку на сайте",
+                      "Получите консультацию по услуге 5",
+                      "Узнайте условия сотрудничества 5"
+                    ],
+                    "Href": "https://example.test/service",
+                    "SitelinkSetId": 10,
+                    "AdImageHashes": [
+                      "hash-5-0",
+                      "hash-5-1",
+                      "hash-5-2"
+                    ],
+                    "AdExtensionIds": [
+                      20
+                    ]
+                  }
+                }
+              ],
+              "keywords": [
+                {
+                  "Keyword": "заказать услугу"
+                }
+              ],
+              "semantic": {
+                "direction_id": "service",
+                "intent": "Заказать услугу",
+                "offer": "Услуга",
+                "landing_url": "https://example.test/service",
+                "split_reason": "Единое предложение и покупательское намерение",
+                "brand_segment": "generic",
+                "business_source_ids": [
+                  "site"
+                ],
+                "candidate_ids": [
+                  "service"
+                ],
+                "keyword_count_reason": "Узкая тестовая семантика",
+                "source_geo_reason": "Географические варианты требуют отдельного исследования"
+              },
+              "ad_hypotheses": [
+                "Отдельная гипотеза объявления 3",
+                "Отдельная гипотеза объявления 4",
+                "Отдельная гипотеза объявления 5"
+              ],
+              "action_buttons": [
+                {
+                  "text": "Узнать больше",
+                  "reason": "Условия услуги на посадочной",
+                  "href": "https://example.test/service",
+                  "destination": "main"
+                },
+                {
+                  "text": "Узнать больше",
+                  "reason": "Условия услуги на посадочной",
+                  "href": "https://example.test/service",
+                  "destination": "main"
+                },
+                {
+                  "text": "Узнать больше",
+                  "reason": "Условия услуги на посадочной",
+                  "href": "https://example.test/service",
+                  "destination": "main"
+                }
+              ]
+            }
+          ],
+          "group_count_reason": "В тестовом бизнесе одно направление",
+          "bid_modifiers": [
+            {
+              "DemographicsAdjustments": [
+                {
+                  "Age": "AGE_0_17",
+                  "BidModifier": 0
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "channel": "maps",
+          "channel_variant": 0,
+          "campaign": {
+            "Name": "Клиент | Услуга | Карты",
+            "StartDate": "2026-09-19",
+            "TimeZone": "Europe/Moscow",
+            "UnifiedCampaign": {
+              "BiddingStrategy": {
+                "Search": {
+                  "BiddingStrategyType": "WB_MAXIMUM_CLICKS",
+                  "WbMaximumClicks": {
+                    "WeeklySpendLimit": 2000000000
+                  },
+                  "PlacementTypes": {
+                    "SearchResults": "NO",
+                    "ProductGallery": "NO",
+                    "DynamicPlaces": "NO",
+                    "Maps": "YES",
+                    "SearchOrganizationList": "YES"
+                  }
+                },
+                "Network": {
+                  "BiddingStrategyType": "SERVING_OFF",
+                  "PlacementTypes": {
+                    "Network": "NO",
+                    "Maps": "NO"
+                  }
+                }
+              },
+              "Settings": [
+                {
+                  "Option": "ADD_METRICA_TAG",
+                  "Value": "YES"
+                },
+                {
+                  "Option": "ENABLE_SITE_MONITORING",
+                  "Value": "YES"
+                },
+                {
+                  "Option": "ALTERNATIVE_TEXTS_ENABLED",
+                  "Value": "NO"
+                }
+              ],
+              "TrackingParams": "type={source_type}&source={source}&block={position_type}&pos={position}&key={keyword}&campaign={campaign_id}&yd_campaign_name={campaign_name}&name_lat={campaign_name_lat}&retargeting={retargeting_id}&ad={ad_id}&phrase={phrase_id}&gbid={gbid}&device={device_type}&region={region_id}&region_name={region_name}&utm_source=yandex&utm_medium=cpc&utm_campaign={campaign_id}&utm_content={ad_id}&utm_term={phrase_id}",
+              "AttributionModel": "AUTO",
+              "CounterIds": {
+                "Items": [
+                  12345
+                ]
+              },
+              "PriorityGoals": {
+                "Items": [
+                  {
+                    "GoalId": 77,
+                    "Value": 1500000000
+                  }
+                ]
+              }
+            }
+          },
+          "groups": [
+            {
+              "ad_group": {
+                "Name": "Услуга Карты",
+                "RegionIds": [
+                  213
+                ],
+                "UnifiedAdGroup": {
+                  "OfferRetargeting": "NO"
+                }
+              },
+              "ads": [
+                {
+                  "ResponsiveAd": {
+                    "Titles": [
+                      "Профессиональная услуга для развития вашего бизнеса 7",
+                      "Комплексное решение задачи для вашей компании 7",
+                      "Консультация и расчёт проекта для вашего бизнеса 7"
+                    ],
+                    "Texts": [
+                      "Оставьте заявку на сайте",
+                      "Получите консультацию по услуге 7",
+                      "Узнайте условия сотрудничества 7"
+                    ],
+                    "Href": "https://example.test/service",
+                    "SitelinkSetId": 10,
+                    "BusinessId": 999,
+                    "AdExtensionIds": [
+                      20
+                    ]
+                  }
+                },
+                {
+                  "ResponsiveAd": {
+                    "Titles": [
+                      "Профессиональная услуга для развития вашего бизнеса 8",
+                      "Комплексное решение задачи для вашей компании 8",
+                      "Консультация и расчёт проекта для вашего бизнеса 8"
+                    ],
+                    "Texts": [
+                      "Оставьте заявку на сайте",
+                      "Получите консультацию по услуге 8",
+                      "Узнайте условия сотрудничества 8"
+                    ],
+                    "Href": "https://example.test/service",
+                    "SitelinkSetId": 10,
+                    "BusinessId": 999,
+                    "AdExtensionIds": [
+                      20
+                    ]
+                  }
+                }
+              ],
+              "keywords": [
+                {
+                  "Keyword": "заказать услугу"
+                },
+                {
+                  "Keyword": "---autotargeting",
+                  "AutotargetingSettings": {
+                    "Categories": {
+                      "Exact": "YES",
+                      "Narrow": "YES",
+                      "Alternative": "NO",
+                      "Accessory": "NO",
+                      "Broader": "NO"
+                    },
+                    "BrandOptions": {
+                      "WithoutBrands": "YES",
+                      "WithAdvertiserBrand": "NO",
+                      "WithCompetitorsBrand": "NO"
+                    }
+                  }
+                }
+              ],
+              "semantic": {
+                "direction_id": "service",
+                "intent": "Заказать услугу",
+                "offer": "Услуга",
+                "landing_url": "https://example.test/service",
+                "split_reason": "Единое предложение и покупательское намерение",
+                "brand_segment": "generic",
+                "business_source_ids": [
+                  "site"
+                ],
+                "candidate_ids": [
+                  "service"
+                ],
+                "keyword_count_reason": "Узкая тестовая семантика",
+                "source_geo_reason": "Географические варианты требуют отдельного исследования"
+              },
+              "ad_hypotheses": [
+                "Отдельная гипотеза объявления 7",
+                "Отдельная гипотеза объявления 8"
+              ],
+              "action_buttons": [
+                {
+                  "text": "Узнать больше",
+                  "reason": "Условия услуги на посадочной",
+                  "href": "https://example.test/service",
+                  "destination": "main"
+                },
+                {
+                  "text": "Узнать больше",
+                  "reason": "Условия услуги на посадочной",
+                  "href": "https://example.test/service",
+                  "destination": "main"
+                }
+              ]
+            }
+          ],
+          "group_count_reason": "В тестовом бизнесе одно направление",
+          "bid_modifiers": [
+            {
+              "DemographicsAdjustments": [
+                {
+                  "Age": "AGE_0_17",
+                  "BidModifier": 0
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "required_manual_actions": [
+        {
+          "rule": "ads.action_button",
+          "required": true,
+          "status": "pending_ui",
+          "verification_method": "saved_ui_per_ad",
+          "requirements": {
+            "required_with_href": true,
+            "selection": "most_relevant_available_ui_label_for_offer",
+            "reason_required": true,
+            "destinations": [
+              "main",
+              "contacts"
+            ],
+            "default_href": "ad_href",
+            "contacts_url": "explicit_verified_same_site_page",
+            "api_supported": false,
+            "verification": "saved_ui_per_ad"
+          },
+          "requested": {
+            "text": "Узнать больше",
+            "reason": "Условия услуги на посадочной",
+            "href": "https://example.test/service",
+            "destination": "main"
+          },
+          "message": "Выбрать наиболее релевантный предложению текст из доступных кнопок интерфейса, явно заполнить URL (основной или проверенной страницы контактов), сохранить и повторно открыть объявление: проверить выбранный текст и полный URL. Публичный API не подтверждает сохранение кнопки.",
+          "campaign_index": 0,
+          "group_index": 0,
+          "ad_index": 0
+        },
+        {
+          "rule": "ads.action_button",
+          "required": true,
+          "status": "pending_ui",
+          "verification_method": "saved_ui_per_ad",
+          "requirements": {
+            "required_with_href": true,
+            "selection": "most_relevant_available_ui_label_for_offer",
+            "reason_required": true,
+            "destinations": [
+              "main",
+              "contacts"
+            ],
+            "default_href": "ad_href",
+            "contacts_url": "explicit_verified_same_site_page",
+            "api_supported": false,
+            "verification": "saved_ui_per_ad"
+          },
+          "requested": {
+            "text": "Узнать больше",
+            "reason": "Условия услуги на посадочной",
+            "href": "https://example.test/service",
+            "destination": "main"
+          },
+          "message": "Выбрать наиболее релевантный предложению текст из доступных кнопок интерфейса, явно заполнить URL (основной или проверенной страницы контактов), сохранить и повторно открыть объявление: проверить выбранный текст и полный URL. Публичный API не подтверждает сохранение кнопки.",
+          "campaign_index": 0,
+          "group_index": 0,
+          "ad_index": 1
+        },
+        {
+          "rule": "ads.action_button",
+          "required": true,
+          "status": "pending_ui",
+          "verification_method": "saved_ui_per_ad",
+          "requirements": {
+            "required_with_href": true,
+            "selection": "most_relevant_available_ui_label_for_offer",
+            "reason_required": true,
+            "destinations": [
+              "main",
+              "contacts"
+            ],
+            "default_href": "ad_href",
+            "contacts_url": "explicit_verified_same_site_page",
+            "api_supported": false,
+            "verification": "saved_ui_per_ad"
+          },
+          "requested": {
+            "text": "Узнать больше",
+            "reason": "Условия услуги на посадочной",
+            "href": "https://example.test/service",
+            "destination": "main"
+          },
+          "message": "Выбрать наиболее релевантный предложению текст из доступных кнопок интерфейса, явно заполнить URL (основной или проверенной страницы контактов), сохранить и повторно открыть объявление: проверить выбранный текст и полный URL. Публичный API не подтверждает сохранение кнопки.",
+          "campaign_index": 1,
+          "group_index": 0,
+          "ad_index": 0
+        },
+        {
+          "rule": "network.carousel",
+          "required": true,
+          "status": "pending_ui",
+          "verification_method": "saved_ui_per_ad",
+          "requirements": {
+            "required": true,
+            "minimum_images": 2,
+            "maximum_images": 10,
+            "main_image_required": true,
+            "minimum_side_px": 450,
+            "maximum_file_mb": 10,
+            "aspect_ratio_difference_exclusive_max": 0.15,
+            "verification": "saved_ui_per_ad",
+            "api_supported": false,
+            "ordinary_ad_image_hashes_satisfy_requirement": false
+          },
+          "message": "Добавить и сохранить карусель из 2–10 релевантных изображений, затем повторно открыть объявление и проверить число и порядок слайдов. AdImageHashes и обычное изображение не подтверждают карусель.",
+          "campaign_index": 1,
+          "group_index": 0,
+          "ad_index": 0
+        },
+        {
+          "rule": "ads.action_button",
+          "required": true,
+          "status": "pending_ui",
+          "verification_method": "saved_ui_per_ad",
+          "requirements": {
+            "required_with_href": true,
+            "selection": "most_relevant_available_ui_label_for_offer",
+            "reason_required": true,
+            "destinations": [
+              "main",
+              "contacts"
+            ],
+            "default_href": "ad_href",
+            "contacts_url": "explicit_verified_same_site_page",
+            "api_supported": false,
+            "verification": "saved_ui_per_ad"
+          },
+          "requested": {
+            "text": "Узнать больше",
+            "reason": "Условия услуги на посадочной",
+            "href": "https://example.test/service",
+            "destination": "main"
+          },
+          "message": "Выбрать наиболее релевантный предложению текст из доступных кнопок интерфейса, явно заполнить URL (основной или проверенной страницы контактов), сохранить и повторно открыть объявление: проверить выбранный текст и полный URL. Публичный API не подтверждает сохранение кнопки.",
+          "campaign_index": 1,
+          "group_index": 0,
+          "ad_index": 1
+        },
+        {
+          "rule": "network.carousel",
+          "required": true,
+          "status": "pending_ui",
+          "verification_method": "saved_ui_per_ad",
+          "requirements": {
+            "required": true,
+            "minimum_images": 2,
+            "maximum_images": 10,
+            "main_image_required": true,
+            "minimum_side_px": 450,
+            "maximum_file_mb": 10,
+            "aspect_ratio_difference_exclusive_max": 0.15,
+            "verification": "saved_ui_per_ad",
+            "api_supported": false,
+            "ordinary_ad_image_hashes_satisfy_requirement": false
+          },
+          "message": "Добавить и сохранить карусель из 2–10 релевантных изображений, затем повторно открыть объявление и проверить число и порядок слайдов. AdImageHashes и обычное изображение не подтверждают карусель.",
+          "campaign_index": 1,
+          "group_index": 0,
+          "ad_index": 1
+        },
+        {
+          "rule": "ads.action_button",
+          "required": true,
+          "status": "pending_ui",
+          "verification_method": "saved_ui_per_ad",
+          "requirements": {
+            "required_with_href": true,
+            "selection": "most_relevant_available_ui_label_for_offer",
+            "reason_required": true,
+            "destinations": [
+              "main",
+              "contacts"
+            ],
+            "default_href": "ad_href",
+            "contacts_url": "explicit_verified_same_site_page",
+            "api_supported": false,
+            "verification": "saved_ui_per_ad"
+          },
+          "requested": {
+            "text": "Узнать больше",
+            "reason": "Условия услуги на посадочной",
+            "href": "https://example.test/service",
+            "destination": "main"
+          },
+          "message": "Выбрать наиболее релевантный предложению текст из доступных кнопок интерфейса, явно заполнить URL (основной или проверенной страницы контактов), сохранить и повторно открыть объявление: проверить выбранный текст и полный URL. Публичный API не подтверждает сохранение кнопки.",
+          "campaign_index": 1,
+          "group_index": 0,
+          "ad_index": 2
+        },
+        {
+          "rule": "network.carousel",
+          "required": true,
+          "status": "pending_ui",
+          "verification_method": "saved_ui_per_ad",
+          "requirements": {
+            "required": true,
+            "minimum_images": 2,
+            "maximum_images": 10,
+            "main_image_required": true,
+            "minimum_side_px": 450,
+            "maximum_file_mb": 10,
+            "aspect_ratio_difference_exclusive_max": 0.15,
+            "verification": "saved_ui_per_ad",
+            "api_supported": false,
+            "ordinary_ad_image_hashes_satisfy_requirement": false
+          },
+          "message": "Добавить и сохранить карусель из 2–10 релевантных изображений, затем повторно открыть объявление и проверить число и порядок слайдов. AdImageHashes и обычное изображение не подтверждают карусель.",
+          "campaign_index": 1,
+          "group_index": 0,
+          "ad_index": 2
+        },
+        {
+          "rule": "ads.action_button",
+          "required": true,
+          "status": "pending_ui",
+          "verification_method": "saved_ui_per_ad",
+          "requirements": {
+            "required_with_href": true,
+            "selection": "most_relevant_available_ui_label_for_offer",
+            "reason_required": true,
+            "destinations": [
+              "main",
+              "contacts"
+            ],
+            "default_href": "ad_href",
+            "contacts_url": "explicit_verified_same_site_page",
+            "api_supported": false,
+            "verification": "saved_ui_per_ad"
+          },
+          "requested": {
+            "text": "Узнать больше",
+            "reason": "Условия услуги на посадочной",
+            "href": "https://example.test/service",
+            "destination": "main"
+          },
+          "message": "Выбрать наиболее релевантный предложению текст из доступных кнопок интерфейса, явно заполнить URL (основной или проверенной страницы контактов), сохранить и повторно открыть объявление: проверить выбранный текст и полный URL. Публичный API не подтверждает сохранение кнопки.",
+          "campaign_index": 2,
+          "group_index": 0,
+          "ad_index": 0
+        },
+        {
+          "rule": "ads.action_button",
+          "required": true,
+          "status": "pending_ui",
+          "verification_method": "saved_ui_per_ad",
+          "requirements": {
+            "required_with_href": true,
+            "selection": "most_relevant_available_ui_label_for_offer",
+            "reason_required": true,
+            "destinations": [
+              "main",
+              "contacts"
+            ],
+            "default_href": "ad_href",
+            "contacts_url": "explicit_verified_same_site_page",
+            "api_supported": false,
+            "verification": "saved_ui_per_ad"
+          },
+          "requested": {
+            "text": "Узнать больше",
+            "reason": "Условия услуги на посадочной",
+            "href": "https://example.test/service",
+            "destination": "main"
+          },
+          "message": "Выбрать наиболее релевантный предложению текст из доступных кнопок интерфейса, явно заполнить URL (основной или проверенной страницы контактов), сохранить и повторно открыть объявление: проверить выбранный текст и полный URL. Публичный API не подтверждает сохранение кнопки.",
+          "campaign_index": 2,
+          "group_index": 0,
+          "ad_index": 1
+        }
+      ],
+      "findings": [
+        {
+          "status": "MANUAL",
+          "rule": "ads.title_diversity",
+          "message": "bundle.channels.search.groups[0].ads[0]: рекомендуется до 7 содержательно разных заголовков; не добавляйте повторы ради количества."
+        },
+        {
+          "status": "MANUAL",
+          "rule": "ads.title_diversity",
+          "message": "bundle.channels.search.groups[0].ads[1]: рекомендуется до 7 содержательно разных заголовков; не добавляйте повторы ради количества."
+        },
+        {
+          "status": "MANUAL",
+          "rule": "ads.title_diversity",
+          "message": "bundle.channels.network.groups[0].ads[0]: рекомендуется до 7 содержательно разных заголовков; не добавляйте повторы ради количества."
+        },
+        {
+          "status": "MANUAL",
+          "rule": "ads.title_diversity",
+          "message": "bundle.channels.network.groups[0].ads[1]: рекомендуется до 7 содержательно разных заголовков; не добавляйте повторы ради количества."
+        },
+        {
+          "status": "MANUAL",
+          "rule": "ads.title_diversity",
+          "message": "bundle.channels.network.groups[0].ads[2]: рекомендуется до 7 содержательно разных заголовков; не добавляйте повторы ради количества."
+        },
+        {
+          "status": "MANUAL",
+          "rule": "ads.title_diversity",
+          "message": "bundle.channels.maps.groups[0].ads[0]: рекомендуется до 7 содержательно разных заголовков; не добавляйте повторы ради количества."
+        },
+        {
+          "status": "MANUAL",
+          "rule": "ads.title_diversity",
+          "message": "bundle.channels.maps.groups[0].ads[1]: рекомендуется до 7 содержательно разных заголовков; не добавляйте повторы ради количества."
+        },
+        {
+          "status": "MANUAL",
+          "rule": "search.negative_keywords",
+          "message": "Проверить минус-фразы по бизнесу и посадочной; общего обязательного списка нет.",
+          "evidence": {
+            "profile": "custom",
+            "business_terms": [],
+            "selected": [],
+            "excluded": [],
+            "review_required": true,
+            "review_context": [],
+            "group_selections": []
+          }
+        },
+        {
+          "status": "MANUAL",
+          "rule": "regions.api_lookup",
+          "message": "Регионы подтверждены пользователем; executor должен повторно проверить ID через API.",
+          "evidence": {
+            "regions": [
+              {
+                "id": 213,
+                "source": "bundle.channels.search.groups[0].region_ids"
+              },
+              {
+                "id": 213,
+                "source": "bundle.channels.network.groups[0].region_ids"
+              },
+              {
+                "id": 213,
+                "source": "bundle.channels.maps.groups[0].region_ids"
+              }
+            ]
+          }
+        },
+        {
+          "status": "MANUAL",
+          "rule": "structure.group_count",
+          "message": "Клиент | Услуга | Поиск: 1; стартовый ориентир 3–10. Зафиксируйте причину выбранного количества.",
+          "evidence": {
+            "target": "Клиент | Услуга | Поиск",
+            "count": 1,
+            "recommended": [
+              3,
+              10
+            ],
+            "reason": "В тестовом бизнесе одно направление"
+          }
+        },
+        {
+          "status": "MANUAL",
+          "rule": "semantics.keyword_count",
+          "message": "Клиент | Услуга | Поиск / Услуга поиск: 1; стартовый ориентир 10–30. Зафиксируйте причину выбранного количества.",
+          "evidence": {
+            "target": "Клиент | Услуга | Поиск / Услуга поиск",
+            "count": 1,
+            "recommended": [
+              10,
+              30
+            ],
+            "reason": "Узкая тестовая семантика"
+          }
+        },
+        {
+          "status": "MANUAL",
+          "rule": "structure.group_count",
+          "message": "Клиент | Услуга | РСЯ: 1; стартовый ориентир 2–5. Зафиксируйте причину выбранного количества.",
+          "evidence": {
+            "target": "Клиент | Услуга | РСЯ",
+            "count": 1,
+            "recommended": [
+              2,
+              5
+            ],
+            "reason": "В тестовом бизнесе одно направление"
+          }
+        },
+        {
+          "status": "MANUAL",
+          "rule": "semantics.keyword_count",
+          "message": "Клиент | Услуга | РСЯ / Услуга РСЯ: 1; стартовый ориентир 5–15. Зафиксируйте причину выбранного количества.",
+          "evidence": {
+            "target": "Клиент | Услуга | РСЯ / Услуга РСЯ",
+            "count": 1,
+            "recommended": [
+              5,
+              15
+            ],
+            "reason": "Узкая тестовая семантика"
+          }
+        },
+        {
+          "status": "MANUAL",
+          "rule": "semantics.content_review",
+          "message": "Проверить смысловую близость фраз, предложение и источники. Наличие ссылок не доказывает чтение источников или полноту спроса.",
+          "evidence": {}
+        }
+      ],
+      "summary": {
+        "client_budget": {
+          "status": "not_configured",
+          "scope": "planned_campaigns",
+          "weekly_net_total_micros": 9000000000
+        },
+        "tracking_profile": "utm_v1",
+        "alternative_texts_enabled": false,
+        "business_profiles_declared": 1,
+        "time_zone": "Europe/Moscow",
+        "weekly_budget_by_channel": {
+          "search": 3000.0,
+          "network": 4000.0,
+          "maps": 2000.0
+        },
+        "weekly_budget_total": 9000.0,
+        "campaigns": 3,
+        "ad_groups": 3,
+        "ads": 7,
+        "keywords": 3,
+        "autotargeting": 2,
+        "criteria": 5,
+        "bid_modifiers": 3
+      },
+      "api_units_estimate": {
+        "scope": "successful_add_calls_only",
+        "rates_source": "https://yandex.ru/dev/direct/doc/ru/concepts/units",
+        "rates_verified_on": "2026-09-09",
+        "rates_current": true,
+        "estimated_units": 313,
+        "estimated_requests": 5,
+        "services": [
+          {
+            "service": "Campaigns.add",
+            "objects": 3,
+            "calls": 1,
+            "call_units": 10,
+            "object_units": 15,
+            "estimated_units": 25
+          },
+          {
+            "service": "BidModifiers.add",
+            "objects": 3,
+            "calls": 1,
+            "call_units": 15,
+            "object_units": 3,
+            "estimated_units": 18
+          },
+          {
+            "service": "AdGroups.add",
+            "objects": 3,
+            "calls": 1,
+            "call_units": 20,
+            "object_units": 60,
+            "estimated_units": 80
+          },
+          {
+            "service": "Ads.add",
+            "objects": 7,
+            "calls": 1,
+            "call_units": 20,
+            "object_units": 140,
+            "estimated_units": 160
+          },
+          {
+            "service": "Keywords.add",
+            "objects": 5,
+            "calls": 1,
+            "call_units": 20,
+            "object_units": 10,
+            "estimated_units": 30
+          }
+        ],
+        "not_included": [
+          "get-вызовы preflight и readback",
+          "вызовы Вордстата v4",
+          "штрафы за ошибочные операции",
+          "создание дополнений вне этого bundle"
+        ]
+      },
+      "ready": true,
+      "plan_hash": "87501855d2f0cdf26d472c12b06c282f46614ec8fbecdbb0a32363b2d9660901"
+    }
+  },
+  {
+    "name": "tracking_legacy",
+    "source": {
+      "semantic_plan": {
+        "profile": "small_business",
+        "business_directions": [
+          {
+            "id": "service",
+            "name": "Услуга"
+          }
+        ],
+        "sources": [
+          {
+            "id": "site",
+            "type": "website",
+            "reference": "https://example.test/service",
+            "collected_on": "2026-09-18",
+            "region_ids": []
+          },
+          {
+            "id": "ws",
+            "type": "wordstat",
+            "reference": "fixture://wordstat.tsv",
+            "collected_on": "2026-09-18",
+            "region_ids": [
+              213
+            ]
+          }
+        ],
+        "history": {
+          "status": "new_account",
+          "reason": "Тестовый новый кабинет"
+        },
+        "candidates": [
+          {
+            "id": "service",
+            "phrase": "заказать услугу",
+            "source_ids": [
+              "ws"
+            ],
+            "decision": "selected",
+            "reason": "Целевой запрос по услуге"
+          }
+        ]
+      },
+      "name": "Клиент | Услуга",
+      "start_date": "2026-09-19",
+      "age_min": 18,
+      "weekly_budget": {
+        "search": 3000,
+        "network": 4000,
+        "maps": 2000
+      },
+      "region_ids": [
+        213
+      ],
+      "counter_ids": [
+        12345
+      ],
+      "priority_goals": [
+        {
+          "goal_id": 77,
+          "value": 1500
+        }
+      ],
+      "allow_unverified_goals": true,
+      "office": false,
+      "manual_checks": {
+        "goals_reviewed": true,
+        "regions_verified": true,
+        "landing_pages_verified": true
+      },
+      "channels": {
+        "search": {
+          "groups": [
+            {
+              "name": "Услуга поиск",
+              "keywords": [
+                "заказать услугу"
+              ],
+              "ads": [
+                {
+                  "titles": [
+                    "Профессиональная услуга для развития вашего бизнеса 1",
+                    "Комплексное решение задачи для вашей компании 1",
+                    "Консультация и расчёт проекта для вашего бизнеса 1"
+                  ],
+                  "texts": [
+                    "Оставьте заявку на сайте",
+                    "Получите консультацию по услуге 1",
+                    "Узнайте условия сотрудничества 1"
+                  ],
+                  "href": "https://example.test/service",
+                  "action_button": {
+                    "text": "Узнать больше",
+                    "reason": "Условия услуги на посадочной"
+                  },
+                  "hypothesis": "Отдельная гипотеза объявления 1",
+                  "sitelink_set_id": 10,
+                  "ad_extension_ids": [
+                    20
+                  ]
+                },
+                {
+                  "titles": [
+                    "Профессиональная услуга для развития вашего бизнеса 2",
+                    "Комплексное решение задачи для вашей компании 2",
+                    "Консультация и расчёт проекта для вашего бизнеса 2"
+                  ],
+                  "texts": [
+                    "Оставьте заявку на сайте",
+                    "Получите консультацию по услуге 2",
+                    "Узнайте условия сотрудничества 2"
+                  ],
+                  "href": "https://example.test/service",
+                  "action_button": {
+                    "text": "Узнать больше",
+                    "reason": "Условия услуги на посадочной"
+                  },
+                  "hypothesis": "Отдельная гипотеза объявления 2",
+                  "sitelink_set_id": 10,
+                  "ad_extension_ids": [
+                    20
+                  ]
+                }
+              ],
+              "semantic": {
+                "direction_id": "service",
+                "intent": "Заказать услугу",
+                "offer": "Услуга",
+                "landing_url": "https://example.test/service",
+                "split_reason": "Единое предложение и покупательское намерение",
+                "brand_segment": "generic",
+                "business_source_ids": [
+                  "site"
+                ],
+                "candidate_ids": [
+                  "service"
+                ],
+                "keyword_count_reason": "Узкая тестовая семантика",
+                "source_geo_reason": "Географические варианты требуют отдельного исследования"
+              }
+            }
+          ],
+          "group_count_reason": "В тестовом бизнесе одно направление"
+        },
+        "network": {
+          "groups": [
+            {
+              "name": "Услуга РСЯ",
+              "keywords": [
+                "заказать услугу"
+              ],
+              "ads": [
+                {
+                  "titles": [
+                    "Профессиональная услуга для развития вашего бизнеса 3",
+                    "Комплексное решение задачи для вашей компании 3",
+                    "Консультация и расчёт проекта для вашего бизнеса 3"
+                  ],
+                  "texts": [
+                    "Оставьте заявку на сайте",
+                    "Получите консультацию по услуге 3",
+                    "Узнайте условия сотрудничества 3"
+                  ],
+                  "href": "https://example.test/service",
+                  "action_button": {
+                    "text": "Узнать больше",
+                    "reason": "Условия услуги на посадочной"
+                  },
+                  "hypothesis": "Отдельная гипотеза объявления 3",
+                  "sitelink_set_id": 10,
+                  "ad_extension_ids": [
+                    20
+                  ],
+                  "ad_image_hashes": [
+                    "hash-3-0",
+                    "hash-3-1",
+                    "hash-3-2"
+                  ]
+                },
+                {
+                  "titles": [
+                    "Профессиональная услуга для развития вашего бизнеса 4",
+                    "Комплексное решение задачи для вашей компании 4",
+                    "Консультация и расчёт проекта для вашего бизнеса 4"
+                  ],
+                  "texts": [
+                    "Оставьте заявку на сайте",
+                    "Получите консультацию по услуге 4",
+                    "Узнайте условия сотрудничества 4"
+                  ],
+                  "href": "https://example.test/service",
+                  "action_button": {
+                    "text": "Узнать больше",
+                    "reason": "Условия услуги на посадочной"
+                  },
+                  "hypothesis": "Отдельная гипотеза объявления 4",
+                  "sitelink_set_id": 10,
+                  "ad_extension_ids": [
+                    20
+                  ],
+                  "ad_image_hashes": [
+                    "hash-4-0",
+                    "hash-4-1",
+                    "hash-4-2"
+                  ]
+                },
+                {
+                  "titles": [
+                    "Профессиональная услуга для развития вашего бизнеса 5",
+                    "Комплексное решение задачи для вашей компании 5",
+                    "Консультация и расчёт проекта для вашего бизнеса 5"
+                  ],
+                  "texts": [
+                    "Оставьте заявку на сайте",
+                    "Получите консультацию по услуге 5",
+                    "Узнайте условия сотрудничества 5"
+                  ],
+                  "href": "https://example.test/service",
+                  "action_button": {
+                    "text": "Узнать больше",
+                    "reason": "Условия услуги на посадочной"
+                  },
+                  "hypothesis": "Отдельная гипотеза объявления 5",
+                  "sitelink_set_id": 10,
+                  "ad_extension_ids": [
+                    20
+                  ],
+                  "ad_image_hashes": [
+                    "hash-5-0",
+                    "hash-5-1",
+                    "hash-5-2"
+                  ]
+                }
+              ],
+              "semantic": {
+                "direction_id": "service",
+                "intent": "Заказать услугу",
+                "offer": "Услуга",
+                "landing_url": "https://example.test/service",
+                "split_reason": "Единое предложение и покупательское намерение",
+                "brand_segment": "generic",
+                "business_source_ids": [
+                  "site"
+                ],
+                "candidate_ids": [
+                  "service"
+                ],
+                "keyword_count_reason": "Узкая тестовая семантика",
+                "source_geo_reason": "Географические варианты требуют отдельного исследования"
+              }
+            }
+          ],
+          "group_count_reason": "В тестовом бизнесе одно направление"
+        }
+      },
+      "tracking_profile": "regulation_v1"
+    },
+    "plan": {
+      "schema": "direct_campaign_bundle_v1",
+      "client_login": "client",
+      "api_version": "v501",
+      "policy": {
+        "name": "agency_default_v1",
+        "version": "1.12.0"
+      },
+      "manual_checks": {
+        "goals_reviewed": true,
+        "regions_verified": true,
+        "landing_pages_verified": true
+      },
+      "tracking_profile": "regulation_v1",
+      "client_budget": null,
+      "business_profiles": [],
+      "goal_catalog_campaign_id": null,
+      "allow_unverified_goals": true,
+      "negative_keyword_selection": {
+        "profile": "custom",
+        "business_terms": [],
+        "selected": [],
+        "excluded": [],
+        "review_required": true,
+        "review_context": [],
+        "group_selections": []
+      },
+      "semantic_plan": {
+        "profile": "small_business",
+        "business_directions": [
+          {
+            "id": "service",
+            "name": "Услуга"
+          }
+        ],
+        "sources": [
+          {
+            "id": "site",
+            "type": "website",
+            "reference": "https://example.test/service",
+            "collected_on": "2026-09-18",
+            "region_ids": []
+          },
+          {
+            "id": "ws",
+            "type": "wordstat",
+            "reference": "fixture://wordstat.tsv",
+            "collected_on": "2026-09-18",
+            "region_ids": [
+              213
+            ]
+          }
+        ],
+        "history": {
+          "status": "new_account",
+          "reason": "Тестовый новый кабинет"
+        },
+        "candidates": [
+          {
+            "id": "service",
+            "phrase": "заказать услугу",
+            "source_ids": [
+              "ws"
+            ],
+            "decision": "selected",
+            "reason": "Целевой запрос по услуге"
+          }
+        ]
+      },
+      "semantic_review": {
+        "profile": "small_business",
+        "profile_reason": null,
+        "sources": [
+          {
+            "id": "site",
+            "type": "website",
+            "reference": "https://example.test/service",
+            "collected_on": "2026-09-18",
+            "region_ids": [],
+            "evidence_status": "provided_in_bundle"
+          },
+          {
+            "id": "ws",
+            "type": "wordstat",
+            "reference": "fixture://wordstat.tsv",
+            "collected_on": "2026-09-18",
+            "region_ids": [
+              213
+            ],
+            "evidence_status": "provided_in_bundle"
+          }
+        ],
+        "history": {
+          "status": "new_account",
+          "reason": "Тестовый новый кабинет"
+        },
+        "business_directions": [
+          {
+            "id": "service",
+            "name": "Услуга"
+          }
+        ],
+        "groups": [
+          {
+            "campaign_index": 0,
+            "group_index": 0,
+            "group": "Клиент | Услуга | Поиск / Услуга поиск",
+            "direction_id": "service",
+            "intent": "Заказать услугу",
+            "offer": "Услуга",
+            "landing_url": "https://example.test/service",
+            "split_reason": "Единое предложение и покупательское намерение",
+            "brand_segment": "generic",
+            "business_source_ids": [
+              "site"
+            ],
+            "candidate_ids": [
+              "service"
+            ],
+            "keyword_count_reason": "Узкая тестовая семантика",
+            "source_geo_reason": "Географические варианты требуют отдельного исследования",
+            "keywords_count": 1,
+            "candidates": [
+              {
+                "id": "service",
+                "phrase": "заказать услугу",
+                "source_ids": [
+                  "ws"
+                ],
+                "decision": "selected",
+                "reason": "Целевой запрос по услуге",
+                "evidence_kind": "query_source"
+              }
+            ],
+            "ad_hypotheses": [
+              "Отдельная гипотеза объявления 1",
+              "Отдельная гипотеза объявления 2"
+            ],
+            "review_status": "declared_requires_semantic_review"
+          },
+          {
+            "campaign_index": 1,
+            "group_index": 0,
+            "group": "Клиент | Услуга | РСЯ / Услуга РСЯ",
+            "direction_id": "service",
+            "intent": "Заказать услугу",
+            "offer": "Услуга",
+            "landing_url": "https://example.test/service",
+            "split_reason": "Единое предложение и покупательское намерение",
+            "brand_segment": "generic",
+            "business_source_ids": [
+              "site"
+            ],
+            "candidate_ids": [
+              "service"
+            ],
+            "keyword_count_reason": "Узкая тестовая семантика",
+            "source_geo_reason": "Географические варианты требуют отдельного исследования",
+            "keywords_count": 1,
+            "candidates": [
+              {
+                "id": "service",
+                "phrase": "заказать услугу",
+                "source_ids": [
+                  "ws"
+                ],
+                "decision": "selected",
+                "reason": "Целевой запрос по услуге",
+                "evidence_kind": "query_source"
+              }
+            ],
+            "ad_hypotheses": [
+              "Отдельная гипотеза объявления 3",
+              "Отдельная гипотеза объявления 4",
+              "Отдельная гипотеза объявления 5"
+            ],
+            "review_status": "declared_requires_semantic_review"
+          }
+        ],
+        "candidates": [
+          {
+            "id": "service",
+            "phrase": "заказать услугу",
+            "source_ids": [
+              "ws"
+            ],
+            "decision": "selected",
+            "reason": "Целевой запрос по услуге",
+            "evidence_kind": "query_source"
+          }
+        ],
+        "counts": {
+          "candidate_records": 1,
+          "found_unique_phrases": 1,
+          "selected_unique_phrases": 1,
+          "excluded_candidates": 0,
+          "pending_candidates": 0,
+          "selected_hypotheses": 0
+        },
+        "evidence_status": "provided_in_bundle"
+      },
+      "campaigns": [
+        {
+          "channel": "search",
+          "channel_variant": 0,
+          "campaign": {
+            "Name": "Клиент | Услуга | Поиск",
+            "StartDate": "2026-09-19",
+            "TimeZone": "Europe/Moscow",
+            "UnifiedCampaign": {
+              "BiddingStrategy": {
+                "Search": {
+                  "BiddingStrategyType": "WB_MAXIMUM_CLICKS",
+                  "WbMaximumClicks": {
+                    "WeeklySpendLimit": 3000000000
+                  },
+                  "PlacementTypes": {
+                    "SearchResults": "YES",
+                    "ProductGallery": "NO",
+                    "DynamicPlaces": "YES",
+                    "Maps": "NO",
+                    "SearchOrganizationList": "NO"
+                  }
+                },
+                "Network": {
+                  "BiddingStrategyType": "SERVING_OFF",
+                  "PlacementTypes": {
+                    "Network": "NO",
+                    "Maps": "NO"
+                  }
+                }
+              },
+              "Settings": [
+                {
+                  "Option": "ADD_METRICA_TAG",
+                  "Value": "YES"
+                },
+                {
+                  "Option": "ENABLE_SITE_MONITORING",
+                  "Value": "YES"
+                },
+                {
+                  "Option": "ALTERNATIVE_TEXTS_ENABLED",
+                  "Value": "NO"
+                }
+              ],
+              "TrackingParams": "type={source_type}&source={source}&block={position_type}&pos={position}&key={keyword}&campaign={campaign_id}&yd_campaign_name={campaign_name}&name_lat={campaign_name_lat}&retargeting={retargeting_id}&ad={ad_id}&phrase={phrase_id}&gbid={gbid}&device={device_type}&region={region_id}&region_name={region_name}",
+              "AttributionModel": "AUTO",
+              "CounterIds": {
+                "Items": [
+                  12345
+                ]
+              },
+              "PriorityGoals": {
+                "Items": [
+                  {
+                    "GoalId": 77,
+                    "Value": 1500000000
+                  }
+                ]
+              }
+            }
+          },
+          "groups": [
+            {
+              "ad_group": {
+                "Name": "Услуга поиск",
+                "RegionIds": [
+                  213
+                ],
+                "UnifiedAdGroup": {
+                  "OfferRetargeting": "NO"
+                }
+              },
+              "ads": [
+                {
+                  "ResponsiveAd": {
+                    "Titles": [
+                      "Профессиональная услуга для развития вашего бизнеса 1",
+                      "Комплексное решение задачи для вашей компании 1",
+                      "Консультация и расчёт проекта для вашего бизнеса 1"
+                    ],
+                    "Texts": [
+                      "Оставьте заявку на сайте",
+                      "Получите консультацию по услуге 1",
+                      "Узнайте условия сотрудничества 1"
+                    ],
+                    "Href": "https://example.test/service",
+                    "SitelinkSetId": 10,
+                    "AdExtensionIds": [
+                      20
+                    ]
+                  }
+                },
+                {
+                  "ResponsiveAd": {
+                    "Titles": [
+                      "Профессиональная услуга для развития вашего бизнеса 2",
+                      "Комплексное решение задачи для вашей компании 2",
+                      "Консультация и расчёт проекта для вашего бизнеса 2"
+                    ],
+                    "Texts": [
+                      "Оставьте заявку на сайте",
+                      "Получите консультацию по услуге 2",
+                      "Узнайте условия сотрудничества 2"
+                    ],
+                    "Href": "https://example.test/service",
+                    "SitelinkSetId": 10,
+                    "AdExtensionIds": [
+                      20
+                    ]
+                  }
+                }
+              ],
+              "keywords": [
+                {
+                  "Keyword": "заказать услугу"
+                },
+                {
+                  "Keyword": "---autotargeting",
+                  "AutotargetingSettings": {
+                    "Categories": {
+                      "Exact": "YES",
+                      "Narrow": "YES",
+                      "Alternative": "NO",
+                      "Accessory": "NO",
+                      "Broader": "NO"
+                    },
+                    "BrandOptions": {
+                      "WithoutBrands": "YES",
+                      "WithAdvertiserBrand": "NO",
+                      "WithCompetitorsBrand": "NO"
+                    }
+                  }
+                }
+              ],
+              "semantic": {
+                "direction_id": "service",
+                "intent": "Заказать услугу",
+                "offer": "Услуга",
+                "landing_url": "https://example.test/service",
+                "split_reason": "Единое предложение и покупательское намерение",
+                "brand_segment": "generic",
+                "business_source_ids": [
+                  "site"
+                ],
+                "candidate_ids": [
+                  "service"
+                ],
+                "keyword_count_reason": "Узкая тестовая семантика",
+                "source_geo_reason": "Географические варианты требуют отдельного исследования"
+              },
+              "ad_hypotheses": [
+                "Отдельная гипотеза объявления 1",
+                "Отдельная гипотеза объявления 2"
+              ],
+              "action_buttons": [
+                {
+                  "text": "Узнать больше",
+                  "reason": "Условия услуги на посадочной",
+                  "href": "https://example.test/service",
+                  "destination": "main"
+                },
+                {
+                  "text": "Узнать больше",
+                  "reason": "Условия услуги на посадочной",
+                  "href": "https://example.test/service",
+                  "destination": "main"
+                }
+              ]
+            }
+          ],
+          "group_count_reason": "В тестовом бизнесе одно направление",
+          "bid_modifiers": [
+            {
+              "DemographicsAdjustments": [
+                {
+                  "Age": "AGE_0_17",
+                  "BidModifier": 0
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "channel": "network",
+          "channel_variant": 0,
+          "campaign": {
+            "Name": "Клиент | Услуга | РСЯ",
+            "StartDate": "2026-09-19",
+            "TimeZone": "Europe/Moscow",
+            "ExcludedSites": {
+              "Items": [
+                "com.aaaudi.wordmaker",
+                "com.addswhilessuffers.binds",
+                "com.agedstudio.card.solitaire.klondike",
+                "com.aif.aifkitchen",
+                "com.alexanderkondrashov.slovari",
+                "com.allconnected.turbovpn",
+                "com.almondstudio.wordbyword",
+                "com.amberfog.reader",
+                "com.amberfog.vkfree",
+                "com.andr.gostivk",
+                "com.apalon.wallpapers",
+                "com.appgame7.candyfrenzy",
+                "com.appgame7.jigsaw.free",
+                "com.appteka.sportexpress",
+                "com.appyogi.vpnapp",
+                "com.ascellamobile.musicloudfree",
+                "com.atrix.rusvpn",
+                "com.avito.android",
+                "com.Balls",
+                "com.banderlogiapps.hd",
+                "com.basicvpnproxy.app",
+                "com.bcsofts.colorLinesReborn",
+                "com.bigcake.android.mergemania",
+                "com.bigcake.android.solitairedaily",
+                "com.bigduckgames.flow",
+                "com.bobr.vpn1",
+                "com.bobr.vpn1pro",
+                "com.bolsh.calorie",
+                "com.bonbeart.doors",
+                "com.bonbeart.doorsseasons.part2",
+                "com.boss.chat.egorshipcallvideo",
+                "com.breakcoder.blocksmerger",
+                "com.candl.athena",
+                "com.candylegend.legend",
+                "com.cardgame.collection.fishdom",
+                "com.clean.road",
+                "com.cleanmaster.mguard",
+                "com.cloudycastlegames.wordline",
+                "com.color.colorvpn",
+                "com.coloring.color.number.ios",
+                "com.coolmobilesolution.fastscannerfree",
+                "com.cootek.smartinputv5",
+                "com.cootek.smartinputv5.oem",
+                "com.corgi.VPNStart",
+                "com.craftgames.plntcrft",
+                "com.craftsman.go",
+                "com.crazylight.photoscanner.age",
+                "com.creativemobile.dragracing",
+                "com.devexpert.weather",
+                "com.dicedom.mergepuzzle",
+                "com.disoftware.android.vpngate",
+                "com.disoftware.android.vpngateclient",
+                "com.dmitry.social.nets.vkontakevkmini",
+                "com.dobar.vpn",
+                "com.droid27.senseflipclockweather",
+                "com.droid27.transparentclockweather",
+                "com.dropdom.blockpuzzle.hwwgame",
+                "com.easybrain.art.puzzle",
+                "com.easybrain.block.puzzle.games",
+                "com.easybrain.chamy",
+                "com.easybrain.jigsaw.puzzles",
+                "com.easybrain.killer.sudoku.free",
+                "com.easybrain.make.music",
+                "com.easybrain.nonogram",
+                "com.easybrain.nonogram.color",
+                "com.easybrain.number.puzzle.game",
+                "com.easybrain.solitaire",
+                "com.easybrain.solitaire.klondike.free",
+                "com.easybrain.sudoku.android",
+                "com.easybrain.sudoku.ios",
+                "com.easygames.race",
+                "com.echomoscow.EchoMsk",
+                "com.edadeal.android",
+                "com.emoji.keyboard.touchpal",
+                "com.europosit.pixelcoloring",
+                "com.evvsoft.preferance",
+                "com.fast.free.secure.unblock.vpn",
+                "com.fingersoft.failhard",
+                "com.fingersoft.hillclimb",
+                "com.fingersoft.hillclimbracing",
+                "com.fmarzana.vdlfree2",
+                "com.free.unlimited.fast.secure.vpn",
+                "com.free.vpn.hotspot.secure.vpnify",
+                "com.free.vpn.proxy.master.app",
+                "com.free.vpn.super.hotspot.open",
+                "com.free.vpn.turbo.fast.secure.govpn",
+                "com.freevpnplanet",
+                "com.fruitheroes.legend",
+                "com.fugo.wow",
+                "com.fugo.wowguru",
+                "com.fusee.RomanBuilder",
+                "com.gafv.puzzle.game.classic.blockpuzzle.wood",
+                "com.gamepie.airpolice",
+                "com.games.joinblocks",
+                "com.gemteam.stickerpackstg",
+                "com.gemteam.trmpclient",
+                "com.gethornet.Hornet",
+                "com.gjg.colorfill3d",
+                "com.GMA.Ball.Sort.Puzzle",
+                "com.gmail.heagoo.apkeditor",
+                "com.gramgames.tenten",
+                "com.gregorioapps.stfree",
+                "com.grydmitrij.ticketpdddemo",
+                "com.gym.racegame",
+                "com.hb.dialer.free",
+                "com.hide.me.vpn",
+                "com.hornet.android",
+                "com.hotspotvpn.super4-ios",
+                "com.hotspotvpn.super4-ios.lite",
+                "com.idownloaderapp.idl2free",
+                "com.igoodnewgames.airlines2",
+                "com.IguazuGames.Mahjong",
+                "com.ijinshan.kbatterydoctor_en",
+                "com.ilyondynamics.bubbleShooterClassic",
+                "com.imo.android.imoim",
+                "com.imo.android.imoimbeta",
+                "com.infolink.LimeHDTV",
+                "com.infolink.limeiptv",
+                "com.instavpns.max",
+                "com.intellectualflame.ledflashlight.washer",
+                "com.iphonease.ledflashlight.button",
+                "com.ivansoft.VPN",
+                "com.ivygames.morskoiboi",
+                "com.jagplay.client.android.app.thousand.hd",
+                "com.jewelblast.puzzlelegend",
+                "com.jewels.gems.android",
+                "com.k17.millionaire",
+                "com.kadka.forknsausage",
+                "com.karmangames.solitaire",
+                "com.karmangames.spider",
+                "com.kii.safe",
+                "com.krishnatechnoweb.vpnbrowser",
+                "com.linkdesks.jewelblastmania",
+                "com.lunappstudio.wordomaze",
+                "com.lyrebirdstudio.pipcamera",
+                "com.memory.brain.training.games",
+                "com.merge.animals",
+                "com.merigotech.chestofwords",
+                "com.merigotech.fillwords",
+                "com.mgc.runnergame",
+                "com.mind.quiz.brain.out",
+                "com.miui.cleaner",
+                "com.miui.videoplayer",
+                "com.mocomediallc.fastfriend",
+                "com.modulardreams.bubblewars",
+                "com.muscle.rush",
+                "com.mydevcorp.balda",
+                "com.nektome.chatruletka.voice",
+                "com.nektome.talk",
+                "com.netsecurity.bestvpn.bestvpn",
+                "com.newsstand.dating",
+                "com.ninegag.android.app",
+                "com.notvpn",
+                "com.now.vpn",
+                "com.onecwearable.keyboard",
+                "com.onecwireless.mahjong",
+                "com.onecwireless.solitaire1.free",
+                "com.openmygame.games.android.crossword.plants",
+                "com.openmygame.games.android.jigsawpuzzle",
+                "com.openmygame.games.android.wordpizza",
+                "com.openmygame.games.android.wordsearchsea",
+                "com.openmygame.games.ios.wordspizza",
+                "com.openmygame.games.kr.client",
+                "com.openmygame.magicwordsearch",
+                "com.opera.app.news",
+                "com.opera.browser",
+                "com.opera.mini.native",
+                "com.osinit.megavpn",
+                "com.outfit7.mytalkingangelafree",
+                "com.outfit7.mytalkingtomfree",
+                "com.outfit7.talkingangelafree",
+                "com.outfit7.talkingben",
+                "com.outfit7.talkingtom2free",
+                "com.outfit7.tomlovesangelafree",
+                "com.perm.kate",
+                "com.pixel.art.coloring.color.number",
+                "com.pixelduck.ru4pics1word",
+                "com.platovpn.vpn",
+                "com.playgendary.tom",
+                "com.playreap.fmdpropro",
+                "com.playstrom.bob",
+                "com.playstrom.dop4",
+                "com.promt.pmtappfree",
+                "com.puzzle.merge",
+                "com.quarterborrowresult.customer",
+                "com.rambler.horoscopes",
+                "com.reachjunction.card.game.solitaire",
+                "com.renualsoftware.minecraftpe.minecraftpeservers",
+                "com.rexplayer.app",
+                "com.romant.image",
+                "com.rusdev.pid",
+                "com.s-g-i.Edadeal",
+                "com.s2apps.game2048",
+                "com.sabzira.pianotiles",
+                "com.satoshi.vpns",
+                "com.scanword.journal",
+                "com.shadowbiz.semechki",
+                "com.shazam.android",
+                "com.simple.pro.fast.unlimited.private.vpn",
+                "com.slippy.linerusher",
+                "com.snail.VPNSnail",
+                "com.soodexlabs.sudoku2",
+                "com.spcards.cards2",
+                "com.spcomes.fruitforest",
+                "com.speed.svpn",
+                "com.speedy.vpn",
+                "com.sportexpress.ipad",
+                "com.sportexpress.iphone",
+                "com.stack.booklib2",
+                "com.stealthgame.master",
+                "com.stolitomson.vpn",
+                "com.supermastervpn.max",
+                "com.superproxyyvpn.max",
+                "com.supervpn.max",
+                "com.supervpn.vpn.free.proxy",
+                "com.surpax.ledflashlight.panel",
+                "com.sushirolls.app",
+                "com.swc.yaplakal",
+                "com.teamtol.livedota",
+                "com.thousandcardgame.android.huawei",
+                "com.tikvpn.tikvpn",
+                "com.tmarki.spidersol",
+                "com.tomato.pasbayan",
+                "com.tomato.scanword.collection",
+                "com.topface.topface",
+                "com.turbo.stars",
+                "com.ultralvpn.max",
+                "com.veraxen.blockpuzzle",
+                "com.vg.sanandreasstraight2compton",
+                "com.viber.voip",
+                "com.vpn-buck.proxy",
+                "com.vpn-buck.proxy.lite",
+                "com.vpn.free.hotspot.secure.vpnify",
+                "com.vpn.hedgehog",
+                "com.vpn.securevpnpro",
+                "com.vpnappvpn.VPNApp",
+                "com.vpnbeaver.vpn",
+                "com.vpnmaster.android",
+                "com.vpnproxyvpn.max",
+                "com.vpnredcat.vpn",
+                "com.vpnsatoshi.vpnsatoshiapp",
+                "com.waplog.social",
+                "com.whisperarts.kids.breastfeeding",
+                "com.wutapp.otkrytki",
+                "com.xoopsoft.apps.russia.free",
+                "com.xoopsoft.apps.seriea.free",
+                "com.yandex.browser",
+                "com.zigzag_mobile.skorolek",
+                "AdsNative",
+                "BidSwitch"
+              ]
+            },
+            "UnifiedCampaign": {
+              "BiddingStrategy": {
+                "Search": {
+                  "BiddingStrategyType": "SERVING_OFF",
+                  "PlacementTypes": {
+                    "SearchResults": "NO",
+                    "ProductGallery": "NO",
+                    "DynamicPlaces": "NO",
+                    "Maps": "NO",
+                    "SearchOrganizationList": "NO"
+                  }
+                },
+                "Network": {
+                  "BiddingStrategyType": "WB_MAXIMUM_CLICKS",
+                  "WbMaximumClicks": {
+                    "WeeklySpendLimit": 4000000000
+                  },
+                  "PlacementTypes": {
+                    "Network": "YES",
+                    "Maps": "NO"
+                  }
+                }
+              },
+              "Settings": [
+                {
+                  "Option": "ADD_METRICA_TAG",
+                  "Value": "YES"
+                },
+                {
+                  "Option": "ENABLE_SITE_MONITORING",
+                  "Value": "YES"
+                },
+                {
+                  "Option": "ALTERNATIVE_TEXTS_ENABLED",
+                  "Value": "NO"
+                }
+              ],
+              "TrackingParams": "type={source_type}&source={source}&block={position_type}&pos={position}&key={keyword}&campaign={campaign_id}&yd_campaign_name={campaign_name}&name_lat={campaign_name_lat}&retargeting={retargeting_id}&ad={ad_id}&phrase={phrase_id}&gbid={gbid}&device={device_type}&region={region_id}&region_name={region_name}",
+              "AttributionModel": "AUTO",
+              "CounterIds": {
+                "Items": [
+                  12345
+                ]
+              },
+              "PriorityGoals": {
+                "Items": [
+                  {
+                    "GoalId": 77,
+                    "Value": 1500000000
+                  }
+                ]
+              }
+            }
+          },
+          "groups": [
+            {
+              "ad_group": {
+                "Name": "Услуга РСЯ",
+                "RegionIds": [
+                  213
+                ],
+                "UnifiedAdGroup": {
+                  "OfferRetargeting": "NO"
+                }
+              },
+              "ads": [
+                {
+                  "ResponsiveAd": {
+                    "Titles": [
+                      "Профессиональная услуга для развития вашего бизнеса 3",
+                      "Комплексное решение задачи для вашей компании 3",
+                      "Консультация и расчёт проекта для вашего бизнеса 3"
+                    ],
+                    "Texts": [
+                      "Оставьте заявку на сайте",
+                      "Получите консультацию по услуге 3",
+                      "Узнайте условия сотрудничества 3"
+                    ],
+                    "Href": "https://example.test/service",
+                    "SitelinkSetId": 10,
+                    "AdImageHashes": [
+                      "hash-3-0",
+                      "hash-3-1",
+                      "hash-3-2"
+                    ],
+                    "AdExtensionIds": [
+                      20
+                    ]
+                  }
+                },
+                {
+                  "ResponsiveAd": {
+                    "Titles": [
+                      "Профессиональная услуга для развития вашего бизнеса 4",
+                      "Комплексное решение задачи для вашей компании 4",
+                      "Консультация и расчёт проекта для вашего бизнеса 4"
+                    ],
+                    "Texts": [
+                      "Оставьте заявку на сайте",
+                      "Получите консультацию по услуге 4",
+                      "Узнайте условия сотрудничества 4"
+                    ],
+                    "Href": "https://example.test/service",
+                    "SitelinkSetId": 10,
+                    "AdImageHashes": [
+                      "hash-4-0",
+                      "hash-4-1",
+                      "hash-4-2"
+                    ],
+                    "AdExtensionIds": [
+                      20
+                    ]
+                  }
+                },
+                {
+                  "ResponsiveAd": {
+                    "Titles": [
+                      "Профессиональная услуга для развития вашего бизнеса 5",
+                      "Комплексное решение задачи для вашей компании 5",
+                      "Консультация и расчёт проекта для вашего бизнеса 5"
+                    ],
+                    "Texts": [
+                      "Оставьте заявку на сайте",
+                      "Получите консультацию по услуге 5",
+                      "Узнайте условия сотрудничества 5"
+                    ],
+                    "Href": "https://example.test/service",
+                    "SitelinkSetId": 10,
+                    "AdImageHashes": [
+                      "hash-5-0",
+                      "hash-5-1",
+                      "hash-5-2"
+                    ],
+                    "AdExtensionIds": [
+                      20
+                    ]
+                  }
+                }
+              ],
+              "keywords": [
+                {
+                  "Keyword": "заказать услугу"
+                }
+              ],
+              "semantic": {
+                "direction_id": "service",
+                "intent": "Заказать услугу",
+                "offer": "Услуга",
+                "landing_url": "https://example.test/service",
+                "split_reason": "Единое предложение и покупательское намерение",
+                "brand_segment": "generic",
+                "business_source_ids": [
+                  "site"
+                ],
+                "candidate_ids": [
+                  "service"
+                ],
+                "keyword_count_reason": "Узкая тестовая семантика",
+                "source_geo_reason": "Географические варианты требуют отдельного исследования"
+              },
+              "ad_hypotheses": [
+                "Отдельная гипотеза объявления 3",
+                "Отдельная гипотеза объявления 4",
+                "Отдельная гипотеза объявления 5"
+              ],
+              "action_buttons": [
+                {
+                  "text": "Узнать больше",
+                  "reason": "Условия услуги на посадочной",
+                  "href": "https://example.test/service",
+                  "destination": "main"
+                },
+                {
+                  "text": "Узнать больше",
+                  "reason": "Условия услуги на посадочной",
+                  "href": "https://example.test/service",
+                  "destination": "main"
+                },
+                {
+                  "text": "Узнать больше",
+                  "reason": "Условия услуги на посадочной",
+                  "href": "https://example.test/service",
+                  "destination": "main"
+                }
+              ]
+            }
+          ],
+          "group_count_reason": "В тестовом бизнесе одно направление",
+          "bid_modifiers": [
+            {
+              "DemographicsAdjustments": [
+                {
+                  "Age": "AGE_0_17",
+                  "BidModifier": 0
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "required_manual_actions": [
+        {
+          "rule": "ads.action_button",
+          "required": true,
+          "status": "pending_ui",
+          "verification_method": "saved_ui_per_ad",
+          "requirements": {
+            "required_with_href": true,
+            "selection": "most_relevant_available_ui_label_for_offer",
+            "reason_required": true,
+            "destinations": [
+              "main",
+              "contacts"
+            ],
+            "default_href": "ad_href",
+            "contacts_url": "explicit_verified_same_site_page",
+            "api_supported": false,
+            "verification": "saved_ui_per_ad"
+          },
+          "requested": {
+            "text": "Узнать больше",
+            "reason": "Условия услуги на посадочной",
+            "href": "https://example.test/service",
+            "destination": "main"
+          },
+          "message": "Выбрать наиболее релевантный предложению текст из доступных кнопок интерфейса, явно заполнить URL (основной или проверенной страницы контактов), сохранить и повторно открыть объявление: проверить выбранный текст и полный URL. Публичный API не подтверждает сохранение кнопки.",
+          "campaign_index": 0,
+          "group_index": 0,
+          "ad_index": 0
+        },
+        {
+          "rule": "ads.action_button",
+          "required": true,
+          "status": "pending_ui",
+          "verification_method": "saved_ui_per_ad",
+          "requirements": {
+            "required_with_href": true,
+            "selection": "most_relevant_available_ui_label_for_offer",
+            "reason_required": true,
+            "destinations": [
+              "main",
+              "contacts"
+            ],
+            "default_href": "ad_href",
+            "contacts_url": "explicit_verified_same_site_page",
+            "api_supported": false,
+            "verification": "saved_ui_per_ad"
+          },
+          "requested": {
+            "text": "Узнать больше",
+            "reason": "Условия услуги на посадочной",
+            "href": "https://example.test/service",
+            "destination": "main"
+          },
+          "message": "Выбрать наиболее релевантный предложению текст из доступных кнопок интерфейса, явно заполнить URL (основной или проверенной страницы контактов), сохранить и повторно открыть объявление: проверить выбранный текст и полный URL. Публичный API не подтверждает сохранение кнопки.",
+          "campaign_index": 0,
+          "group_index": 0,
+          "ad_index": 1
+        },
+        {
+          "rule": "ads.action_button",
+          "required": true,
+          "status": "pending_ui",
+          "verification_method": "saved_ui_per_ad",
+          "requirements": {
+            "required_with_href": true,
+            "selection": "most_relevant_available_ui_label_for_offer",
+            "reason_required": true,
+            "destinations": [
+              "main",
+              "contacts"
+            ],
+            "default_href": "ad_href",
+            "contacts_url": "explicit_verified_same_site_page",
+            "api_supported": false,
+            "verification": "saved_ui_per_ad"
+          },
+          "requested": {
+            "text": "Узнать больше",
+            "reason": "Условия услуги на посадочной",
+            "href": "https://example.test/service",
+            "destination": "main"
+          },
+          "message": "Выбрать наиболее релевантный предложению текст из доступных кнопок интерфейса, явно заполнить URL (основной или проверенной страницы контактов), сохранить и повторно открыть объявление: проверить выбранный текст и полный URL. Публичный API не подтверждает сохранение кнопки.",
+          "campaign_index": 1,
+          "group_index": 0,
+          "ad_index": 0
+        },
+        {
+          "rule": "network.carousel",
+          "required": true,
+          "status": "pending_ui",
+          "verification_method": "saved_ui_per_ad",
+          "requirements": {
+            "required": true,
+            "minimum_images": 2,
+            "maximum_images": 10,
+            "main_image_required": true,
+            "minimum_side_px": 450,
+            "maximum_file_mb": 10,
+            "aspect_ratio_difference_exclusive_max": 0.15,
+            "verification": "saved_ui_per_ad",
+            "api_supported": false,
+            "ordinary_ad_image_hashes_satisfy_requirement": false
+          },
+          "message": "Добавить и сохранить карусель из 2–10 релевантных изображений, затем повторно открыть объявление и проверить число и порядок слайдов. AdImageHashes и обычное изображение не подтверждают карусель.",
+          "campaign_index": 1,
+          "group_index": 0,
+          "ad_index": 0
+        },
+        {
+          "rule": "ads.action_button",
+          "required": true,
+          "status": "pending_ui",
+          "verification_method": "saved_ui_per_ad",
+          "requirements": {
+            "required_with_href": true,
+            "selection": "most_relevant_available_ui_label_for_offer",
+            "reason_required": true,
+            "destinations": [
+              "main",
+              "contacts"
+            ],
+            "default_href": "ad_href",
+            "contacts_url": "explicit_verified_same_site_page",
+            "api_supported": false,
+            "verification": "saved_ui_per_ad"
+          },
+          "requested": {
+            "text": "Узнать больше",
+            "reason": "Условия услуги на посадочной",
+            "href": "https://example.test/service",
+            "destination": "main"
+          },
+          "message": "Выбрать наиболее релевантный предложению текст из доступных кнопок интерфейса, явно заполнить URL (основной или проверенной страницы контактов), сохранить и повторно открыть объявление: проверить выбранный текст и полный URL. Публичный API не подтверждает сохранение кнопки.",
+          "campaign_index": 1,
+          "group_index": 0,
+          "ad_index": 1
+        },
+        {
+          "rule": "network.carousel",
+          "required": true,
+          "status": "pending_ui",
+          "verification_method": "saved_ui_per_ad",
+          "requirements": {
+            "required": true,
+            "minimum_images": 2,
+            "maximum_images": 10,
+            "main_image_required": true,
+            "minimum_side_px": 450,
+            "maximum_file_mb": 10,
+            "aspect_ratio_difference_exclusive_max": 0.15,
+            "verification": "saved_ui_per_ad",
+            "api_supported": false,
+            "ordinary_ad_image_hashes_satisfy_requirement": false
+          },
+          "message": "Добавить и сохранить карусель из 2–10 релевантных изображений, затем повторно открыть объявление и проверить число и порядок слайдов. AdImageHashes и обычное изображение не подтверждают карусель.",
+          "campaign_index": 1,
+          "group_index": 0,
+          "ad_index": 1
+        },
+        {
+          "rule": "ads.action_button",
+          "required": true,
+          "status": "pending_ui",
+          "verification_method": "saved_ui_per_ad",
+          "requirements": {
+            "required_with_href": true,
+            "selection": "most_relevant_available_ui_label_for_offer",
+            "reason_required": true,
+            "destinations": [
+              "main",
+              "contacts"
+            ],
+            "default_href": "ad_href",
+            "contacts_url": "explicit_verified_same_site_page",
+            "api_supported": false,
+            "verification": "saved_ui_per_ad"
+          },
+          "requested": {
+            "text": "Узнать больше",
+            "reason": "Условия услуги на посадочной",
+            "href": "https://example.test/service",
+            "destination": "main"
+          },
+          "message": "Выбрать наиболее релевантный предложению текст из доступных кнопок интерфейса, явно заполнить URL (основной или проверенной страницы контактов), сохранить и повторно открыть объявление: проверить выбранный текст и полный URL. Публичный API не подтверждает сохранение кнопки.",
+          "campaign_index": 1,
+          "group_index": 0,
+          "ad_index": 2
+        },
+        {
+          "rule": "network.carousel",
+          "required": true,
+          "status": "pending_ui",
+          "verification_method": "saved_ui_per_ad",
+          "requirements": {
+            "required": true,
+            "minimum_images": 2,
+            "maximum_images": 10,
+            "main_image_required": true,
+            "minimum_side_px": 450,
+            "maximum_file_mb": 10,
+            "aspect_ratio_difference_exclusive_max": 0.15,
+            "verification": "saved_ui_per_ad",
+            "api_supported": false,
+            "ordinary_ad_image_hashes_satisfy_requirement": false
+          },
+          "message": "Добавить и сохранить карусель из 2–10 релевантных изображений, затем повторно открыть объявление и проверить число и порядок слайдов. AdImageHashes и обычное изображение не подтверждают карусель.",
+          "campaign_index": 1,
+          "group_index": 0,
+          "ad_index": 2
+        }
+      ],
+      "findings": [
+        {
+          "status": "MANUAL",
+          "rule": "ads.title_diversity",
+          "message": "bundle.channels.search.groups[0].ads[0]: рекомендуется до 7 содержательно разных заголовков; не добавляйте повторы ради количества."
+        },
+        {
+          "status": "MANUAL",
+          "rule": "ads.title_diversity",
+          "message": "bundle.channels.search.groups[0].ads[1]: рекомендуется до 7 содержательно разных заголовков; не добавляйте повторы ради количества."
+        },
+        {
+          "status": "MANUAL",
+          "rule": "ads.title_diversity",
+          "message": "bundle.channels.network.groups[0].ads[0]: рекомендуется до 7 содержательно разных заголовков; не добавляйте повторы ради количества."
+        },
+        {
+          "status": "MANUAL",
+          "rule": "ads.title_diversity",
+          "message": "bundle.channels.network.groups[0].ads[1]: рекомендуется до 7 содержательно разных заголовков; не добавляйте повторы ради количества."
+        },
+        {
+          "status": "MANUAL",
+          "rule": "ads.title_diversity",
+          "message": "bundle.channels.network.groups[0].ads[2]: рекомендуется до 7 содержательно разных заголовков; не добавляйте повторы ради количества."
+        },
+        {
+          "status": "MANUAL",
+          "rule": "search.negative_keywords",
+          "message": "Проверить минус-фразы по бизнесу и посадочной; общего обязательного списка нет.",
+          "evidence": {
+            "profile": "custom",
+            "business_terms": [],
+            "selected": [],
+            "excluded": [],
+            "review_required": true,
+            "review_context": [],
+            "group_selections": []
+          }
+        },
+        {
+          "status": "MANUAL",
+          "rule": "regions.api_lookup",
+          "message": "Регионы подтверждены пользователем; executor должен повторно проверить ID через API.",
+          "evidence": {
+            "regions": [
+              {
+                "id": 213,
+                "source": "bundle.channels.search.groups[0].region_ids"
+              },
+              {
+                "id": 213,
+                "source": "bundle.channels.network.groups[0].region_ids"
+              }
+            ]
+          }
+        },
+        {
+          "status": "MANUAL",
+          "rule": "structure.group_count",
+          "message": "Клиент | Услуга | Поиск: 1; стартовый ориентир 3–10. Зафиксируйте причину выбранного количества.",
+          "evidence": {
+            "target": "Клиент | Услуга | Поиск",
+            "count": 1,
+            "recommended": [
+              3,
+              10
+            ],
+            "reason": "В тестовом бизнесе одно направление"
+          }
+        },
+        {
+          "status": "MANUAL",
+          "rule": "semantics.keyword_count",
+          "message": "Клиент | Услуга | Поиск / Услуга поиск: 1; стартовый ориентир 10–30. Зафиксируйте причину выбранного количества.",
+          "evidence": {
+            "target": "Клиент | Услуга | Поиск / Услуга поиск",
+            "count": 1,
+            "recommended": [
+              10,
+              30
+            ],
+            "reason": "Узкая тестовая семантика"
+          }
+        },
+        {
+          "status": "MANUAL",
+          "rule": "structure.group_count",
+          "message": "Клиент | Услуга | РСЯ: 1; стартовый ориентир 2–5. Зафиксируйте причину выбранного количества.",
+          "evidence": {
+            "target": "Клиент | Услуга | РСЯ",
+            "count": 1,
+            "recommended": [
+              2,
+              5
+            ],
+            "reason": "В тестовом бизнесе одно направление"
+          }
+        },
+        {
+          "status": "MANUAL",
+          "rule": "semantics.keyword_count",
+          "message": "Клиент | Услуга | РСЯ / Услуга РСЯ: 1; стартовый ориентир 5–15. Зафиксируйте причину выбранного количества.",
+          "evidence": {
+            "target": "Клиент | Услуга | РСЯ / Услуга РСЯ",
+            "count": 1,
+            "recommended": [
+              5,
+              15
+            ],
+            "reason": "Узкая тестовая семантика"
+          }
+        },
+        {
+          "status": "MANUAL",
+          "rule": "semantics.content_review",
+          "message": "Проверить смысловую близость фраз, предложение и источники. Наличие ссылок не доказывает чтение источников или полноту спроса.",
+          "evidence": {}
+        }
+      ],
+      "summary": {
+        "client_budget": {
+          "status": "not_configured",
+          "scope": "planned_campaigns",
+          "weekly_net_total_micros": 7000000000
+        },
+        "tracking_profile": "regulation_v1",
+        "alternative_texts_enabled": false,
+        "business_profiles_declared": 0,
+        "time_zone": "Europe/Moscow",
+        "weekly_budget_by_channel": {
+          "search": 3000.0,
+          "network": 4000.0
+        },
+        "weekly_budget_total": 7000.0,
+        "campaigns": 2,
+        "ad_groups": 2,
+        "ads": 5,
+        "keywords": 2,
+        "autotargeting": 1,
+        "criteria": 3,
+        "bid_modifiers": 2
+      },
+      "api_units_estimate": {
+        "scope": "successful_add_calls_only",
+        "rates_source": "https://yandex.ru/dev/direct/doc/ru/concepts/units",
+        "rates_verified_on": "2026-09-09",
+        "rates_current": true,
+        "estimated_units": 243,
+        "estimated_requests": 5,
+        "services": [
+          {
+            "service": "Campaigns.add",
+            "objects": 2,
+            "calls": 1,
+            "call_units": 10,
+            "object_units": 10,
+            "estimated_units": 20
+          },
+          {
+            "service": "BidModifiers.add",
+            "objects": 2,
+            "calls": 1,
+            "call_units": 15,
+            "object_units": 2,
+            "estimated_units": 17
+          },
+          {
+            "service": "AdGroups.add",
+            "objects": 2,
+            "calls": 1,
+            "call_units": 20,
+            "object_units": 40,
+            "estimated_units": 60
+          },
+          {
+            "service": "Ads.add",
+            "objects": 5,
+            "calls": 1,
+            "call_units": 20,
+            "object_units": 100,
+            "estimated_units": 120
+          },
+          {
+            "service": "Keywords.add",
+            "objects": 3,
+            "calls": 1,
+            "call_units": 20,
+            "object_units": 6,
+            "estimated_units": 26
+          }
+        ],
+        "not_included": [
+          "get-вызовы preflight и readback",
+          "вызовы Вордстата v4",
+          "штрафы за ошибочные операции",
+          "создание дополнений вне этого bundle"
+        ]
+      },
+      "ready": true,
+      "plan_hash": "36dad1c0be071f2ea6032c4d6b18fb31d72a1059b9cb3a16eb91f234be78a445"
+    }
+  }
+]

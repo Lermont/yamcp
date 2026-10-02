@@ -29,8 +29,11 @@ classifiers = [
     "Topic :: Office/Business",
 ]
 dependencies = [
-    "mcp>=1.3.0",
+    # С 1.19.0 FastMCP передаёт CallToolResult напрямую, сохраняя isError и
+    # structuredContent. В 2.x пакет mcp.server.fastmcp удалён.
+    "mcp>=1.29.0,<2.0.0",
     "httpx>=0.27.0",
+    "Pillow>=12.1.0,<13",
 ]
 
 [project.urls]
@@ -46,12 +49,16 @@ dev = [
     "pytest>=8.0",
     "pytest-asyncio>=0.23",
     "respx>=0.21",
-    "ruff>=0.6",
+    # Верхняя граница по той же причине, по которой ниже зафиксирован select:
+    # линтер добавляет правила в минорных версиях, и CI краснеет от обновления
+    # инструмента, а не от изменения кода.
+    "ruff>=0.6,<0.17",
     "twine>=5.1",
 ]
 
 [project.scripts]
 yadirect-mcp = "yadirect_mcp:main"
+yadirect-report = "yadirect_mcp.report_runner:main"
 
 [build-system]
 requires = ["hatchling"]
@@ -60,10 +67,51 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["src/yadirect_mcp"]
 
+[tool.hatch.build.targets.wheel.force-include]
+"templates/client-report/build.py" = "yadirect_mcp/report_template/build.py"
+"templates/client-report/template.html" = "yadirect_mcp/report_template/template.html"
+"templates/client-report/styles.css" = "yadirect_mcp/report_template/styles.css"
+"templates/client-report/report.js" = "yadirect_mcp/report_template/report.js"
+"templates/client-report/assets/logo.svg" = "yadirect_mcp/report_template/assets/logo.svg"
+
+[tool.hatch.build.targets.sdist]
+# Gitignore's !.env.example exception can re-include nested backup/worktree
+# examples in Hatch's file selection. Explicitly exclude local directories.
+exclude = [
+    "/out/**",
+    "/.claude/**",
+    "/.codex/**",
+    "/.build-check/**",
+    "/.release-check/**",
+    "/scripts/**",
+    "/templates/client-report/*.zip",
+    "/templates/client-report/assets/gilroy-*.ttf",
+]
+
 [tool.pytest.ini_options]
 testpaths = ["."]
 python_files = ["test_*.py"]
+norecursedirs = [".*", "out", "build", "dist", "venv", "ENV", "__pycache__"]
 
 [tool.ruff]
 target-version = "py311"
 line-length = 100
+
+[tool.ruff.lint]
+# Набор правил фиксируем явно. Без select ruff берёт свой дефолт, а он
+# расширяется от версии к версии: CI краснеет на релизе линтера, при том что
+# ни одна строка кода не менялась. Здесь выбраны правила, которые ловят ошибки
+# (F, B, PYI, PLE, ASYNC), держат единый стиль (E, W, I, UP, SIM) и защищают
+# два места, где этот проект уже обжигался: часовой пояс (DTZ) и слишком
+# широкий except, глотающий ошибку API (BLE).
+#
+# Сознательно НЕ включены: RUF001/RUF002 (весь проект на русском, и каждая
+# кириллическая буква для них — «неоднозначный символ»), TRY003 (длинные
+# сообщения об ошибках здесь читает модель, и они обязаны быть подробными),
+# PLR2004 (сравнение с ожидаемым числом — это и есть тест).
+select = ["E", "W", "F", "I", "UP", "B", "SIM", "BLE", "DTZ", "PYI", "ASYNC", "PLE"]
+
+[tool.ruff.lint.per-file-ignores]
+# Тесты пишут файлы из async-функций напрямую. Правило про trio/anyio.Path
+# адресовано боевому коду с event loop под нагрузкой, а не проверке выгрузки.
+"test_*.py" = ["ASYNC240"]

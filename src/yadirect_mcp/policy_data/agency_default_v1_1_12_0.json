@@ -1,0 +1,501 @@
+{
+  "name": "agency_default_v1",
+  "version": "1.12.0",
+  "execution_workflow": {
+    "questions": "missing_information_at_start",
+    "budget_approval_required": false,
+    "campaign_plan_approval_required": false,
+    "creation_approval_required": false,
+    "report_publication_approval_required": false,
+    "known_report_destination_required": true,
+    "launch_requires_explicit_user_instruction": true,
+    "preview_token": "internal_plan_integrity_not_human_consent",
+    "source": "explicit_user_instruction",
+    "approved_on": "2026-09-11"
+  },
+  "browser_workflow": {
+    "engine": "playwright",
+    "browser_channel": "chrome",
+    "scope": "all_browser_actions",
+    "separate_authenticated_profile": true,
+    "fallback_requires_explicit_user_request": true,
+    "verification": "save_reopen_and_visual_review",
+    "source": "explicit_user_instruction",
+    "approved_on": "2026-09-11"
+  },
+  "status_model": {
+    "PASS": "требование подтверждено данными API",
+    "WARNING": "допустимо только после осознанного решения специалиста",
+    "BLOCK": "план или настройка противоречат обязательному правилу",
+    "MANUAL": "API не даёт достаточно данных, нужна ручная проверка"
+  },
+  "sources": {
+    "action_button": {
+      "url": "https://yandex.ru/support/direct/ru/efficiency/button",
+      "api_reference": "https://yandex.ru/dev/direct/doc/ru/ads/add",
+      "verified_on": "2026-09-10"
+    },
+    "responsive_group_limits": {
+      "url": "https://yandex.ru/support/direct/ru/unified-performance-campaign/create-comb-ad",
+      "verified_on": "2026-09-05"
+    },
+    "report_conversion_contract": {
+      "url": "https://yandex.ru/dev/direct/doc/ru/spec",
+      "verified_on": "2026-09-05"
+    },
+    "network_carousel": {
+      "url": "https://yandex.ru/support/direct/ru/efficiency/carousel",
+      "verified_on": "2026-09-04",
+      "api_reference": "https://yandex.ru/dev/direct/doc/ru/ads/add"
+    },
+    "geotargeting_update": {
+      "url": "https://b2b.yandex.ru/adv/news/obnovlenie-geotargetinga-v-direkte",
+      "published_on": "2026-08-31",
+      "verified_on": "2026-09-04",
+      "api_reference": "https://yandex.ru/dev/direct/doc/ru/annex/campaign-options"
+    },
+    "regulation": {
+      "url": "https://docs.google.com/document/d/1eegjaMrZmx9C_a1EXd72zL5_SHJ-bQUON2qoC4JVjZM/edit?tab=t.0",
+      "observed_modified_on": "2025-09-29"
+    },
+    "search_negative_keywords": {
+      "url": "https://docs.google.com/spreadsheets/d/1emyOx8EGWt2BgSdi9JUSMWfRYj8qOzGs97gT_vjmIVE/edit?gid=0",
+      "observed_modified_on": "2025-09-17",
+      "rows": 250,
+      "unique_items": 249,
+      "snapshot_state": "embedded",
+      "snapshot_file": "search_negative_keywords_v1.json",
+      "sha256": "0066111357f9ba2dfb1367b99679d19cb5d15e9280fbdcba0ff1ee6a07beb263"
+    },
+    "network_excluded_sites": {
+      "url": "https://docs.google.com/spreadsheets/d/1TSal-cuTprcY8yin5UznwbmMOLpm107kYTkYUYthCLE/edit",
+      "observed_modified_on": "2025-12-15",
+      "unique_items": 248,
+      "snapshot_state": "embedded",
+      "snapshot_file": "network_excluded_sites_v1.json",
+      "sha256": "febd80318a8bbeaf62c7351aea6db07219bf9bbe5bb8b76c7bc0a26e87f2cc5a"
+    }
+  },
+  "campaign_structure": {
+    "required_channels": [
+      "search"
+    ],
+    "optional_channels": [
+      "network"
+    ],
+    "conditional_channel": "maps_if_office",
+    "separate_campaigns": true,
+    "groups_maximum": 1000,
+    "group_principle": "one_intent_offer_landing",
+    "split_by": [
+      "product",
+      "purchase_scenario",
+      "landing",
+      "offer",
+      "brand_segment"
+    ],
+    "geo_split": "only_when_offer_economics_or_management_differ",
+    "separate_campaign_when": [
+      "budget",
+      "strategy",
+      "goals"
+    ],
+    "low_frequency": "merge_only_semantically_related",
+    "default_profile": "small_business",
+    "profiles": {
+      "small_business": {
+        "search": {
+          "groups": [
+            3,
+            10
+          ],
+          "keywords_per_group": [
+            10,
+            30
+          ]
+        },
+        "network": {
+          "groups": [
+            2,
+            5
+          ],
+          "keywords_per_group": [
+            5,
+            15
+          ]
+        }
+      },
+      "catalogue": {
+        "requires_reason": true,
+        "fixed_recommended_counts": false
+      }
+    },
+    "range_enforcement": "recommendation_with_explanation",
+    "coverage": "each_business_direction_grouped_or_excluded_with_reason"
+  },
+  "semantics": {
+    "required_in_new_bundle": true,
+    "keywords_maximum": 200,
+    "keyword_max_words": 7,
+    "keyword_max_length": 4096,
+    "campaign_keyword_minimum": null,
+    "source_fields": [
+      "id",
+      "type",
+      "reference",
+      "collected_on",
+      "region_ids"
+    ],
+    "business_evidence_required": true,
+    "wordstat": "regional_research_or_documented_unavailability",
+    "search_history": "review_if_available_otherwise_record_reason",
+    "generated_phrases": "hypotheses_until_supported_by_observed_queries",
+    "frequency": "zero_missing_and_no_results_are_distinct",
+    "zero_frequency_action": "review_not_automatic_exclusion",
+    "sum_nested_frequencies": false,
+    "autotargeting_counted_separately": true,
+    "evidence_verification": "references_provided_by_caller_not_independently_verified"
+  },
+  "geotargeting": {
+    "region_level": "ad_group",
+    "note": "Проверяются регионы показа на уровне групп."
+  },
+  "budget": {
+    "client_limit_scope": "planned_campaigns",
+    "client_limit_field": "client_budget",
+    "monthly_conversion": "amount * 12 / 52; not a calendar month spend cap",
+    "period": "weekly",
+    "minimum": 2000,
+    "maximum": 5000,
+    "range_enforcement": "warning",
+    "units": "account_currency",
+    "spend_constraint": "budget",
+    "forbidden_default_constraints": [
+      "target_cpa"
+    ]
+  },
+  "strategy": {
+    "recommended": [
+      "WB_MAXIMUM_CLICKS",
+      "WB_MAXIMUM_CONVERSION_RATE"
+    ],
+    "allowed_with_warning": [
+      "HIGHEST_POSITION",
+      "NETWORK_DEFAULT"
+    ],
+    "blocked": [
+      "AVERAGE_CPA",
+      "AVERAGE_CRR",
+      "PAY_FOR_CONVERSION",
+      "PAY_FOR_CONVERSION_CRR"
+    ]
+  },
+  "creative": {
+    "responsive_ads_max_non_archived": 3,
+    "responsive_ads_max_total": 10,
+    "responsive_ads_recommended_start": 1,
+    "responsive_titles_recommended": 7,
+    "additional_ads_require_distinct_hypotheses": true,
+    "network_images": {
+      "minimum": 3,
+      "maximum": 5,
+      "unique_required": true,
+      "generation_minimum": 3,
+      "generation": "agent_image_tool_or_direct_ui",
+      "server_generates_images": false,
+      "verification": "api_readback_hashes_and_ui_visual_review"
+    },
+    "action_button": {
+      "required_with_href": true,
+      "selection": "most_relevant_available_ui_label_for_offer",
+      "reason_required": true,
+      "destinations": [
+        "main",
+        "contacts"
+      ],
+      "default_href": "ad_href",
+      "contacts_url": "explicit_verified_same_site_page",
+      "api_supported": false,
+      "verification": "saved_ui_per_ad"
+    },
+    "network_carousel": {
+      "required": true,
+      "minimum_images": 2,
+      "maximum_images": 10,
+      "main_image_required": true,
+      "minimum_side_px": 450,
+      "maximum_file_mb": 10,
+      "aspect_ratio_difference_exclusive_max": 0.15,
+      "verification": "saved_ui_per_ad",
+      "api_supported": false,
+      "ordinary_ad_image_hashes_satisfy_requirement": false
+    },
+    "sitelinks_minimum": 4,
+    "sitelinks_recommended": 8,
+    "sitelinks_maximum": 8,
+    "responsive_title_max_length": 56,
+    "responsive_title_near_limit_min_length": 45,
+    "responsive_title_near_limit_required": 3
+  },
+  "goals": {
+    "selection": "explicit_business_goals",
+    "optional_for_strategies": [
+      "WB_MAXIMUM_CLICKS"
+    ],
+    "manual_review_when": "priority_goals_selected",
+    "maximum_recommended": 5,
+    "requires_manual_review": true
+  },
+  "negative_keywords": {
+    "default_profile": "custom",
+    "universal_required_list": false,
+    "profiles": [
+      "custom",
+      "rental",
+      "education",
+      "toys",
+      "legacy_reviewed"
+    ],
+    "client_exclusions_require_reason": true,
+    "context_conflicts_require_review": true
+  },
+  "reporting": {
+    "conversion_scope_default": "campaign",
+    "goals_default": "resolve_strategy_then_priority_goals",
+    "attribution_default": "resolve_campaign_settings",
+    "mixed_settings": "split_campaigns_or_explicit_comparison",
+    "all_goals_requires_explicit_scope": true,
+    "include_vat_default": true,
+    "metadata_sidecar": true,
+    "client_report": {
+      "required": true,
+      "format": "single_report_setup_then_statistics",
+      "create_at": "campaign_setup",
+      "update_at": "statistics_reporting",
+      "canonical_url": "https://bi-data.ru/elama/{client_login}/",
+      "preserve_setup": true,
+      "preserve_previous_periods": true,
+      "read_existing_before_update": true,
+      "backup_before_update": true,
+      "navigation": [
+        "Настройка",
+        "Статистика"
+      ],
+      "navigation_location": "left_sidebar",
+      "template": "templates/client-report",
+      "knowledge_resource": "direct://kb/client-report",
+      "enforcement": "agent_workflow",
+      "refresh_tool": "direct_client_report",
+      "statistics_and_html": "deterministic_code",
+      "ai_input": "bounded_brief_only",
+      "ai_output": "title_and_text_bound_to_data_revision",
+      "daily_runner": "python -m yadirect_mcp.report_runner refresh-all",
+      "runner_installs_schedule": false,
+      "legacy_create_report_satisfies_requirement": false,
+      "contacts": {
+        "telegram": "https://t.me/SergeyMushtuk",
+        "max_phone": "+79099994402",
+        "email": "hello@mediatargeting.agency",
+        "phone": "+74951961160"
+      },
+      "approved_on": "2026-09-06",
+      "source": "explicit_user_instruction"
+    }
+  },
+  "tracking_default_profile": "utm_v1",
+  "alternative_texts_default": false,
+  "business_profile_verification": [
+    "IsPublished",
+    "Phone",
+    "Address",
+    "HasOffice"
+  ],
+  "tracking_profiles": {
+    "utm_v1": {
+      "level": "campaign",
+      "params": {
+        "type": "{source_type}",
+        "source": "{source}",
+        "block": "{position_type}",
+        "pos": "{position}",
+        "key": "{keyword}",
+        "campaign": "{campaign_id}",
+        "yd_campaign_name": "{campaign_name}",
+        "name_lat": "{campaign_name_lat}",
+        "retargeting": "{retargeting_id}",
+        "ad": "{ad_id}",
+        "phrase": "{phrase_id}",
+        "gbid": "{gbid}",
+        "device": "{device_type}",
+        "region": "{region_id}",
+        "region_name": "{region_name}",
+        "utm_source": "yandex",
+        "utm_medium": "cpc",
+        "utm_campaign": "{campaign_id}",
+        "utm_content": "{ad_id}",
+        "utm_term": "{phrase_id}"
+      }
+    },
+    "regulation_v1": {
+      "level": "campaign",
+      "params": {
+        "type": "{source_type}",
+        "source": "{source}",
+        "block": "{position_type}",
+        "pos": "{position}",
+        "key": "{keyword}",
+        "campaign": "{campaign_id}",
+        "yd_campaign_name": "{campaign_name}",
+        "name_lat": "{campaign_name_lat}",
+        "retargeting": "{retargeting_id}",
+        "ad": "{ad_id}",
+        "phrase": "{phrase_id}",
+        "gbid": "{gbid}",
+        "device": "{device_type}",
+        "region": "{region_id}",
+        "region_name": "{region_name}"
+      }
+    }
+  },
+  "landing_url_policy": {
+    "required": true,
+    "scope": [
+      "main",
+      "sitelink",
+      "button"
+    ],
+    "button_url_readback": "saved_ui_per_ad",
+    "check_effective_tracking": true,
+    "devices": [
+      "desktop",
+      "mobile"
+    ],
+    "unknown_or_truncated": "BLOCK",
+    "soft_404": "BLOCK",
+    "manual_acknowledgement_is_not_http_evidence": true,
+    "campaign_name_parameter": "yd_campaign_name",
+    "approved_on": "2026-09-07"
+  },
+  "rules": [
+    {
+      "id": "landing.effective_urls",
+      "failure_status": "BLOCK"
+    },
+    {
+      "id": "ads.sitelink_count",
+      "failure_status": "BLOCK"
+    },
+    {
+      "id": "structure.separate_channels",
+      "failure_status": "BLOCK"
+    },
+    {
+      "id": "budget.weekly_range",
+      "failure_status": "WARNING"
+    },
+    {
+      "id": "strategy.no_target_cpa",
+      "failure_status": "BLOCK"
+    },
+    {
+      "id": "tracking.campaign_profile",
+      "failure_status": "BLOCK"
+    },
+    {
+      "id": "groups.region_ids",
+      "failure_status": "BLOCK"
+    },
+    {
+      "id": "groups.tracking_override",
+      "failure_status": "WARNING"
+    },
+    {
+      "id": "structure.coverage",
+      "failure_status": "BLOCK"
+    },
+    {
+      "id": "structure.group_rationale",
+      "failure_status": "BLOCK"
+    },
+    {
+      "id": "structure.landing",
+      "failure_status": "BLOCK"
+    },
+    {
+      "id": "structure.brand_segment",
+      "failure_status": "BLOCK"
+    },
+    {
+      "id": "structure.group_count",
+      "failure_status": "WARNING"
+    },
+    {
+      "id": "semantics.keyword_count",
+      "failure_status": "WARNING"
+    },
+    {
+      "id": "semantics.research_required",
+      "failure_status": "BLOCK"
+    },
+    {
+      "id": "semantics.keyword_evidence",
+      "failure_status": "BLOCK"
+    },
+    {
+      "id": "semantics.history",
+      "failure_status": "BLOCK"
+    },
+    {
+      "id": "semantics.regional_wordstat",
+      "failure_status": "BLOCK"
+    },
+    {
+      "id": "semantics.source_geography",
+      "failure_status": "WARNING"
+    },
+    {
+      "id": "semantics.content_review",
+      "failure_status": "MANUAL"
+    },
+    {
+      "id": "semantics.evidence_unavailable",
+      "failure_status": "MANUAL"
+    },
+    {
+      "id": "ads.distinct_hypotheses",
+      "failure_status": "BLOCK"
+    },
+    {
+      "id": "search.negative_keywords",
+      "failure_status": "MANUAL"
+    },
+    {
+      "id": "network.excluded_sites",
+      "failure_status": "BLOCK"
+    },
+    {
+      "id": "network.carousel",
+      "failure_status": "MANUAL"
+    },
+    {
+      "id": "ads.network_image",
+      "failure_status": "BLOCK"
+    },
+    {
+      "id": "ads.action_button",
+      "failure_status": "MANUAL"
+    },
+    {
+      "id": "ads.action_button_selection",
+      "failure_status": "BLOCK"
+    },
+    {
+      "id": "goals.explicit_business_selection",
+      "failure_status": "MANUAL"
+    },
+    {
+      "id": "maps.office_required",
+      "failure_status": "MANUAL"
+    }
+  ]
+}

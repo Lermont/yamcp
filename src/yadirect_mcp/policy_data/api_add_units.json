@@ -1,0 +1,14 @@
+{
+  "source": "https://yandex.ru/dev/direct/doc/ru/concepts/units",
+  "verified_on": "2026-09-09",
+  "maximum_age_days": 90,
+  "rates": {
+    "campaigns": {"label": "Campaigns.add", "per_call": 10, "per_object": 5},
+    "bid_modifiers": {"label": "BidModifiers.add", "per_call": 15, "per_object": 1},
+    "ad_groups": {"label": "AdGroups.add", "per_call": 20, "per_object": 20},
+    "ads": {"label": "Ads.add", "per_call": 20, "per_object": 20},
+    "keywords": {"label": "Keywords.add", "per_call": 20, "per_object": 2},
+    "retargeting_lists": {"label": "RetargetingLists.add", "per_call": 10, "per_object": 2},
+    "audience_targets": {"label": "AudienceTargets.add", "per_call": 10, "per_object": 2}
+  }
+}

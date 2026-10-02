@@ -1,4 +1,7 @@
 * text=auto
+.gitattributes text eol=lf
+.gitignore text eol=lf
+.env.example text eol=lf
 *.py text eol=lf
 *.md text eol=lf
 *.toml text eol=lf
@@ -7,3 +10,6 @@
 *.json text eol=lf
 *.bat text eol=crlf
 *.ps1 text eol=crlf
+
+# Policy snapshots are verified by SHA-256 over their original bytes.
+src/yadirect_mcp/policy_data/*.json -text whitespace=cr-at-eol
