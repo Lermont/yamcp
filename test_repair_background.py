@@ -50,7 +50,7 @@ async def test_append_preflight_is_background_and_binds_evidence(server, monkeyp
         await gate.wait()
         return evidence
     monkeypatch.setattr(repair, "preflight", slow)
-    initial = (await server.direct_campaign_repair("client", source())).structuredContent
+    initial = (await server.direct_campaign_repair("client", source())).structured_content
     assert initial["status"] == "running"
     assert initial["job_id"] and initial["poll_tool"] == "direct_write_job"
     assert not approval.REGISTRY._grants
@@ -59,7 +59,7 @@ async def test_append_preflight_is_background_and_binds_evidence(server, monkeyp
     await jobs.wait_briefly(initial["job_id"], seconds=2)
     # Completed preview must survive token-registry recreation, using journal evidence.
     monkeypatch.setattr(approval, "REGISTRY", approval.ApprovalRegistry())
-    preview = (await server.direct_write_job("client", initial["job_id"])).structuredContent
+    preview = (await server.direct_write_job("client", initial["job_id"])).structured_content
     assert preview["status"] == "preview" and preview["preview_kind"] == "repair"
     token = preview["confirmation_required"]
     grant = approval.REGISTRY.validate(token, "client", preview["plan_hash"])
@@ -68,20 +68,20 @@ async def test_append_preflight_is_background_and_binds_evidence(server, monkeyp
     monkeypatch.setattr(repair, "apply", apply)
     monkeypatch.setattr(repair, "readback", AsyncMock(return_value={"verified": True}))
     refused = await server.direct_campaign_repair("client", source(), token, ctx=host("decline"))
-    assert refused.isError and not apply.called
+    assert refused.is_error and not apply.called
     accepted = await server.direct_campaign_repair("client", source(), token, ctx=host())
-    assert not accepted.isError
+    assert not accepted.is_error
     assert apply.call_args.kwargs["expected_preflight"] == evidence
     repeated = await server.direct_campaign_repair("client", source(), token, ctx=host())
-    assert repeated.isError and apply.call_count == 1
+    assert repeated.is_error and apply.call_count == 1
 
 
 @pytest.mark.asyncio
 async def test_background_failure_never_issues_confirmation(server, monkeypatch):
     monkeypatch.setattr(repair, "preflight", AsyncMock(side_effect=ValueError("URL BLOCK")))
-    response = (await server.direct_campaign_repair("client", source())).structuredContent
+    response = (await server.direct_campaign_repair("client", source())).structured_content
     await jobs.wait_briefly(response["job_id"], seconds=2)
-    result = (await server.direct_write_job("client", response["job_id"])).structuredContent
+    result = (await server.direct_write_job("client", response["job_id"])).structured_content
     assert result["status"] == "blocked"
     assert "confirmation_required" not in result
     assert not approval.REGISTRY._grants and not server._client.calls

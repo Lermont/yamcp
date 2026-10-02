@@ -404,19 +404,19 @@ api = ProductAPI(empty=True)
 s._api = lambda: api
 async def run():
     feed = {'name': 'Test feed', 'url': FEED_URL}
-    preview = (await s.direct_feed_create('client', feed)).structuredContent
+    preview = (await s.direct_feed_create('client', feed)).structured_content
     before = len([c for c in api.calls if c[2] == 'add'])
     token = preview['confirmation_required']
     changed = (await s.direct_feed_create('client', {**feed, 'url': FEED_URL+'?new'},
-                                         token, host())).isError
-    declined = (await s.direct_feed_create('client', feed, token, host('decline'))).isError
+                                         token, host())).is_error
+    declined = (await s.direct_feed_create('client', feed, token, host('decline'))).is_error
     after_decline = len([c for c in api.calls if c[2] == 'add'])
     applied = await s.direct_feed_create('client', feed, token, host())
-    repeated = (await s.direct_feed_create('client', feed, token, host())).isError
+    repeated = (await s.direct_feed_create('client', feed, token, host())).is_error
     journal = json.loads(next((Path(s.SETTINGS.out_dir)/'jobs').glob('*.json')).read_text(
         encoding='utf-8'))
     return {'before': before, 'after_decline': after_decline, 'changed': changed,
-            'declined': declined, 'applied_error': applied.isError, 'repeated': repeated,
+            'declined': declined, 'applied_error': applied.is_error, 'repeated': repeated,
             'adds': len([c for c in api.calls if c[2] == 'add']),
             'job_kind': journal['kind'], 'approval': journal['approval']['decision'],
             'created': journal['result']['feed_id']}
@@ -452,7 +452,7 @@ async def run():
     result = await s.direct_product_source('client', {
         'type':'website', 'url':'https://example.test/',
         'sample_urls':['https://example.test/item']})
-    return {'result':result.structuredContent, 'api_created':s._client is not None}
+    return {'result':result.structured_content, 'api_created':s._client is not None}
 print(json.dumps(asyncio.run(run())))""",
         str(tmp_path),
         YD_MODE="report",

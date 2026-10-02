@@ -162,24 +162,24 @@ async def test_network_confirmation_drift_decline_replay_and_reverification(tmp_
     monkeypatch.setattr(approval, "REGISTRY", approval.ApprovalRegistry())
     raw = network_source()
     preview = await server.direct_campaign_repair("client", raw)
-    assert not preview.isError, preview
-    token = preview.structuredContent["confirmation_required"]
+    assert not preview.is_error, preview
+    token = preview.structured_content["confirmation_required"]
     changed = deepcopy(raw)
     changed["new_groups"][0]["ads"][0]["ad_image_hashes"][0] = "changed"
     for login, value in [("other", raw), ("client", changed)]:
-        assert (await server.direct_campaign_repair(login, value, token, ctx=host())).isError
-    assert (await server.direct_campaign_repair("client", raw, token, ctx=host("decline"))).isError
+        assert (await server.direct_campaign_repair(login, value, token, ctx=host())).is_error
+    assert (await server.direct_campaign_repair("client", raw, token, ctx=host("decline"))).is_error
     api.rows["campaigns"][0]["Name"] += " changed externally"
     refused = await server.direct_campaign_repair("client", raw, token, ctx=host())
     assert api.writes == [], refused
     preview = await server.direct_campaign_repair("client", raw)
-    token = preview.structuredContent["confirmation_required"]
+    token = preview.structured_content["confirmation_required"]
     result = await server.direct_campaign_repair("client", raw, token, ctx=host())
-    assert not result.isError, result
-    saved = result.structuredContent
+    assert not result.is_error, result
+    saved = result.structured_content
     assert saved["readback"]["verified"], saved["readback"]
     assert saved["workflow"]["scope"] == "repair" and saved["setup_complete"] is False
-    assert (await server.direct_campaign_repair("client", raw, token, ctx=host())).isError
+    assert (await server.direct_campaign_repair("client", raw, token, ctx=host())).is_error
     count = len(api.writes)
     check = await verification.run(api, tmp_path, "client", saved["job_id"])
     assert check["readback"]["verified"]

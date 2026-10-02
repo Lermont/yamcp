@@ -417,7 +417,7 @@ def test_mcp_exposes_profile_catalog_and_knowledge(tmp_path):
     result = _in_server(
         "import asyncio, json\nimport yadirect_mcp.server as s\n"
         "r = asyncio.run(s.direct_policy('ecommerce_new_v1'))\n"
-        "print(r.model_dump_json())",
+        "print(r.model_dump_json(by_alias=True))",
         str(tmp_path),
         YD_MODE="report",
     )

@@ -27,7 +27,7 @@ def test_report_guidance_loaded_in_both_modes_without_policy_mutation(tmp_path, 
     result = _in_server(
         "import asyncio, json\n"
         "import yadirect_mcp.server as s\n"
-        "p = asyncio.run(s.direct_policy()).structuredContent\n"
+        "p = asyncio.run(s.direct_policy()).structured_content\n"
         "print(json.dumps({'instructions': s.mcp.instructions, 'result': p, "
         "'features': s.runtime.describe(s.SETTINGS)['features']}))",
         str(tmp_path), YD_MODE=mode,

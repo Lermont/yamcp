@@ -4,11 +4,9 @@ import json
 import os
 import sys
 import tomllib
-from datetime import timedelta
 from pathlib import Path
 
-from mcp import ClientSession, StdioServerParameters
-from mcp.client.stdio import stdio_client
+from mcp import Client, StdioServerParameters
 
 
 async def main():
@@ -20,12 +18,10 @@ async def main():
     if missing:
         raise RuntimeError('Missing configured environment variable names: ' + ', '.join(missing))
     params = StdioServerParameters(command=source['command'], args=source.get('args', []),
-                                  env=env, cwd='D:/mcp_direct')
-    async with (
-        stdio_client(params) as (read, write),
-        ClientSession(read, write, read_timeout_seconds=timedelta(minutes=10)) as session,
-    ):
-        await session.initialize()
+                                  env=env, cwd=source.get('cwd'))
+    # SDK v2 takes seconds as a float; Client drives modern input-required rounds.
+    # No elicitation callback: this non-interactive helper cannot supply consent.
+    async with Client(params, read_timeout_seconds=600) as session:
         print(json.dumps({'status': 'MCP connected'}), flush=True)
         while line := await asyncio.to_thread(sys.stdin.readline):
             request = json.loads(line)
@@ -38,7 +34,7 @@ async def main():
                 )
                 arguments = json.loads(content)
             result = await session.call_tool(request['tool'], arguments)
-            data = result.structuredContent
+            data = result.structured_content
             if data is None:
                 texts = [c.text for c in result.content if c.type == 'text']
                 data = json.loads(''.join(texts))
