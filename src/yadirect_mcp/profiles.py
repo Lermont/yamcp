@@ -90,6 +90,42 @@ def build_policies(base: dict) -> dict[str, dict]:
             "Товарная ЕПК (галерея + РСЯ) и отдельный Поиск; источник — фид или сайт")
         selected["campaign_structure"]["product_channel"] = "gallery_and_network_shared_budget"
         result[name] = selected
+    # Previously published profiles remain immutable for stored plan hashes.
+    for business in BUSINESSES:
+        for stage in ("new", "established"):
+            base_version = "v2" if business == "ecommerce" else "v1"
+            selected = deepcopy(result[f"{business}_{stage}_{base_version}"])
+            name = f"{business}_{stage}_v3"
+            selected.update(name=name, version="3.0.0")
+            selected["profile"].update(
+                strategy_selection="conversions_with_click_payment",
+                conversion_history_required=False,
+                start_defaults_version="2026-09-24",
+            )
+            result[name] = selected
+    for business in BUSINESSES:
+        for stage in ("new", "established"):
+            selected = deepcopy(result[f"{business}_{stage}_v3"])
+            name = f"{business}_{stage}_v4"
+            selected.update(name=name, version="4.0.0", alternative_texts_default=True,
+                            neuro_ads_default=True)
+            selected["profile"]["creative_defaults_version"] = "2026-09-25"
+            result[name] = selected
+    # Explicit download KPI for software. Keep every existing profile frozen;
+    # a file download must never be labelled a qualified lead or purchase.
+    for stage in ("new", "established"):
+        selected = deepcopy(result[f"services_b2b_{stage}_v3"])
+        name = f"software_{stage}_v3"
+        selected.update(name=name)
+        selected["profile"].update(
+            business="software", label="Программное обеспечение",
+            goal_kinds=["download"], primary_kpi="download_cost",
+            recommendations=[
+                "Проверенная цель скачивания рекламируемого продукта",
+                "Скачивание не подтверждает установку, обращение или покупку",
+            ],
+        )
+        result[name] = selected
     return result
 
 
@@ -137,6 +173,7 @@ def context(
             "exclusions_reason",
             "schedule_reason",
             "autotexts_reason",
+            "conversion_goal_reason",
         },
         "",
     )
@@ -144,11 +181,20 @@ def context(
         value.setdefault(key, False)
         if type(value[key]) is not bool:
             raise ValueError(f"profile_context.{key}: требуется boolean")
-    for key in ("exclusions_reason", "schedule_reason", "autotexts_reason"):
+    for key in (
+        "exclusions_reason", "schedule_reason", "autotexts_reason", "conversion_goal_reason",
+    ):
         if key in value:
             value[key] = _text(value[key], key)
     if spec["business"] == "ecommerce" and not value["catalog_reviewed"]:
         raise ValueError("profile_context.catalog_reviewed: проверьте товарные посадочные")
+    allowed_kinds = set(spec["goal_kinds"])
+    if "conversion_goal_reason" in value:
+        if spec["business"] != "ecommerce" or not selected["name"].endswith("_v4"):
+            raise ValueError("conversion_goal_reason допустим только для ecommerce v4")
+        # Keep enquiries/orders separate from purchases. Cart is an explicit
+        # lower-value auxiliary goal, checked against primary goals below.
+        allowed_kinds.update({"lead", "order", "cart"})
     rows = value.setdefault("goals", [])
     if not isinstance(rows, list):
         raise ValueError("profile_context.goals: нужен массив")
@@ -156,13 +202,17 @@ def context(
     for row in rows:
         row = _object(row, {"goal_id", "kind"}, "goals")
         identifier = parse_id(row.get("goal_id"), "profile_context.goals.goal_id")
-        if row.get("kind") not in spec["goal_kinds"]:
+        if row.get("kind") not in allowed_kinds:
             raise ValueError("profile_context.goals.kind не соответствует бизнес-профилю")
         declared.append({"goal_id": identifier, "kind": row["kind"]})
     ids = [row["goal_id"] for row in declared]
     if len(ids) != len(set(ids)) or set(ids) != goals or goals & {12, 13}:
         raise ValueError("profile_context.goals: классифицируйте все реальные priority_goals")
     value["goals"] = sorted(declared, key=lambda row: row["goal_id"])
+    if any(row["kind"] == "cart" for row in declared) and not any(
+        row["kind"] in {"purchase", "lead", "order"} for row in declared
+    ):
+        raise ValueError("profile_context.goals.kind: cart требует основную бизнес-цель")
     if value["measurement_verified"] and (not goals or not counters):
         raise ValueError("profile_context.measurement_verified требует счётчик и бизнес-цели")
     history = value.setdefault("history", [])
@@ -259,13 +309,18 @@ def eligible_goals(
 def strategy(
     source: Any, value: dict, selected: dict, *, channel: str, regions: list[int], today: date
 ) -> tuple[Any, dict]:
-    eligible = eligible_goals(value, selected["profile"], channel, regions, today)
+    current = selected["profile"].get("conversion_history_required") is False
     goals = {row["goal_id"] for row in value["goals"]}
+    if current and goals and not value["measurement_verified"]:
+        raise ValueError("profile_context.measurement_verified: сначала проверьте Метрику и цели")
+    eligible = (goals if value["measurement_verified"] else set()) if current else eligible_goals(
+        value, selected["profile"], channel, regions, today)
     explicit = source is not None
     if not explicit:
         source = (
-            {"type": "maximum_conversion_rate", "goal_id": next(iter(goals))}
-            if len(goals) == 1 and goals <= eligible
+            {"type": "maximum_conversion_rate",
+             "goal_id": next(iter(goals)) if len(goals) == 1 else 13}
+            if goals and goals <= eligible and (current or len(goals) == 1)
             else {"type": "maximum_clicks"}
         )
     source = {"type": source} if isinstance(source, str) else deepcopy(source)
@@ -276,6 +331,8 @@ def strategy(
         goal = parse_id(source.get("goal_id"), "strategy.goal_id")
         required = goals if goal == 13 else {goal}
         if not required or not required <= eligible:
+            if current:
+                raise ValueError("Для конверсий нужны проверенные Метрика и выбранные бизнес-цели")
             raise ValueError(
                 "profile.history: для конверсионной стратегии нет проверенной "
                 "достаточной истории этой цели, канала и географии"
@@ -289,6 +346,10 @@ def strategy(
         "reason": (
             "Явный выбор стратегии"
             if explicit
+            else "Проверенные Метрика и цели; конверсии с оплатой за клики без требования истории"
+            if current and kind == "maximum_conversion_rate"
+            else "Нет Метрики или выбранных целей"
+            if current
             else "Проверенная история цели, канала и географии"
             if kind == "maximum_conversion_rate"
             else "Нет достаточной истории одной выбранной цели для этого среза"
@@ -319,12 +380,23 @@ def validate_campaigns(
         actual_goals = {row["GoalId"] for row in unified.get("PriorityGoals", {}).get("Items", [])}
         if actual_goals != expected_goals:
             raise ValueError("Цели кампании не соответствуют profile_context.goals")
+        cart_ids = {row["goal_id"] for row in value["goals"] if row["kind"] == "cart"}
+        if cart_ids:
+            values = {row["GoalId"]: row["Value"] for row in unified["PriorityGoals"]["Items"]}
+            if max(values[i] for i in cart_ids) >= min(
+                values[i] for i in expected_goals - cart_ids
+            ):
+                raise ValueError(
+                    "Вспомогательная корзина должна иметь меньшую ценность основной цели"
+                )
         if campaign.get("ExcludedSites", {}).get("Items") and not value.get("exclusions_reason"):
             raise ValueError("profile_context.exclusions_reason: обоснуйте исключения площадок")
         if campaign.get("TimeTargeting") and not value.get("schedule_reason"):
             raise ValueError("profile_context.schedule_reason: обоснуйте ограничение расписания")
         settings = {r["Option"]: r["Value"] for r in unified.get("Settings", [])}
-        if settings.get("ALTERNATIVE_TEXTS_ENABLED") == "YES" and not value.get("autotexts_reason"):
+        if (settings.get("ALTERNATIVE_TEXTS_ENABLED") == "YES"
+                and selected["alternative_texts_default"] is not True
+                and not value.get("autotexts_reason")):
             raise ValueError("profile_context.autotexts_reason: обоснуйте включение автотекстов")
         if item["channel"] == "maps" and any(
             not ad["ResponsiveAd"].get("BusinessId")

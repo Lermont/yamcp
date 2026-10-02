@@ -40,7 +40,9 @@ def compact(payload: dict[str, Any]) -> dict[str, Any]:
             "incomplete_sources", "data_complete",
             "confirmation_required", "confirmation_ttl_seconds", "api_units_estimate",
             "preflight", "required_manual_actions", "creation_report", "fatal_error", "message",
-            "api_creation_complete", "setup_complete",
+            "api_creation_complete", "setup_complete", "workflow", "manual_review",
+            "job_id", "job_status", "journal_path", "uncertain", "poll_tool",
+            "poll_after_seconds", "preview_kind", "human_approval",
         ) if key in payload
     }
     findings = []

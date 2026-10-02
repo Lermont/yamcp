@@ -72,10 +72,45 @@ def needs_button(payload: dict) -> bool:
                                          or payload.get("VideoExtensionIds")))
 
 
+def neuro_ad(source: dict, *, default_enabled: bool) -> dict | None:
+    """A group-level UI requirement, never an invented Ads.add payload."""
+    enabled = source.get("neuro_ad", default_enabled)
+    if type(enabled) is not bool:
+        raise ValueError("group.neuro_ad: требуется true или false")
+    if not enabled:
+        return None
+    semantic = source.get("semantic") or {}
+    href = semantic.get("landing_url") if isinstance(semantic, dict) else None
+    parsed = urlsplit(href) if isinstance(href, str) else None
+    if (parsed is None or parsed.scheme not in {"http", "https"} or not parsed.hostname
+            or parsed.username or parsed.password or len(href) > 1024):
+        raise ValueError("neuro_ad: требуется HTTP(S) semantic.landing_url рекламируемой страницы")
+    return {"href": href, "source": "landing_page"}
+
+
+def neuro_requirement(requested: dict, **target: Any) -> dict:
+    return {
+        "rule": "ads.neuro_ad", "required": True, "status": "pending_ui",
+        "verification_method": "saved_ui_per_group",
+        "requested": deepcopy(requested),
+        "message": (
+            "Добавить или включить одно Нейрообъявление в группе через интерфейс Директа "
+            "по указанной посадочной, сохранить и повторно открыть. Проверить источник, "
+            "метки, статус генерации, тексты и изображения. Не создавать дубликат, если "
+            "нейрообъявление уже есть. Публичный API не подтверждает этот тип объявления. "
+            "Запуск показов требует отдельной команды пользователя."
+        ),
+        **target,
+    }
+
+
 def planned_actions(campaigns: list[dict]) -> list[dict]:
     actions = []
     for ci, item in enumerate(campaigns):
         for gi, group in enumerate(item["groups"]):
+            if group.get("neuro_ad"):
+                actions.append(neuro_requirement(group["neuro_ad"],
+                                                  campaign_index=ci, group_index=gi))
             for ai, ad in enumerate(group["ads"]):
                 target = {"campaign_index": ci, "group_index": gi, "ad_index": ai}
                 button = group["action_buttons"][ai]
@@ -98,6 +133,9 @@ def executed_actions(plan: dict, campaigns: list[dict]) -> list[dict]:
         planned = plan["campaigns"][item["plan_index"]]
         for group in item["groups"]:
             planned_group = planned["groups"][group["plan_index"]]
+            if planned_group.get("neuro_ad"):
+                actions.append(neuro_requirement(planned_group["neuro_ad"],
+                                                  campaign_id=item["id"], group_id=group["id"]))
             for ai, action in enumerate(group["ads"]):
                 if action.get("Errors") or action.get("Id") is None:
                     continue
@@ -114,3 +152,25 @@ def executed_actions(plan: dict, campaigns: list[dict]) -> list[dict]:
                 if item["channel"] == "network":
                     actions.append(policy.network_carousel_requirement(**target))
     return actions
+
+
+def repaired_carousel_actions(plan: dict, before: dict) -> list[dict]:
+    """Bind carousel rechecks to image repairs without rewriting the original job."""
+    changed = [row for row in plan.get("ads", [])
+               if "AdImageHashes" in row.get("ResponsiveAd", {})]
+    ad_map = {str(row["id"]): row for row in before.get("ads", [])}
+    campaigns = {str(row["id"]): row for row in before.get("campaigns", [])}
+    result = []
+    for update in changed:
+        ad = ad_map.get(str(update["Id"]))
+        if not ad or not ad.get("ad_group_id"):
+            raise ValueError("Image repair requires the saved ad ownership snapshot")
+        campaign = campaigns.get(str(ad.get("campaign_id")))
+        strategy = (campaign or {}).get("bidding_strategy", {}).get("Network", {})
+        if not strategy.get("BiddingStrategyType"):
+            raise ValueError("Image repair requires the saved campaign placement snapshot")
+        if strategy["BiddingStrategyType"] != "SERVING_OFF":
+            result.append(policy.network_carousel_requirement(
+                campaign_id=str(ad["campaign_id"]), group_id=str(ad["ad_group_id"]),
+                ad_id=str(ad["id"])))
+    return result

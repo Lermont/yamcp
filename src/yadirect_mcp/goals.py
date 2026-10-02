@@ -26,3 +26,26 @@ async def read(api: Any, campaign_id: int) -> dict[str, Any]:
             "API не возвращает дату создания, поэтому новые серые цели нужно проверять вручную.",
         ],
     }
+
+
+async def read_retargeting(api: Any, client_login: str) -> dict[str, Any]:
+    """Client-scoped catalog; segments are not optimization/conversion goals."""
+    from .identifiers import parse_id
+
+    result = await api.call_v4("GetRetargetingGoals", {"Logins": [client_login]})
+    if not isinstance(result, list):
+        raise ValueError("GetRetargetingGoals: incomplete or invalid catalog")
+    rows = []
+    seen = set()
+    for row in result:
+        if not isinstance(row, dict) or row.get("Login") not in (None, "", client_login):
+            raise ValueError("GetRetargetingGoals: foreign or invalid catalog row")
+        identifier = parse_id(row.get("GoalID"), "GetRetargetingGoals.GoalID")
+        if identifier in seen:
+            raise ValueError("GetRetargetingGoals: duplicate ID")
+        seen.add(identifier)
+        rows.append({"id": identifier, "name": row.get("Name"),
+                     "type": row.get("Type"), "domain": row.get("GoalDomain")})
+    return {"client_login": client_login, "goals": rows, "count": len(rows),
+            "api_version": "live_v4", "complete": True,
+            "limitations": ["Audience size and readiness require separate verification."]}

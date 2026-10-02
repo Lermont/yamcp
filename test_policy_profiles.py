@@ -422,13 +422,14 @@ def test_mcp_exposes_profile_catalog_and_knowledge(tmp_path):
         YD_MODE="report",
     )
     data = result["structuredContent"]
-    assert len(data["available_profiles"]) == 9
+    assert len(data["available_profiles"]) == 23
     assert data["policy"]["profile"]["business"] == "ecommerce"
     guidance = data["planning_defaults"]
     assert guidance["stages"] == ["new", "established"]
     assert guidance["budget"] == {
-        "amount": 30000, "period": "monthly", "currency": "RUB",
-        "scope": "planned_campaigns", "vat_basis": "explicit_client_choice",
+        "amount": 30000, "period": "two_weeks", "currency": "RUB",
+        "scope": "planned_campaigns", "includes_vat": True, "vat_percent": 22,
+        "duration_days": 14, "vat_basis": "RU_2026_default_explicit_override",
         "allocation": "explicit_within_total",
     }
     assert guidance["campaign_mix"] == {

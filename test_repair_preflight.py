@@ -203,7 +203,8 @@ def server(monkeypatch, tmp_path):
     monkeypatch.setenv("YD_OUT_DIR", str(tmp_path))
     from yadirect_mcp import server as s
     monkeypatch.setattr(s, "SETTINGS", SimpleNamespace(
-        mode="campaign_setup", out_dir=tmp_path, check_login=lambda login: None,
+        mode="campaign_setup", approval_mode="elicitation", out_dir=tmp_path,
+        check_login=lambda login: None,
     ))
     monkeypatch.setattr(s, "_client", Api())
     monkeypatch.setattr(approval, "REGISTRY", approval.ApprovalRegistry())

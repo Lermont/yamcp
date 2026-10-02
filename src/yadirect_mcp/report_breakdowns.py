@@ -148,7 +148,16 @@ async def collect(api, config: dict, start: str, end: str, raw_dir: Path) -> dic
             "reconciliation": reconcile(rows, controls, key), "rows": rows,
         }
     ad_rows = result["slices"]["ads"]["rows"]
-    ad_ids = sorted({int(r["dimensions"]["AdId"]) for r in ad_rows})
+    # Some report-only formats expose traffic but no API ad identifier ("--").
+    # Keep those rows and totals; current-copy enrichment requires a real ID.
+    available_ids = {r["dimensions"]["AdId"] for r in ad_rows
+                     if r["dimensions"]["AdId"] not in store.EMPTY}
+    if any(not value.isdigit() or int(value) <= 0 for value in available_ids):
+        raise ValueError("Некорректный идентификатор объявления в статистике")
+    ad_ids = sorted(map(int, available_ids))
+    result["slices"]["ads"]["unavailableAdIdRows"] = sum(
+        r["dimensions"]["AdId"] in store.EMPTY for r in ad_rows
+    )
     copy = {}
     for offset in range(0, len(ad_ids), 1000):
         payload = await api.call_v501("ads", "get", {
@@ -173,6 +182,7 @@ def summary(details: dict | None) -> dict:
     return {
         key: {"row_count": len(part["rows"]), "scope": part["scope"],
               "traffic_matches": all(c["trafficMatches"] for c in part["reconciliation"]),
+              "unavailable_ad_id_rows": part.get("unavailableAdIdRows", 0),
               "top_by_clicks": [
                   {"campaign": r["campaign"], "dimensions": {
                       k: v[:120] for k, v in r["dimensions"].items()},

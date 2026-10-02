@@ -119,3 +119,22 @@ def test_duplicate_unknown_campaign_and_empty_header_rejected():
     for bad in [header + row + row, header + row.replace("1\tSEARCH", "2\tSEARCH"), ""]:
         with pytest.raises(ValueError):
             breakdowns.parse(bad, config, "devices", ["Device"])
+
+
+@pytest.mark.asyncio
+async def test_report_only_ad_without_id_keeps_statistics_and_skips_copy_lookup(tmp_path):
+    _, _, _, config = register(tmp_path, measurement=False)
+    config['client_login'] = 'client'
+    class ReportsOnlyAdAPI(SliceAPI):
+        async def report(self, spec, **kwargs):
+            return (await super().report(spec, **kwargs)).replace('1920705538295248721', '--')
+        async def call_v501(self, service, method, params, **kwargs):
+            raise AssertionError('No real ad IDs: current-copy lookup must not run')
+    result = await breakdowns.collect(ReportsOnlyAdAPI(), config, '2026-08-01',
+                                      '2026-08-01', tmp_path / 'raw')
+    ads = result['slices']['ads']
+    assert ads['rows'][0]['dimensions']['AdId'] == '--'
+    assert ads['rows'][0]['clicks'] == 10 and ads['rows'][0]['spend'] == 120.25
+    assert ads['currentCopy'] == {} and ads['unavailableAdIdRows'] == 1
+    assert ads['reconciliation'][0]['trafficMatches'] is True
+    assert breakdowns.summary(result)['ads']['unavailable_ad_id_rows'] == 1

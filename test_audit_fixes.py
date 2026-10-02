@@ -173,7 +173,8 @@ async def test_landing_stream_is_bounded_and_closed(public_dns, respx_mock, monk
     body = CountingStream([b"<title>OK</title>"] + [b"x" * 65536] * 100)
     respx_mock.get("https://93.184.216.34/").respond(200, stream=body)
     result = await landing.inspect_pages([{"url": "https://example.test/"}])
-    assert result[0]["ok"] is True
+    assert result[0]["http_ok"] is True
+    assert result[0]["ok"] is False
     assert result[0]["title"] == "OK"
     assert result[0]["html_truncated"] is True
     assert body.read < 200_000

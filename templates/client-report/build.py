@@ -12,6 +12,110 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 
+ACCEPTANCE_KEYS = {"campaigns", "coverage", "goals", "links", "contacts", "assets"}
+
+
+def validate_acceptance(value: dict, parse_day) -> None:
+    """Validate the authored snapshot, never infer verification from planned settings."""
+    def require(condition, message):
+        if not condition:
+            raise ValueError("setup.acceptance: " + message)
+
+    require(isinstance(value, dict), "expected an object")
+    require(set(value) == {"checkedAt", "items", "launch"},
+            "expected checkedAt, items, launch")
+    parse_day(value["checkedAt"])
+    items = value["items"]
+    require(isinstance(items, list) and len(items) == len(ACCEPTANCE_KEYS),
+            "all six acceptance sections are required")
+    keys = []
+    for item in items:
+        require(isinstance(item, dict) and set(item) == {"key", "status", "text", "method"},
+                "each item requires key, status, text, method")
+        keys.append(item["key"])
+        require(item["status"] in {"verified", "pending", "not_applicable"}, "invalid item status")
+        require(isinstance(item["text"], str) and bool(item["text"].strip()),
+                "describe each result")
+        require(item["method"] in {"system", "specialist", "none"}, "invalid verification method")
+        require((item["method"] != "none") == (item["status"] == "verified"),
+                "verified items require system/specialist; other items require none")
+        require(item["key"] not in {"campaigns", "coverage", "links"}
+                or item["status"] != "not_applicable", "core sections cannot be not_applicable")
+        validate_client_copy(item["text"], "setup.acceptance." + str(item["key"]))
+    require(set(keys) == ACCEPTANCE_KEYS, "missing, duplicate or unknown section")
+    launch = value["launch"]
+    require(isinstance(launch, dict) and set(launch) <= {
+        "status", "text", "checkedAt", "firstImpressionDate"}, "invalid launch fields")
+    require(launch.get("status") in {"not_started", "observed", "paused", "unknown"},
+            "invalid launch status")
+    require(isinstance(launch.get("text"), str) and bool(launch["text"].strip()),
+            "describe launch evidence or limitation")
+    validate_client_copy(launch["text"], "setup.acceptance.launch.text")
+    if launch["status"] != "unknown":
+        require(bool(launch.get("checkedAt")), "launch requires its own check date")
+    if "checkedAt" in launch:
+        parse_day(launch["checkedAt"])
+    if launch["status"] == "observed":
+        require(bool(launch.get("firstImpressionDate")), "observed requires first impression date")
+    if "firstImpressionDate" in launch:
+        parse_day(launch["firstImpressionDate"])
+        require(launch["status"] in {"observed", "paused"},
+                "first impression conflicts with status")
+        require(launch["firstImpressionDate"] <= launch["checkedAt"],
+                "first impression cannot follow the launch check")
+
+# Check authored narrative only, never ad copy, names, URLs or setting IDs.
+# This catches explicit internal notes; it cannot prove tone or factual accuracy.
+INTERNAL_COPY = re.compile(
+    r"\b(?:MCP|API|JSON|TSV|readback|preflight|confirmation|SHA-?256|"
+    r"data_revision|expected_revision|direct_[a-z_]+)\b"
+    r"|каталог\w*\s+цел\w*"
+    r"|(?:восстанов\w*|подстанов\w*)\s+нул\w*"
+    r"|(?:разрешени\w*|прав[ао])\s+(?:на\s+)?(?:повыс\w*|увелич\w*|запуск\w*|запис\w*)"
+    r"|(?:из\s+сообщени\w*|со\s+слов|с\s+командой|согласова\w*\s+с)\s+клиент\w*"
+    r"|(?:сайт|бюджет|кабинет)\s+клиента\b"
+    r"|клиент(?:у)?\s+(?:сообщил\w*|рекоменду\w*|предлага\w*|должен|необходимо)",
+    re.IGNORECASE,
+)
+
+
+def validate_client_copy(value: str, path: str) -> None:
+    """Reject internal commentary, preserving the original text for correction."""
+    if isinstance(value, str) and INTERNAL_COPY.search(value):
+        raise ValueError(
+            f"{path}: внутренний комментарий в клиентском тексте. "
+            "Обратитесь к заказчику от лица агентства; объясните ограничение простыми "
+            "словами, а технические свидетельства сохраните локально."
+        )
+
+
+def validate_narrative(data: dict) -> None:
+    def fields(obj, path, keys):
+        for key in keys:
+            validate_client_copy(obj.get(key, ""), f"{path}.{key}")
+
+    def cards(items, path):
+        for i, item in enumerate(items):
+            fields(item, f"{path}[{i}]", ("title", "text", "meta", "status"))
+
+    setup = data.get("setup") or {}
+    fields(setup, "setup", ("title", "status", "objective"))
+    for key in ("summary", "nextStep"):
+        fields(setup.get(key) or {}, f"setup.{key}", ("title", "text"))
+    for key in ("checks", "work", "next"):
+        cards(setup.get(key, []), f"setup.{key}")
+    for i, ad in enumerate(setup.get("adVariants", [])):
+        fields(ad, f"setup.adVariants[{i}]", ("note",))
+    for i, campaign in enumerate(data.get("campaigns", [])):
+        fields(campaign, f"campaigns[{i}]", ("purpose",))
+    for i, period in enumerate(data.get("periods", [])):
+        path = f"periods[{i}]"
+        fields(period, path, ("sourceNote", "completenessNote"))
+        fields(period.get("measurement") or {}, f"{path}.measurement", ("note",))
+        fields(period.get("insight") or {}, f"{path}.insight", ("title", "text"))
+        for key in ("work", "next"):
+            cards(period.get(key, []), f"{path}.{key}")
+
 
 def validate(data: dict) -> None:
     def require(condition: bool, message: str) -> None:
@@ -212,6 +316,8 @@ def validate(data: dict) -> None:
     if "setup" in views:
         s = data.get("setup")
         require(isinstance(s, dict), "setup is required")
+        if "acceptance" in s:
+            validate_acceptance(s["acceptance"], parse_day)
         parse_day(s["date"])
         for key in ("title", "status", "objective"):
             require(isinstance(s.get(key), str), f"setup.{key} is required")
@@ -258,6 +364,17 @@ def render(data: dict, view: str | None = None) -> str:
     data.setdefault("daily", [])
     data.setdefault("periods", [])
     validate(data)
+    validate_narrative(data)
+    # Evidence stays in the local input/revision. Only its client-relevant
+    # consequence belongs in the public payload, including offline HTML.
+    for period in data["periods"]:
+        for part in period.get("breakdowns", {}).get("slices", {}).values():
+            checks = part.pop("reconciliation", [])
+            part["coverageLimited"] = bool(part.get("coverageLimited")) or any(
+                not check.get("trafficMatches", False) for check in checks
+            )
+            part.pop("reportType", None)
+            part.pop("unavailableAdIdRows", None)
     if data.get("views") == ["setup"]:
         data["periods"] = []
         data["daily"] = []

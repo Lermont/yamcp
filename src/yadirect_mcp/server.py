@@ -29,6 +29,7 @@ from mcp.types import CallToolResult, TextContent
 
 from . import (
     account,
+    ad_resume,
     adgroups,
     ads,
     approval,
@@ -36,17 +37,23 @@ from . import (
     assets,
     audit,
     bundle,
+    businesses,
     campaigns,
     config,
     creation_report,
     executor,
     feeds,
+    forecast,
+    geotargeting,
     goals,
     identifiers,
+    interest_catalog,
     jobs,
     keywords,
     knowledge,
     landing,
+    landing_content,
+    manual_review,
     operations,
     planning,
     policy,
@@ -55,6 +62,7 @@ from . import (
     regions,
     repair,
     report_context,
+    report_copy,
     report_pipeline,
     reports,
     runtime,
@@ -107,23 +115,27 @@ def _instructions(settings: config.Settings) -> str:
         "цифры и HTML кодом, возвращает компактный brief; write_insight сохраняет только "
         "вывод по data_revision. Не читай полный HTML/TSV для обычного обновления."
     ]
+    parts.append(report_copy.INSTRUCTIONS)
+    parts.append(landing_content.INSTRUCTIONS)
+    parts.append(forecast.INSTRUCTIONS)
     if settings.mode != "campaign_setup":
         return " ".join(parts) + " Режим report: методы записи в кабинет недоступны."
     parts.append(planning.INSTRUCTIONS)
     parts.append(
         "Настройка: прочитай direct://kb/launch-checklist и server-capabilities. "
         "Для нового клиента явно выбери policy_name: services_b2b, local_business или ecommerce "
-        "с суффиксом _new_v1 без истории либо _established_v1 со статистикой. "
+        "с суффиксом _new_v4 без истории либо _established_v4 со статистикой. "
         "agency_default_v1 сохранён для воспроизведения прежних bundle; не мигрируй их молча. "
         "В profile_context укажи типы бизнес-целей и проверку измерения; для established нужны "
         "источники статистики с логином, каналом, географией, целью, счётчиком, периодом, "
         "конверсиями и признаками complete/reviewed. Не выдумывай эти данные. "
-        "Автоматический выбор конверсий возможен по одной цели: период от 7 дней, "
-        "окончание не старше 30 дней, среднее от 10 конверсий в неделю; иначе максимум кликов. "
-        "Это критерий профиля, не гарантированный результат и не универсальный запрет API. "
+        "Для новых планов всегда выбирай v4: конверсии с оплатой за клики. "
+        "История и число прошлых конверсий не ограничивают старт; при нескольких целях GoalId=13. "
+        "Максимум кликов — только если нет Метрики или целей; недоступную проверку не считай "
+        "отсутствием. "
         "Проверь бюджет и качество лидов; сам MCP не удостоверяет содержание источника. "
         "Для конверсий запрещено allow_unverified_goals=true. Local требует офис/Карты/контакты; "
-        "Для товарного сценария ecommerce выбери _new_v2 или _established_v2: "
+        "Для товарного сценария ecommerce выбери _new_v4 или _established_v4: "
         "catalog_reviewed и покупка как цель. CRR пока не создаётся. "
         "Адрес фида бери из задания, включая отдельно переданный URL. "
         "direct_product_source читает фиды и проверяет источник; direct_feed_create "
@@ -133,12 +145,17 @@ def _instructions(settings: config.Settings) -> str:
         "Адрес HTML-сайта не передавай как URL-фид. Ошибка явно заданного фида не "
         "разрешает молча менять источник. ShoppingAd/ListingAd создаются в product. "
         "В бизнес-профилях нет общего blacklist площадок: задавай исключения явно с причиной. "
-        "В новом плане явно задавай client_budget: amount, period (weekly/monthly), currency, "
+        "В новом плане явно задавай client_budget: amount, period (two_weeks/weekly/monthly), "
+        "currency, "
         "includes_vat; для суммы с НДС нужна явная vat_percent. Лимит относится только "
         "к кампаниям плана; недельные бюджеты кампаний задаются без НДС. Месячная сумма "
         "пересчитывается ×12/52 и не является жёстким потолком календарного месяца. "
         "По умолчанию tracking_profile=utm_v1 сохраняет BI-параметры и добавляет UTM. "
-        "ALTERNATIVE_TEXTS_ENABLED явно NO; включай только при согласованной свободе текстов. "
+        "В новых профилях v4 ALTERNATIVE_TEXTS_ENABLED=YES по умолчанию. "
+        "Отдельное нейрообъявление добавляй через интерфейс: одно на группу по её посадочной; "
+        "сохрани, повторно открой и проверь генерацию, тексты и изображения. "
+        "required_manual_actions с ads.neuro_ad не означает создание через API. "
+        "Явные settings.ALTERNATIVE_TEXTS_ENABLED=false и group.neuro_ad=false сохраняются. "
         "Для каждого BusinessId нужны business_profiles с phone, address, has_office; "
         "телефон, адрес и офис сверяются через API до записи и после неё. "
         "Возраст задавай age_min/age_max по границам API; 25–54 исключает 0–17, 18–24 и 55+. "
@@ -153,11 +170,11 @@ def _instructions(settings: config.Settings) -> str:
         "в сам priority_goals значение 13 не добавляй. "
         "Все недостающие вопросы задай в начале задачи. Затем самостоятельно "
         "настрой кампании и опубликуй клиентский отчёт по известному адресу. "
-        "Перед записью покажи подготовленный preview; поддержка elicitation клиентом обязательна. "
+        "Перед записью самостоятельно проверь подготовленный preview. "
         "Сначала direct_campaign_plan и live preflight через direct_campaign_apply "
         "без confirmation; самостоятельно проверь полный артефакт и исправь BLOCK. "
         "Затем передай неизменный bundle и confirmation из preview. Токен проверяет "
-        "целостность, а согласие на точный хеш запрашивается отдельно через MCP elicitation. "
+        "целостность и одноразовость. Режим согласования задаётся конфигурацией MCP, не bundle. "
         "Ответ running содержит job_id: читай direct_write_job до завершения. "
         "Запуск или возобновление показов требуют отдельной явной команды; при "
         "частичной ошибке перечитай созданные ID, не повторяй apply вслепую. "
@@ -179,6 +196,10 @@ def _instructions(settings: config.Settings) -> str:
         "В каждом объявлении РСЯ всегда добавляй карусель через интерфейс и "
         "повторно открой для проверки: AdImageHashes его не заменяют; "
         "required_manual_actions остаются обязательными. "
+        "После сохранения и повторного открытия UI фиксируй direct_manual_review: "
+        "свежая direct_verify_job, имя проверяющего, время, фактические поля и файлы "
+        "свидетельств из YD_OUT_DIR/ui-evidence. Это проверка специалистом, не API. "
+        "Сверяй текущие manual_review/workflow; изменения UI вне MCP требуют отзыва. "
         "После создания любым способом сформируй клиентский HTML по фактическим ID. "
         "После настройки нужен единый /<client_login>/: "
         "HTTP 200, совпадение SHA-256 и проверка обоих разделов в браузере. "
@@ -191,8 +212,14 @@ def _instructions(settings: config.Settings) -> str:
         parts.append(
             f"недельный бюджет по умолчанию — {settings.default_weekly_budget:g} "
             "в валюте кабинета (технический fallback). Для нового плана задавай доли явно "
-            "в пределах client_budget; fallback не отменяет общий месячный лимит."
+            "в пределах client_budget; fallback не отменяет общий лимит на заданный период."
         )
+    parts.append(
+        "Настроен task_authorized: поручение пользователя разрешает действия в его рамках; "
+        "не запрашивай подтверждение каждого шага и не расширяй задачу."
+        if settings.approval_mode == "task_authorized" else
+        "Настроен elicitation: доверенный клиент запрашивает согласие на запись точного хеша."
+    )
     return " ".join(parts)
 
 
@@ -329,12 +356,18 @@ async def direct_policy(policy_name: str = "agency_default_v1") -> CallToolResul
 
     Ничего не читает и не меняет в кабинете. Возвращает требования к каналам,
     бюджету, стратегии, TrackingParams и сведения о внешних списках.
-    available_profiles перечисляет legacy, шесть профилей v1 и два товарных e-commerce v2.
+    available_profiles перечисляет текущие v3 и сохранённые профили v1/v2/legacy.
     planning_defaults задаёт текущий стартовый состав кампаний и общий бюджет;
     это рекомендации агенту вне зафиксированных снимков policy.
+    landing_review требует проверки содержания всех разделов сайта, не только HTTP.
+    client_report_editorial задаёт актуальную подачу отчётов от агентства клиенту.
+    geotargeting отделяет отменённый переключатель от проверки регионов групп.
     """
     try:
         return _ok({"policy": policy.get(policy_name),
+                    "geotargeting": geotargeting.guidance(),
+                    "client_report_editorial": report_copy.guidance(),
+                    "landing_review": landing_content.requirements(),
                     "planning_defaults": planning.defaults(), "available_profiles": [
             {"name": name, "version": item["version"],
              "business": item.get("profile", {}).get("business"),
@@ -512,7 +545,8 @@ async def direct_campaign_audit(
     """Аудит настроек и посадочных по политике: PASS/WARNING/BLOCK/MANUAL.
 
     По умолчанию полный JSON на диск, сводка и ссылки на факты в ответ.
-    include_landing_pages включает ограниченные HTTP-проверки публичных сайтов.
+    include_landing_pages проверяет HTTP и признаки заглушек публичных страниц.
+    Полнота предложения и работа элементов требуют отдельной проверки в браузере.
     save_artifact=false явно возвращает полный JSON инлайн.
     """
     try:
@@ -580,6 +614,68 @@ async def direct_goal_catalog(client_login: str, campaign_id: int | str) -> Call
         payload = await goals.read(_api(), campaign_id)
         payload["client_login"] = client_login
         return _ok(payload)
+    except Exception as exc:  # noqa: BLE001
+        return _fail(exc)
+
+
+@mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "openWorldHint": True})
+async def direct_business_check(
+    client_login: str,
+    business_ids: list[int | str],
+    landing_urls: list[str] | None = None,
+    phones: list[str] | None = None,
+) -> CallToolResult:
+    """Профили Яндекс Бизнеса по ID и сверка их телефона с сайтом; только чтение.
+
+    Businesses.get ищет только по ID: поиска по телефону в Direct API нет. ID берите
+    из объявления или интерфейса Директа. landing_urls (до 10) — страницы сайта,
+    номера берутся из tel: и текста; phones — ожидаемые номера клиента. PASS —
+    профиль опубликован и его телефон найден на сайте/в ожидаемых; BLOCK — профиль
+    недоступен API, не опубликован или телефон не совпал; MANUAL — сравнивать не с чем.
+    """
+    try:
+        SETTINGS.check_login(client_login)
+        ids = businesses.normalize_ids(business_ids)
+        urls = list(dict.fromkeys(landing_urls or []))
+        if len(urls) > 10:
+            raise ValueError("landing_urls: не более 10 страниц")
+        pages = await landing.inspect_pages([{"url": url} for url in urls]) if urls else []
+        rows = await businesses.read(_api(), client_login, ids)
+        site_phones = sorted({p for page in pages for p in page.get("phones", [])})
+        payload = businesses.compare(
+            ids, rows, site_phones=site_phones, expected_phones=phones, site_urls=urls,
+        )
+        payload["client_login"] = client_login
+        payload["pages"] = [{"url": page.get("url"), "ok": page.get("ok"),
+                             "status_code": page.get("status_code"),
+                             "phones": page.get("phones", []), "error": page.get("error")}
+                            for page in pages]
+        # A failed page only narrows the evidence: a phone found elsewhere still counts.
+        payload["incomplete_sources"] = (["landing_urls"] if any(not page.get("ok")
+                                                                 for page in pages) else [])
+        return _ok(payload)
+    except Exception as exc:  # noqa: BLE001
+        return _fail(exc)
+
+
+@mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "openWorldHint": True})
+async def direct_retargeting_catalog(client_login: str) -> CallToolResult:
+    """Read available goals and Metrika/Audiences segments for exactly one client."""
+    try:
+        SETTINGS.check_login(client_login)
+        return _ok(await goals.read_retargeting(_api(), client_login))
+    except Exception as exc:  # noqa: BLE001
+        return _fail(exc)
+
+
+@mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "openWorldHint": True})
+async def direct_audience_interests(
+    client_login: str, query: str | None = None,
+) -> CallToolResult:
+    """Read the complete live short-term interest dictionary, optionally filtering names."""
+    try:
+        SETTINGS.check_login(client_login)
+        return _ok(await interest_catalog.read(_api(), client_login, query))
     except Exception as exc:  # noqa: BLE001
         return _fail(exc)
 
@@ -839,6 +935,8 @@ async def direct_client_report(
     зарегистрированному периоду, сохраняя дневную статистику и настройку.
     brief: текущая сводка без API. write_insight: title/text, period_id и
     expected_revision=brief.data_revision. Не меняет рекламу и не публикует HTML.
+    Тексты обращены к вам от лица агентства; выполненное отделено от рекомендаций.
+    Следуй brief.rules; служебные пояснения оставляй в локальных артефактах.
     """
     try:
         SETTINGS.check_login(client_login)
@@ -963,6 +1061,38 @@ async def direct_wordstat(
         return _fail(exc)
 
 
+@mcp.tool(annotations={"readOnlyHint": False, "destructiveHint": False,
+                       "openWorldHint": True, "idempotentHint": False})
+async def direct_forecast(
+    action: str = "create", phrases: list[str] | None = None,
+    geo_ids: list[int] | None = None, artifact_path: str | None = None,
+    probe_pending: bool = False,
+) -> CallToolResult:
+    """Monthly Search forecast in RUB; create then get by saved artifact_path.
+
+    Up to 50 phrases; explicit verified geo_ids. No client_login or campaign
+    mutations. Full raw data persisted locally. Bid differs from charged Price;
+    legacy positions do not guarantee current placement. Pending: repeat get.
+    probe_pending explicitly tries reading a result despite a stale queue status;
+    provider errors are returned, never converted to an empty forecast.
+    Read direct://kb/forecast-quality first. done/complete covers provider rows,
+    not a finished budget plan. Legacy data lacks per-traffic-level clicks;
+    obtain the full CPC/clicks/cost matrix in the Direct forecast UI. When budget
+    is primary, maximize relevant clicks within it, choosing cheaper levels on
+    ties. Respect explicit hard CPC limits; compare suggested caps as scenarios.
+    Verify selected levels and totals; show all phrases on the main report page.
+    """
+    try:
+        if SETTINGS.sandbox:
+            raise ValueError("Forecast is unavailable in sandbox")
+        return _result(await forecast.run(
+            _api(), out_dir=SETTINGS.out_dir, action=action, phrases=phrases,
+            geo_ids=geo_ids, artifact_path=artifact_path, probe_pending=probe_pending,
+        ))
+    except Exception as exc:  # noqa: BLE001
+        return _fail(exc)
+
+
 # ── настройка кампании с нуля (явно включаемый write-режим) ─────────────
 
 
@@ -1062,13 +1192,22 @@ def _job_payload(job_id: str, client_login: str) -> dict:
     checked = verification.latest(SETTINGS.out_dir, job)
     if checked is not None:
         payload["current_verification"] = checked
+    if job.get("kind") in {"apply", "repair"} and (job.get("result") or {}).get("executed"):
+        payload.update(manual_review.current(SETTINGS.out_dir, job))
     if job.get("error"):
         payload["error"] = job["error"]
     if job["status"] == "done" and payload.get("status") == "preview":
-        grant = approval.REGISTRY.issue(client_login, job["plan_hash"])
+        evidence = None
+        if payload.get("preview_kind") == "repair":
+            evidence = (job.get("result") or {}).get("preflight")
+            if not evidence or evidence.get("status") != "PASS":
+                raise ValueError("Repair preview без успешного live preflight")
+        grant = approval.REGISTRY.issue(client_login, job["plan_hash"], evidence=evidence)
         payload["confirmation_required"] = grant.phrase
         payload["confirmation_ttl_seconds"] = approval.REGISTRY.ttl_seconds
-        payload["human_approval"] = "mcp_elicitation_on_apply"
+        payload["human_approval"] = ("configured_task_authorization"
+                                     if SETTINGS.approval_mode == "task_authorized"
+                                     else "mcp_elicitation_on_apply")
     return payload
 
 
@@ -1076,11 +1215,14 @@ async def direct_write_job(client_login: str, job_id: str) -> CallToolResult:
     """Состояние фоновой операции; чтение не возобновляет и не повторяет запись.
 
     При running повторите после poll_after_seconds. Ответ preview содержит
-    технический токен; запись дополнительно требует MCP elicitation.
+    технический токен; режим согласования задаётся YD_APPROVAL_MODE.
     """
     try:
         SETTINGS.check_login(client_login)
-        return _ok(_job_payload(job_id, client_login))
+        payload = _job_payload(job_id, client_login)
+        if payload.get("preview_kind") == "repair":
+            payload = artifacts.compact(payload)
+        return _ok(payload)
     except Exception as exc:  # noqa: BLE001
         return _fail(exc)
 
@@ -1102,6 +1244,50 @@ async def direct_pending_actions(
         return _fail(exc)
 
 
+async def direct_manual_review(
+    client_login: str, job_id: str, action_id: str, review: dict[str, Any],
+    confirmation: str | None = None, ctx: Context | None = None,
+) -> CallToolResult:
+    """Preview/apply записи UI-проверки или её отзыва; без записи в Директ.
+
+    action_id берётся из direct_pending_actions. review: outcome=verified, reviewer,
+    checked_at (ISO с поясом), saved_and_reopened=true, checked_fields, evidence_paths
+    (1–5 файлов в YD_OUT_DIR/ui-evidence). Сначала успешный direct_verify_job.
+    Для отзыва: outcome=invalidated, reviewer, reason. Схема: direct://kb/tool-reference.
+    Свидетельство означает проверку специалистом, не подтверждение UI через API.
+    """
+    try:
+        if SETTINGS.mode != "campaign_setup":
+            raise PermissionError("Запись проверки требует YD_MODE=campaign_setup")
+        if confirmation is None:
+            plan = manual_review.prepare(SETTINGS, client_login, job_id, action_id, review)
+            grant = approval.REGISTRY.issue(client_login, plan["plan_hash"], evidence=plan)
+            return _ok({**plan, "status": "preview", "executed": False,
+                        "confirmation_required": grant.phrase,
+                        "confirmation_ttl_seconds": approval.REGISTRY.ttl_seconds})
+        token = confirmation.rsplit(" ", 1)[-1]
+        grant = approval.REGISTRY._grants.get(token)
+        if (grant is None or not grant.evidence
+                or grant.evidence.get("schema") != "direct_manual_review_v1"):
+            raise ValueError("Нужен исходный preview ручной проверки")
+        plan = manual_review.prepare(SETTINGS, client_login, job_id, action_id, review,
+                                     attempt=grant.evidence["attempt"])
+        approval.REGISTRY.validate(confirmation, client_login, plan["plan_hash"])
+        receipt = await approval.REGISTRY.authorize(
+            ctx, plan, "запись свидетельства UI-проверки", confirmation,
+            mode=SETTINGS.approval_mode)
+
+        async def operation(journal):
+            return await manual_review.apply(SETTINGS, plan, journal)
+
+        review_id = jobs.start(SETTINGS.out_dir, client_login, plan["plan_hash"],
+                               "manual_review", operation, receipt=receipt)
+        await jobs.wait_briefly(review_id)
+        return _ok(_job_payload(review_id, client_login))
+    except Exception as exc:  # noqa: BLE001
+        return _fail(exc)
+
+
 async def direct_publish_job(
     client_login: str, job_id: str, confirmation: str | None = None,
     ctx: Context | None = None,
@@ -1109,7 +1295,7 @@ async def direct_publish_job(
     """Preview/apply повторной публикации готового HTML исходного job; без записи в Директ.
 
     Preview связывает исходный журнал, HTML и адрес публикации. Apply требует
-    неизменности и MCP elicitation. Результат — отдельный publish job с source_job_id.
+    неизменности и YD_APPROVAL_MODE. Результат — отдельный publish job с source_job_id.
     """
     try:
         if SETTINGS.mode != "campaign_setup":
@@ -1129,7 +1315,8 @@ async def direct_publish_job(
         plan = publication.prepare(SETTINGS, client_login, job_id,
                                    attempt=grant.evidence["attempt"])
         approval.REGISTRY.validate(confirmation, client_login, plan["plan_hash"])
-        receipt = await approval.REGISTRY.authorize(ctx, plan, "публикацию HTML", confirmation)
+        receipt = await approval.REGISTRY.authorize(ctx, plan, "публикацию HTML", confirmation,
+                                                    mode=SETTINGS.approval_mode)
         async def operation(journal):
             return await publication.apply(SETTINGS, plan, journal)
         publish_id = jobs.start(SETTINGS.out_dir, client_login, plan["plan_hash"],
@@ -1179,11 +1366,11 @@ async def direct_campaign_apply(
     confirmation: str | None = None,
     ctx: Context | None = None,
 ) -> CallToolResult:
-    """Preview/apply ЕПК с job_id, журналом и подтверждением через MCP elicitation.
+    """Preview/apply ЕПК с job_id, журналом и настроенным режимом согласования.
 
     Без confirmation выполняет фоновый preflight. Читайте direct_write_job до
     preview или blocked. Передайте неизменный bundle и confirmation из preview.
-    Токен проверяет целостность; согласие запрашивается отдельным elicitation.
+    Токен проверяет целостность; согласование определяется YD_APPROVAL_MODE.
     При неизвестном результате блокировка сохраняется до сверки журнала.
     """
     try:
@@ -1195,7 +1382,7 @@ async def direct_campaign_apply(
         receipt = None
         if confirmation is not None:
             receipt = await approval.REGISTRY.authorize(
-                ctx, plan, "создание кампаний", confirmation
+                ctx, plan, "создание кампаний", confirmation, mode=SETTINGS.approval_mode
             )
 
         async def operation(journal):
@@ -1234,9 +1421,31 @@ async def direct_campaign_repair(
 ) -> CallToolResult:
     """Preview/apply ограниченных исправлений существующих ЕПК.
 
-    Поддержаны минус-фразы/приоритетные цели кампаний, частичные обновления
-    ResponsiveAd или товарные ShoppingAd/ListingAd и автотаргетинг. Без confirmation возвращает
-    одноразовую фразу. Никогда не запускает показы.
+    draft_group_merge: объединяет все одинаковые группы OFF/DRAFT поисковой ЕПК.
+    Явные campaign_id, group_ids, keep_group_id, name, keywords,
+    negative_keywords, research_note. Сохраняет одно исходное объявление,
+    проверяет новую семантику перед удалением лишних черновиков. Запуск запрещён.
+
+    Отдельный product_ad_texts: массив {id, feed_id, text} меняет только
+    DefaultTexts существующих ShoppingAd/ListingAd с проверкой текущего фида.
+    Поддержаны name/минус-фразы/приоритетные цели кампаний, schedule=always_on,
+    alternative_texts_enabled=true/false; new_groups с semantic_plan
+    для остановленной ЕПК Поиска либо РСЯ (channel=search/network; по умолчанию search).
+    append_drafts_only=true вместе только с new_groups и semantic_plan разрешает ON:
+    add-only, настройки/состояния сохранены, новые объявления OFF/SUSPENDED и DRAFT.
+    РСЯ требует 3–5 разных ad_image_hashes и action_button; ключи и/или autotargeting.
+    Для новых групп нейрообъявление обязательно через UI (neuro_ad=false отключает).
+    Кнопки и карусели остаются required_manual_actions. Поддержаны
+    частичные обновления
+    ResponsiveAd или товарные ShoppingAd/ListingAd и автотаргетинг. Для new_groups
+    без confirmation запускает фоновый preflight: читайте direct_write_job до preview
+    с одноразовой фразой. Остальные исправления проверяются в текущем вызове.
+    Отдельный audience_link связывает существующий сегмент Метрики с группой
+    остановленной сетевой ЕПК; нужны ad_group_id, retargeting_list_id, segment_id.
+    audience_group: campaign_id, source_ad_id, name и segment_id либо goal_rules
+    ([{operator: ALL/ANY/NONE, goals: [{goal_id, days}]}]) — новая группа
+    сегмента с копией ResponsiveAd в черновике; существующая РСЯ не изменяется.
+    Никогда не запускает показы.
     """
     units_mark: Any | None = None
     try:
@@ -1250,6 +1459,23 @@ async def direct_campaign_repair(
         if mark is not None:
             units_mark = mark()
         plan = repair.normalize(repair_bundle, client_login)
+        if confirmation is None and plan.get("new_groups"):
+            async def preview_operation(journal):
+                try:
+                    checked = await repair.preflight(jobs.JournalAPI(api, journal), plan)
+                    status = "preview"
+                except Exception as exc:  # noqa: BLE001 - no token on failed preflight
+                    checked = {"status": "BLOCK", "error": str(exc)}
+                    status = "blocked"
+                response = {**plan, "status": status, "executed": False,
+                            "preview_kind": "repair", "preflight": checked}
+                response["artifact_path"] = str(repair.persist(response, SETTINGS.out_dir))
+                # Evidence must remain in the journal to bind the issued token.
+                return response
+            job_id = jobs.start(SETTINGS.out_dir, client_login, plan["plan_hash"],
+                                "preview", preview_operation)
+            await jobs.wait_briefly(job_id)
+            return _ok(artifacts.compact(_job_payload(job_id, client_login)))
         if confirmation is None:
             checked = await repair.preflight(api, plan)
             grant = approval.REGISTRY.issue(
@@ -1261,11 +1487,13 @@ async def direct_campaign_repair(
             plan["confirmation_required"] = grant.phrase
             plan["confirmation_ttl_seconds"] = approval.REGISTRY.ttl_seconds
             plan["artifact_path"] = str(repair.persist(plan, SETTINGS.out_dir))
-            return _ok(plan, units_mark=units_mark)
+            return _ok(artifacts.compact(plan) if plan.get("new_groups") else plan,
+                       units_mark=units_mark)
         grant = approval.REGISTRY.validate(confirmation, client_login, plan["plan_hash"])
         if grant.evidence is None:
             raise ValueError("Для ремонта требуется новый preview с live preflight")
-        receipt = await approval.REGISTRY.authorize(ctx, plan, "исправление кампаний", confirmation)
+        receipt = await approval.REGISTRY.authorize(ctx, plan, "исправление кампаний", confirmation,
+                                                    mode=SETTINGS.approval_mode)
 
         async def operation(journal):
             journal.verification_plan(plan)
@@ -1274,12 +1502,14 @@ async def direct_campaign_repair(
             journal.checkpoint(result)
             try:
                 result["readback"] = await repair.readback(
-                    guarded, plan, before=result["preflight"]["before"],
+                    guarded, plan, before=result["preflight"]["before"], added=result.get("added"),
                 )
             except Exception as exc:  # noqa: BLE001 - writes already journaled
                 result["readback"] = {"verified": False, "error": str(exc)}
             if result["status"] == "complete" and not result["readback"]["verified"]:
                 result["status"] = "complete_unverified"
+            result["workflow"] = workflow.states(result, scope="repair")
+            result["setup_complete"] = result["workflow"]["setup"] == "complete"
             result["artifact_path"] = str(repair.persist(result, SETTINGS.out_dir))
             return result
         job_id = jobs.start(SETTINGS.out_dir, client_login, plan["plan_hash"], "repair",
@@ -1339,7 +1569,7 @@ async def direct_feed_create(
     """Создаёт один RETAIL URL-фид: feed={name, url}; preview/apply с readback.
 
     URL — именно фид из задания, не HTML-сайт. Сначала выдаёт preview и токен;
-    apply требует того же хеша, elicitation и повторного preflight под блокировкой.
+    apply требует того же хеша, YD_APPROVAL_MODE и повторного preflight под блокировкой.
     Возвращает job_id. Затем читайте direct_product_source до DONE с товарами.
     Обновление существующего фида и автоматический повтор записи не выполняются.
     """
@@ -1354,7 +1584,8 @@ async def direct_feed_create(
             return _ok({**plan, "status": "preview", "executed": False,
                         "preflight": checked, "confirmation_required": grant.phrase,
                         "confirmation_ttl_seconds": approval.REGISTRY.ttl_seconds})
-        receipt = await approval.REGISTRY.authorize(ctx, plan, "создание фида", confirmation)
+        receipt = await approval.REGISTRY.authorize(ctx, plan, "создание фида", confirmation,
+                                                    mode=SETTINGS.approval_mode)
 
         async def operation(journal):
             return await feeds.apply(jobs.JournalAPI(_api(), journal), plan)
@@ -1405,7 +1636,8 @@ async def direct_ad_assets_create(
                 }
             )
             return _ok(response, units_mark=units_mark)
-        receipt = await approval.REGISTRY.authorize(ctx, plan, "создание дополнений", confirmation)
+        receipt = await approval.REGISTRY.authorize(ctx, plan, "создание дополнений", confirmation,
+                                                    mode=SETTINGS.approval_mode)
 
         async def operation(journal):
             return await assets.apply(jobs.JournalAPI(api, journal), plan)
@@ -1417,7 +1649,53 @@ async def direct_ad_assets_create(
         return _fail(exc, units_mark=units_mark)
 
 
+async def direct_ad_resume(
+    client_login: str, resume_bundle: dict[str, Any],
+    confirmation: str | None = None, ctx: Context | None = None,
+) -> CallToolResult:
+    """Возобновляет только явно перечисленные остановленные объявления.
+
+    Требует отдельной команды пользователя на запуск. Bundle: launch_authorized=true,
+    allow_pending_moderation (boolean), targets=[{ad_id, group_id, campaign_id}].
+    Родительские кампании должны быть ON/ACCEPTED. Черновики и отклонённые
+    объявления блокируются. Preview, токен, live preflight и readback обязательны.
+    Показы могут начаться сразу либо после одобрения модерацией. Нет moderate,
+    изменения бюджета, кампаний, текстов или повторной записи после сбоя.
+    """
+    try:
+        if SETTINGS.mode != "campaign_setup":
+            raise PermissionError("Запуск требует YD_MODE=campaign_setup")
+        SETTINGS.check_login(client_login)
+        plan = ad_resume.normalize(resume_bundle, client_login)
+        api = _api()
+        if confirmation is None:
+            checked = await ad_resume.preflight(api, plan)
+            grant = approval.REGISTRY.issue(client_login, plan["plan_hash"], evidence=checked)
+            return _ok({**plan, "status": "preview", "executed": False,
+                        "preflight": checked, "confirmation_required": grant.phrase})
+        grant = approval.REGISTRY.validate(confirmation, client_login, plan["plan_hash"])
+        if grant.evidence is None:
+            raise ValueError("Нужен новый preview с live preflight")
+        receipt = await approval.REGISTRY.authorize(
+            ctx, plan, "возобновление показов объявлений", confirmation,
+            mode=SETTINGS.approval_mode,
+        )
+
+        async def operation(journal):
+            journal.verification_plan(plan)
+            return await ad_resume.apply(jobs.JournalAPI(api, journal), plan,
+                                          grant.evidence, journal)
+        job_id = jobs.start(SETTINGS.out_dir, client_login, plan["plan_hash"],
+                            "ad_resume", operation, receipt=receipt)
+        await jobs.wait_briefly(job_id)
+        return _ok(_job_payload(job_id, client_login))
+    except Exception as exc:  # noqa: BLE001 - MCP boundary
+        return _fail(exc)
+
+
 if SETTINGS.mode == "campaign_setup":
+    mcp.tool(annotations={"readOnlyHint": False, "destructiveHint": False,
+                          "idempotentHint": False, "openWorldHint": False})(direct_manual_review)
     mcp.tool(annotations={"readOnlyHint": False, "destructiveHint": True,
                           "idempotentHint": False, "openWorldHint": True})(direct_feed_create)
     mcp.tool(annotations={"readOnlyHint": False, "destructiveHint": True,
@@ -1451,6 +1729,8 @@ if SETTINGS.mode == "campaign_setup":
             "openWorldHint": True,
         }
     )(direct_ad_assets_create)
+    mcp.tool(annotations={"readOnlyHint": False, "destructiveHint": True,
+                          "idempotentHint": False, "openWorldHint": True})(direct_ad_resume)
 
 
 def main() -> None:

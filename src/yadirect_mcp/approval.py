@@ -76,14 +76,19 @@ class ApprovalRegistry:
         self._grants.pop(grant.token)
         return grant
 
-    async def authorize(self, context, plan: dict, operation: str, confirmation: str) -> dict:
+    async def authorize(
+        self, context, plan: dict, operation: str, confirmation: str, *, mode: str = "elicitation"
+    ) -> dict:
         """Reserve across the UI await; recheck expiry and consume only after consent."""
+        if mode not in {"elicitation", "task_authorized"}:
+            raise ValueError("Неизвестный режим согласования записи")
         grant = self.validate(confirmation, plan["client_login"], plan["plan_hash"])
         if grant.token in self._pending:
             raise ValueError("Для этого подтверждения уже открыт запрос согласия")
         self._pending.add(grant.token)
         try:
-            receipt = await elicit(context, plan, operation)
+            receipt = (task_receipt(plan, operation) if mode == "task_authorized"
+                       else await elicit(context, plan, operation))
             self.consume(confirmation, plan["client_login"], plan["plan_hash"])
             return receipt
         finally:
@@ -152,7 +157,9 @@ async def elicit(context, plan: dict, operation: str) -> dict:
     result = await context.elicit(
         message=(f"Подтвердите {operation} для {plan['client_login']}. "
                  f"Полный хеш: {plan['plan_hash']}. Сводка: {plan.get('summary', {})}. "
-                 "Показы не запускаются. Подтверждение относится только к этому хешу."),
+                 + ("Показы могут начаться после допуска модерацией. "
+                    if plan.get("schema") == "direct_ad_resume_v1" else "Показы не запускаются. ")
+                 + "Подтверждение относится только к этому хешу."),
         schema=Consent,
     )
     if result.action in {"decline", "cancel"}:
@@ -182,3 +189,13 @@ async def elicit(context, plan: dict, operation: str) -> dict:
             "operation": operation, "at": datetime.now(UTC).isoformat(),
             "actor": client["name"] or "connected_mcp_client",
             "identity_assurance": "client_attested"}
+
+
+def task_receipt(plan: dict, operation: str) -> dict:
+    """Host-configured delegation, not a fabricated human elicitation response."""
+    from datetime import UTC, datetime
+
+    return {"mechanism": "configured_task_authorization", "decision": "accept",
+            "client_login": plan["client_login"], "plan_hash": plan["plan_hash"],
+            "operation": operation, "at": datetime.now(UTC).isoformat(),
+            "actor": "trusted_mcp_client", "identity_assurance": "task_scope_delegated"}
