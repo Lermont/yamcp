@@ -176,7 +176,7 @@ def test_typed_preview_does_not_persist_one_time_confirmation(tmp_path):
         "    return [{'url': p['url'], 'ok': True, 'status_code': 200} for p in pages]\n"
         "s.executor.link_checks.landing.inspect_pages = checked_urls\n"
         "result = asyncio.run(s.direct_campaign_apply("
-        "'client', source_bundle())).structuredContent\n"
+        "'client', source_bundle())).structured_content\n"
         "stored = Path(result['artifact_path']).read_text(encoding='utf-8')\n"
         "print(json.dumps({'token_on_disk': result['confirmation_required'] in stored, "
         "'status': result['status']}))",
@@ -212,14 +212,16 @@ def test_typed_apply_generates_and_publishes_creation_report(tmp_path, approval_
         "s._client.last_units = None\n"
         "from types import SimpleNamespace\n"
         "class Host:\n"
+        "    from test_approval_compatibility import host\n"
+        "    session = host().session\n"
         "    async def elicit(self, **kwargs):\n"
         "        assert s.SETTINGS.approval_mode == 'elicitation'\n"
         "        return SimpleNamespace(action='accept', data=SimpleNamespace(approve=True))\n"
         "async def run():\n"
         "    source = source_bundle()\n"
-        "    preview = (await s.direct_campaign_apply('client', source)).structuredContent\n"
+        "    preview = (await s.direct_campaign_apply('client', source)).structured_content\n"
         "    return (await s.direct_campaign_apply("
-        "'client', source, preview['confirmation_required'], ctx=Host())).structuredContent\n"
+        "'client', source, preview['confirmation_required'], ctx=Host())).structured_content\n"
         "result = asyncio.run(run())\n"
         "report = result['creation_report']\n"
         "html = Path(report['artifact_path']).read_text(encoding='utf-8')\n"
@@ -273,7 +275,7 @@ def test_knowledge_is_exposed_as_resources(tmp_path):
         "res = asyncio.run(mcp.list_resources())\n"
         "tpl = asyncio.run(mcp.list_resource_templates())\n"
         "print(json.dumps({'resources': [str(r.uri) for r in res],\n"
-        "                  'templates': [t.uriTemplate for t in tpl]}))",
+        "                  'templates': [t.uri_template for t in tpl]}))",
         str(tmp_path),
     )
     assert listing["resources"] == ["direct://kb"]
@@ -351,11 +353,12 @@ async def run():
     page = await mcp.call_tool("direct_read_artifact", {
         "path": str(path), "pointer": "/large", "limit": 5})
     blocked = await mcp.call_tool("direct_read_artifact", {"path": "../secret.json"})
-    annotations = {tool.name: tool.annotations.model_dump() for tool in await mcp.list_tools()}
-    return {"ok": not good.isError, "structured": good.structuredContent,
-        "text": json.loads(good.content[0].text), "error": bad.isError,
-        "error_data": bad.structuredContent, "page": page.structuredContent,
-        "blocked": blocked.isError, "client_created": s._client is not None,
+    annotations = {tool.name: tool.annotations.model_dump(by_alias=True)
+                   for tool in await mcp.list_tools()}
+    return {"ok": not good.is_error, "structured": good.structured_content,
+        "text": json.loads(good.content[0].text), "error": bad.is_error,
+        "error_data": bad.structured_content, "page": page.structured_content,
+        "blocked": blocked.is_error, "client_created": s._client is not None,
         "annotations": annotations}
 print(json.dumps(asyncio.run(run())))''',
         str(tmp_path), YD_MODE="campaign_setup",
@@ -400,9 +403,9 @@ from pathlib import Path
 from test_bundle import source_bundle
 import yadirect_mcp.server as s
 async def run():
-    preview = (await s.direct_campaign_plan("client", source_bundle())).structuredContent
+    preview = (await s.direct_campaign_plan("client", source_bundle())).structured_content
     stored = json.loads(Path(preview["artifact_path"]).read_text(encoding="utf-8"))
-    full = (await s.direct_campaign_plan("client", source_bundle(), False)).structuredContent
+    full = (await s.direct_campaign_plan("client", source_bundle(), False)).structured_content
     return {"same": stored == full, "hash": stored["plan_hash"] == preview["plan_hash"],
         "compact": len(json.dumps(preview)) < len(json.dumps(full)),
         "client_created": s._client is not None}
@@ -426,10 +429,10 @@ async def run():
             good = await session.call_tool("direct_policy", {})
             bad = await session.call_tool("direct_policy", {"policy_name": "missing"})
             tools = await session.list_tools()
-            return {"success": not good.isError, "error": bad.isError,
-                "version": good.structuredContent["policy"]["version"],
-                "has_error": "error" in bad.structuredContent,
-                "text_matches": json.loads(good.content[0].text) == good.structuredContent,
+            return {"success": not good.is_error, "error": bad.is_error,
+                "version": good.structured_content["policy"]["version"],
+                "has_error": "error" in bad.structured_content,
+                "text_matches": json.loads(good.content[0].text) == good.structured_content,
                 "reader": "direct_read_artifact" in [tool.name for tool in tools.tools]}
 print(json.dumps(asyncio.run(run())))''',
         str(tmp_path), YD_MODE="report",

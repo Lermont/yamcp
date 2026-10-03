@@ -273,3 +273,18 @@ def test_limited_by_is_surfaced():
 
     assert out["truncated"] is True
     assert out["limited_by"] == 1
+
+
+
+def test_moderation_clarification_is_requested_and_preserved():
+    row = ad(1)
+    row["Type"] = "RESPONSIVE_AD"
+    row["StatusClarification"] = "Some combinations rejected"
+    api = fake([row])
+    out = read(api)
+    assert "StatusClarification" in api.params_for("ads")[0]["FieldNames"]
+    assert out["ads"][0]["status_clarification"] == row["StatusClarification"]
+
+
+def test_missing_moderation_clarification_is_unknown():
+    assert read(fake([ad(1)]))["ads"][0]["status_clarification"] is None

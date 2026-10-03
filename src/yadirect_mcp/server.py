@@ -16,6 +16,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import secrets
 import sys
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
@@ -23,9 +24,8 @@ from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Any
 
-from mcp.server.fastmcp import Context, FastMCP
-from mcp.server.fastmcp.server import Settings as FastMCPSettings
-from mcp.types import CallToolResult, TextContent
+from mcp.server.mcpserver import Context, MCPServer, RequestStateSecurity
+from mcp.types import CallToolResult, InputRequiredResult, TextContent
 
 from . import (
     account,
@@ -224,7 +224,7 @@ def _instructions(settings: config.Settings) -> str:
 
 
 @asynccontextmanager
-async def _lifespan(app: FastMCP) -> AsyncIterator[None]:
+async def _lifespan(app: MCPServer) -> AsyncIterator[None]:
     global _client
     try:
         yield None
@@ -234,17 +234,20 @@ async def _lifespan(app: FastMCP) -> AsyncIterator[None]:
             await client.aclose()
 
 
-def _make_mcp() -> FastMCP:
-    # FastMCP 1.x calls basicConfig in its constructor. Keep the embedding
+def _make_mcp() -> MCPServer:
+    # MCPServer calls basicConfig in its constructor. Keep the embedding
     # application's logger configuration, including an initially empty root.
     root = logging.getLogger()
     handlers, level = list(root.handlers), root.level
-    env_file = FastMCPSettings.model_config.get("env_file")
-    FastMCPSettings.model_config["env_file"] = None
     try:
-        return FastMCP("yandex-direct", instructions=_instructions(SETTINGS), lifespan=_lifespan)
+        # SDK v2 Settings is a plain model: no .env or MCP_* loading to bypass.
+        return MCPServer(
+            "yandex-direct", instructions=_instructions(SETTINGS), lifespan=_lifespan,
+            request_state_security=RequestStateSecurity(
+                keys=[secrets.token_bytes(32)], ttl=approval.DEFAULT_TTL_SECONDS,
+            ),
+        )
     finally:
-        FastMCPSettings.model_config["env_file"] = env_file
         for handler in list(root.handlers):
             if handler not in handlers:
                 root.removeHandler(handler)
@@ -307,8 +310,8 @@ def _result(payload: dict[str, Any], *, is_error: bool = False) -> CallToolResul
     serialized = json.dumps(identifiers.wire(payload), ensure_ascii=False, default=str)
     return CallToolResult(
         content=[TextContent(type="text", text=serialized)],
-        structuredContent=json.loads(serialized),
-        isError=is_error,
+        structured_content=json.loads(serialized),
+        is_error=is_error,
     )
 
 
@@ -326,7 +329,9 @@ def _fail(
     hint: str | None = None,
     *,
     units_mark: Any | None = None,
-) -> CallToolResult:
+) -> CallToolResult | InputRequiredResult:
+    if isinstance(exc, approval.InputRequired):
+        return exc.result
     if isinstance(exc, (ValueError, PermissionError, FileNotFoundError, DirectError)):
         log.warning("%s: %s", type(exc).__name__, exc)
     else:
@@ -1247,7 +1252,7 @@ async def direct_pending_actions(
 async def direct_manual_review(
     client_login: str, job_id: str, action_id: str, review: dict[str, Any],
     confirmation: str | None = None, ctx: Context | None = None,
-) -> CallToolResult:
+) -> CallToolResult | InputRequiredResult:
     """Preview/apply записи UI-проверки или её отзыва; без записи в Директ.
 
     action_id берётся из direct_pending_actions. review: outcome=verified, reviewer,
@@ -1291,7 +1296,7 @@ async def direct_manual_review(
 async def direct_publish_job(
     client_login: str, job_id: str, confirmation: str | None = None,
     ctx: Context | None = None,
-) -> CallToolResult:
+) -> CallToolResult | InputRequiredResult:
     """Preview/apply повторной публикации готового HTML исходного job; без записи в Директ.
 
     Preview связывает исходный журнал, HTML и адрес публикации. Apply требует
@@ -1365,7 +1370,7 @@ async def direct_campaign_apply(
     campaign_bundle: dict[str, Any],
     confirmation: str | None = None,
     ctx: Context | None = None,
-) -> CallToolResult:
+) -> CallToolResult | InputRequiredResult:
     """Preview/apply ЕПК с job_id, журналом и настроенным режимом согласования.
 
     Без confirmation выполняет фоновый preflight. Читайте direct_write_job до
@@ -1418,7 +1423,7 @@ async def direct_campaign_repair(
     repair_bundle: dict[str, Any],
     confirmation: str | None = None,
     ctx: Context | None = None,
-) -> CallToolResult:
+) -> CallToolResult | InputRequiredResult:
     """Preview/apply ограниченных исправлений существующих ЕПК.
 
     draft_group_merge: объединяет все одинаковые группы OFF/DRAFT поисковой ЕПК.
@@ -1565,7 +1570,7 @@ async def direct_product_source(
 async def direct_feed_create(
     client_login: str, feed: dict[str, Any], confirmation: str | None = None,
     ctx: Context | None = None,
-) -> CallToolResult:
+) -> CallToolResult | InputRequiredResult:
     """Создаёт один RETAIL URL-фид: feed={name, url}; preview/apply с readback.
 
     URL — именно фид из задания, не HTML-сайт. Сначала выдаёт preview и токен;
@@ -1602,7 +1607,7 @@ async def direct_ad_assets_create(
     assets_bundle: dict[str, Any],
     confirmation: str | None = None,
     ctx: Context | None = None,
-) -> CallToolResult:
+) -> CallToolResult | InputRequiredResult:
     """Preview/apply быстрых ссылок, уточнений и изображений PNG/JPG/GIF.
 
     Первый вызов только валидирует и возвращает одноразовое подтверждение.
@@ -1652,7 +1657,7 @@ async def direct_ad_assets_create(
 async def direct_ad_resume(
     client_login: str, resume_bundle: dict[str, Any],
     confirmation: str | None = None, ctx: Context | None = None,
-) -> CallToolResult:
+) -> CallToolResult | InputRequiredResult:
     """Возобновляет только явно перечисленные остановленные объявления.
 
     Требует отдельной команды пользователя на запуск. Bundle: launch_authorized=true,

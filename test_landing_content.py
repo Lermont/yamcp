@@ -98,7 +98,7 @@ async def test_truncated_html_does_not_pass_effective_url_check(monkeypatch, res
 def test_mcp_exposes_content_review_without_mutating_policy(tmp_path, mode):
     result = _in_server(
         "import asyncio, json\nimport yadirect_mcp.server as s\n"
-        "r=asyncio.run(s.direct_policy()).structuredContent\n"
+        "r=asyncio.run(s.direct_policy()).structured_content\n"
         "print(json.dumps({'data':r,'instructions':mcp.instructions}))",
         str(tmp_path), YD_MODE=mode,
     )

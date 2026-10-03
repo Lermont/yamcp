@@ -403,7 +403,7 @@ class Api:
 api = s._client = Api()
 result = asyncio.run(s.direct_report("client", "2026-01-01", "2026-01-02",
                                     ["Clicks", "Cost"], include_discount=True))
-print(json.dumps({"spec": api.spec, "result": result.structuredContent}))''', str(tmp_path))
+print(json.dumps({"spec": api.spec, "result": result.structured_content}))''', str(tmp_path))
     assert "IncludeDiscount" not in result["spec"]
     assert result["result"]["metadata"]["include_discount"] is True
 

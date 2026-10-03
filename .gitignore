@@ -12,6 +12,7 @@ __pycache__/
 *.pyd
 .Python
 .venv/
+.venv-*/
 venv/
 ENV/
 .pytest_cache/

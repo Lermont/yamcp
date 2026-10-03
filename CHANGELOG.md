@@ -1,5 +1,23 @@
 # Changelog
 
+## Unreleased — официальный MCP Python SDK v2
+
+- Поддерживается `mcp>=2.2.0,<3`: `MCPServer`, snake_case в Python,
+  прежние wire aliases и структурированные успешные/ошибочные результаты.
+  Удалён обход внутренних Settings v1; `.env` по-прежнему не загружается.
+- Для протокола 2026-07-28 добавлен `InputRequiredResult` с защищённым SDK
+  состоянием и серверным резервированием одноразового confirmation. Протокол
+  2025-11-25 использует прежнюю форму. Отказ, отмена, подмена состояния, логина,
+  хеша, клиента и повтор ответа не разрешают запись. Неизвестная идентичность
+  или capabilities теперь явно блокируют elicitation. `task_authorized` сохранён.
+- Служебный stdio-клиент использует SDK `Client` и timeout 600 секунд.
+  Добавлены регрессии продолжений и stdio, CI на минимальном SDK 2.2.0,
+  инструкции независимой приёмки и отката. Настройки общего MCP не изменяются.
+
+## Unreleased — ad moderation clarification
+
+- `direct_ads` requests and preserves `StatusClarification` as `status_clarification`. Missing explanations remain null; partial combination approval must still be checked separately. Read-only change.
+
 ## 2026-10-02 — единый выпуск накопленных исправлений
 
 - Объединены актуальные локальные доработки настройки кампаний, ретаргетинга,

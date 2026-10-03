@@ -13,12 +13,14 @@ PLAN = {"client_login": "client", "plan_hash": "a" * 64}
 
 
 def host(action="accept", approved=True, *, capabilities=None):
+    if capabilities is None:
+        capabilities = types.ClientCapabilities(elicitation=types.ElicitationCapability())
     return SimpleNamespace(
         elicit=AsyncMock(return_value=SimpleNamespace(
             action=action, data=SimpleNamespace(approve=approved)
         )),
-        session=SimpleNamespace(client_params=SimpleNamespace(
-            clientInfo=types.Implementation(name="test-host", version="1"),
+        session=SimpleNamespace(client_capabilities=capabilities, client_params=SimpleNamespace(
+            client_info=types.Implementation(name="test-host", version="1"),
             capabilities=capabilities,
         )),
     )

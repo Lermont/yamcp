@@ -203,14 +203,14 @@ review=json.loads({json.dumps(review)!r})
 async def run():
     args=('client','{job_id}','{action}')
     p=await s.direct_manual_review(*args,review)
-    token=p.structuredContent['confirmation_required']
+    token=p.structured_content['confirmation_required']
     changed=await s.direct_manual_review(*args,dict(review,reviewer='Other'),token)
     denied=await s.direct_manual_review(*args,review,token,ctx=host('decline'))
     ok=await s.direct_manual_review(*args,review,token,ctx=host('accept',True))
     reused=await s.direct_manual_review(*args,review,token,ctx=host('accept',True))
     read=await s.direct_write_job('client','{job_id}')
-    return dict(changed=changed.isError,denied=denied.isError,reused=reused.isError,
-                ok=ok.structuredContent,read=read.structuredContent,api=s._client is not None)
+    return dict(changed=changed.is_error,denied=denied.is_error,reused=reused.is_error,
+                ok=ok.structured_content,read=read.structured_content,api=s._client is not None)
 print(json.dumps(asyncio.run(run())))''', str(tmp_path), YD_MODE="campaign_setup",
         YD_APPROVAL_MODE="elicitation", YD_ALLOWED_CLIENTS="client")
     assert value["changed"] and value["denied"] and value["reused"]

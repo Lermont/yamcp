@@ -190,7 +190,7 @@ import yadirect_mcp.server as s
 async def run():
     info=await s.mcp.call_tool('direct_runtime',{})
     pending=await s.mcp.call_tool('direct_pending_actions',{'client_login':'client'})
-    return {'runtime':info.structuredContent,'pending':pending.structuredContent,
+    return {'runtime':info.structured_content,'pending':pending.structured_content,
             'client_created':s._client is not None}
 print(json.dumps(asyncio.run(run())))""", str(tmp_path), YD_MODE="report")
     assert not result["client_created"]
@@ -213,12 +213,12 @@ def publish(path,**kwargs):
 s.creation_report.publish=publish
 async def run():
     p=await s.direct_publish_job('client','{job_id}')
-    token=p.structuredContent['confirmation_required']
+    token=p.structured_content['confirmation_required']
     refused=await s.direct_publish_job('client','{job_id}',token,ctx=host('decline'))
     assert not calls
     ok=await s.direct_publish_job('client','{job_id}',token,ctx=host('accept',True))
     reused=await s.direct_publish_job('client','{job_id}',token,ctx=host('accept',True))
-    return {{'refused':refused.isError,'ok':ok.structuredContent,'reused':reused.isError,
+    return {{'refused':refused.is_error,'ok':ok.structured_content,'reused':reused.is_error,
              'calls':len(calls),'api':s._client is not None}}
 print(json.dumps(asyncio.run(run())))""", str(tmp_path), YD_MODE="campaign_setup",
         YD_CREATE_REPORT_SSH_HOST="example-host", YD_CREATE_REPORT_REMOTE_ROOT="/reports",

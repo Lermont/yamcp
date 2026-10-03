@@ -29,9 +29,9 @@ classifiers = [
     "Topic :: Office/Business",
 ]
 dependencies = [
-    # С 1.19.0 FastMCP передаёт CallToolResult напрямую, сохраняя isError и
-    # structuredContent. В 2.x пакет mcp.server.fastmcp удалён.
-    "mcp>=1.29.0,<2.0.0",
+    # SDK 2.2 is the tested minimum for MCPServer and era-portable Resolve/Elicit.
+    # Keep the next major version outside the supported compatibility range.
+    "mcp>=2.2.0,<3",
     "httpx>=0.27.0",
     "Pillow>=12.1.0,<13",
 ]
@@ -79,6 +79,7 @@ packages = ["src/yadirect_mcp"]
 # examples in Hatch's file selection. Explicitly exclude local directories.
 exclude = [
     "/out/**",
+    "/.venv*/**",
     "/.claude/**",
     "/.codex/**",
     "/.build-check/**",

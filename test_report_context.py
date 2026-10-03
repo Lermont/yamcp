@@ -236,7 +236,7 @@ class ReportApi(Api):
 api = ReportApi()
 s._api = lambda: api
 payload = asyncio.run(s.direct_report(
-    "client", "2026-09-01", "2026-09-04", ["Clicks", "Cost", "Conversions"])).structuredContent
+    "client", "2026-09-01", "2026-09-04", ["Clicks", "Cost", "Conversions"])).structured_content
 print(json.dumps({"payload": payload, "spec": api.spec}, ensure_ascii=False))
 """,
         str(tmp_path),

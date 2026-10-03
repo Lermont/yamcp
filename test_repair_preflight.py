@@ -9,8 +9,7 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock
 
 import pytest
-from mcp import ClientSession, StdioServerParameters, types
-from mcp.client.stdio import stdio_client
+from mcp import Client, StdioServerParameters, types
 
 from test_approval_compatibility import host
 from test_repair import FakeApi, source
@@ -215,7 +214,7 @@ def server(monkeypatch, tmp_path):
 async def test_failed_preview_issues_no_token(server, monkeypatch):
     monkeypatch.setattr(repair, "preflight", AsyncMock(side_effect=ValueError("URL BLOCK")))
     result = await server.direct_campaign_repair("client", ad_source())
-    assert result.isError
+    assert result.is_error
     assert not approval.REGISTRY._grants
     assert server._client.calls == []
 
@@ -224,34 +223,34 @@ async def test_failed_preview_issues_no_token(server, monkeypatch):
 async def test_repair_confirmation_integrity_decline_and_single_use(server):
     raw = ad_source()
     preview = await server.direct_campaign_repair("client", raw)
-    assert not preview.isError
+    assert not preview.is_error
     assert server._client.calls == []
-    token = preview.structuredContent["confirmation_required"]
+    token = preview.structured_content["confirmation_required"]
     changed = deepcopy(raw)
     changed["ads"][0]["href"] = "https://example.test/other"
     for login, value in [("other-client", raw), ("client", changed)]:
         result = await server.direct_campaign_repair(login, value, token, ctx=host())
-        assert result.isError
+        assert result.is_error
     result = await server.direct_campaign_repair("client", raw, token, ctx=host("decline"))
-    assert result.isError
+    assert result.is_error
     assert server._client.calls == []
     result = await server.direct_campaign_repair("client", raw, token, ctx=host())
-    assert not result.isError, result
-    assert result.structuredContent["readback"]["verified"]
+    assert not result.is_error, result
+    assert result.structured_content["readback"]["verified"]
     assert len(server._client.calls) == 1
     result = await server.direct_campaign_repair("client", raw, token, ctx=host())
-    assert result.isError
+    assert result.is_error
     assert len(server._client.calls) == 1
 
 
 @pytest.mark.asyncio
 async def test_expired_repair_token_does_not_write(server, monkeypatch):
     preview = await server.direct_campaign_repair("client", ad_source())
-    token = preview.structuredContent["confirmation_required"]
-    grant = approval.REGISTRY.validate(token, "client", preview.structuredContent["plan_hash"])
+    token = preview.structured_content["confirmation_required"]
+    grant = approval.REGISTRY.validate(token, "client", preview.structured_content["plan_hash"])
     monkeypatch.setattr(approval.time, "monotonic", lambda: grant.expires_at + 1)
     result = await server.direct_campaign_repair("client", ad_source(), token, ctx=host())
-    assert result.isError
+    assert result.is_error
     assert not server._client.calls
 
 
@@ -280,48 +279,66 @@ async def test_readback_rejects_duplicate_ads(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_partial_repair_over_real_stdio(tmp_path):
+@pytest.mark.parametrize("mode", ["legacy", "2026-07-28"])
+@pytest.mark.parametrize("outcome", ["complete", "partial", "readback_error"])
+async def test_partial_repair_over_real_stdio(tmp_path, mode, outcome):
     code = """
+import os
 from test_repair_preflight import Api
 from yadirect_mcp import server as s
+class FaultApi(Api):
+    async def call_v501(self, service, method, params, **kwargs):
+        result = await super().call_v501(service, method, params, **kwargs)
+        if method == "update" and os.environ["TEST_OUTCOME"] == "partial":
+            return {"UpdateResults": [{"Errors": [{"Code": 1, "Message": "test failure"}]}]}
+        if method == "update" and os.environ["TEST_OUTCOME"] == "readback_error":
+            self.current["ResponsiveAd"]["SitelinkSetId"] = 999
+        return result
 async def check(pages):
     for page in pages:
         page.setdefault("site_check", {"ok": True, "checked": True})
     return pages
 s.repair.link_checks.check_pages = check
-s._client = Api()
+s._client = FaultApi()
 s.mcp.run()
 """
     async def consent(context, params):
         return types.ElicitResult(action="accept", content={"approve": True})
 
     env = {**os.environ, "YD_TOKEN": "dummy", "YD_OUT_DIR": str(tmp_path),
-           "YD_MODE": "campaign_setup", "YD_ALLOWED_LOGINS": "client"}
+           "YD_MODE": "campaign_setup", "YD_ALLOWED_LOGINS": "client",
+           "YD_APPROVAL_MODE": "elicitation", "TEST_OUTCOME": outcome}
     parameters = StdioServerParameters(command=sys.executable, args=["-c", code], env=env)
-    async with stdio_client(parameters) as (reader, writer), ClientSession(
-        reader, writer, elicitation_callback=consent,
+    async with Client(
+        parameters, mode=mode, elicitation_callback=consent, read_timeout_seconds=10,
     ) as session:
-        await session.initialize()
         payload = {"client_login": "client", "repair_bundle": {"ads": [{
             "id": "1921019359743476961", "sitelink_set_id": "41",
             "ad_extension_ids": ["51", "52"],
         }]}}
         result = await session.call_tool("direct_campaign_repair", payload)
-        assert not result.isError, result
-        assert result.structuredContent["preflight"]["status"] == "PASS"
-        payload["confirmation"] = result.structuredContent["confirmation_required"]
+        assert not result.is_error, result
+        assert result.structured_content["preflight"]["status"] == "PASS"
+        payload["confirmation"] = result.structured_content["confirmation_required"]
         result = await session.call_tool("direct_campaign_repair", payload)
         for _ in range(100):
-            if result.structuredContent.get("status") != "running":
+            if result.structured_content.get("status") != "running":
                 break
             await asyncio.sleep(0.02)
             result = await session.call_tool("direct_write_job", {
-                "client_login": "client", "job_id": result.structuredContent["job_id"],
+                "client_login": "client", "job_id": result.structured_content["job_id"],
             })
-        assert not result.isError, result
-        assert result.structuredContent["readback"]["verified"]
-        assert result.structuredContent["updates"]["ads"][0]["Id"] == "1921019359743476961"
-        assert (await session.call_tool("direct_campaign_repair", payload)).isError
+        data = result.structured_content
+        if outcome == "complete":
+            assert not result.is_error, result
+            assert data["readback"]["verified"]
+            assert data["updates"]["ads"][0]["Id"] == "1921019359743476961"
+        elif outcome == "partial":
+            assert result.is_error and data["status"] == "partial"
+        else:
+            assert data["status"] == "complete_unverified"
+            assert not data["readback"]["verified"]
+        assert (await session.call_tool("direct_campaign_repair", payload)).is_error
     journal = json.loads(next((tmp_path / "jobs").glob("*.json")).read_text(encoding="utf-8"))
     requests = [e for e in journal["events"] if e["stage"] == "request"]
     assert len(requests) == 1 and requests[0]["method"] == "update"

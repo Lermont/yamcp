@@ -70,7 +70,7 @@ def test_current_geo_guidance_reaches_tools_without_changing_frozen_policy(tmp_p
         "import asyncio, json\n"
         "import yadirect_mcp.server as s\n"
         "print(json.dumps({'instructions': s.mcp.instructions, "
-        "'policy': asyncio.run(s.direct_policy()).structuredContent, "
+        "'policy': asyncio.run(s.direct_policy()).structured_content, "
         "'features': s.runtime.describe(s.SETTINGS)['features']}))",
         str(tmp_path), YD_MODE=mode,
     )

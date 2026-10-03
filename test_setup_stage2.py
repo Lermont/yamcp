@@ -279,9 +279,9 @@ async def run():
     polled = await s.direct_write_job('client', '{job_id}')
     tools = await s.mcp.list_tools()
     tool = next(t for t in tools if t.name == 'direct_verify_job')
-    return {{'checked': checked.structuredContent, 'polled': polled.structuredContent,
-             'read_only': tool.annotations.readOnlyHint,
-             'destructive': tool.annotations.destructiveHint}}
+    return {{'checked': checked.structured_content, 'polled': polled.structured_content,
+             'read_only': tool.annotations.read_only_hint,
+             'destructive': tool.annotations.destructive_hint}}
 print(json.dumps(asyncio.run(run())))""", str(tmp_path), YD_MODE="campaign_setup")
     assert result["polled"]["status"] == "complete_unverified"
     assert result["polled"]["current_verification"]["status"] == "verified"
