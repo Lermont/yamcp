@@ -48,7 +48,10 @@ ADS_PREVIEW = 50
 
 ARCHIVED = "ARCHIVED"
 
-_AD_FIELDS = ["Id", "CampaignId", "AdGroupId", "Type", "Subtype", "State", "Status", "AgeLabel"]
+_AD_FIELDS = [
+    "Id", "CampaignId", "AdGroupId", "Type", "Subtype", "State", "Status",
+    "StatusClarification", "AgeLabel",
+]
 _TEXT_AD_FIELDS = [
     "Title",
     "Title2",
@@ -104,6 +107,7 @@ def _shape(ad: dict[str, Any]) -> dict[str, Any]:
         "type": ad.get("Type"),
         "state": ad.get("State"),
         "status": ad.get("Status"),
+        "status_clarification": ad.get("StatusClarification"),
         "href": href,
         "age_label": ad.get("AgeLabel"),
         "sitelink_set_id": typed_ad.get("SitelinkSetId"),
